@@ -11,6 +11,8 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
@@ -58,6 +60,7 @@ public class Application extends JPanel implements KeyListener {
         Map<String, Object> attributes = new HashMap<>();
         public int type;
         public int layer;
+        public boolean constrainedToPlayArea = true;
 
         /**
          * Constructeur de l'entité.
@@ -153,8 +156,15 @@ public class Application extends JPanel implements KeyListener {
             this.dx = dx;
             this.dy = dy;
         }
+
+        public Rectangle2D getBounds2D() {
+            return new Rectangle2D.Double(x, y, width, height);
+        }
     }
 
+    /**
+     * La {@link Camera} qui permet de suivre une entité {@link Entity}.
+     */
     public class Camera extends Entity {
 
         private Entity target;
@@ -178,7 +188,60 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public String toString() {
-            return "[" + x + "," + y + "]";
+            return String.format("[%.02f,%.02f]", x, y);
+        }
+
+    }
+
+    public class TextEntity extends Entity {
+        String text;
+        Font font;
+        Object value;
+        int shadowWidth;
+        Color shadowColor;
+        int borderWidth;
+        Color borderColor;
+
+        public TextEntity(String n, double x, double y) {
+            super(n, x, y, 0, 0);
+        }
+
+        @Override
+        public void draw(Graphics2D g) {
+            if (Optional.ofNullable(font).isPresent()) {
+                g.setFont(font);
+            }
+            FontMetrics fm = g.getFontMetrics();
+            String textValue = text;
+            if (text.contains("%") && Optional.ofNullable(value).isPresent()) {
+                textValue = String.format(text, value);
+            }
+            this.width = fm.stringWidth(textValue);
+            this.height = fm.getHeight();
+            if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
+                drawShadowText(g, textValue, x, y);
+            }
+            if (borderWidth > 0 && Optional.ofNullable(borderColor).isPresent()) {
+                drawBorderText(g, textValue, x, y);
+            }
+            g.setColor(color);
+            g.drawString(textValue, (int) x, (int) y);
+        }
+
+        private void drawShadowText(Graphics2D g, String textValue, double x, double y) {
+            g.setColor(shadowColor);
+            for (int i = 0; i < shadowWidth; i++) {
+                g.drawString(textValue, (int) x + i, (int) y + i);
+            }
+        }
+
+        private void drawBorderText(Graphics2D g, String textValue, double x, double y) {
+            g.setColor(borderColor);
+            for (int i = -borderWidth; i < borderWidth; i++) {
+                for (int j = -borderWidth; j < borderWidth; j++) {
+                    g.drawString(textValue, (int) x + i, (int) y + j);
+                }
+            }
         }
 
     }
@@ -205,6 +268,10 @@ public class Application extends JPanel implements KeyListener {
     private boolean keys[] = new boolean[1024];
 
     private Map<String, Entity> entities = new HashMap<>();
+    private boolean ctrlKey;
+    private boolean shiftKey;
+    private boolean altKey;
+    private boolean metaKey;
 
     public Application() {
         messages = ResourceBundle.getBundle("i18n/messages");
@@ -252,7 +319,7 @@ public class Application extends JPanel implements KeyListener {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.createBufferStrategy(3);
+        frame.createBufferStrategy(2);
         frame.addKeyListener(this);
         clearWindow(frame);
 
@@ -323,7 +390,7 @@ public class Application extends JPanel implements KeyListener {
 
             input();
 
-            update(elapsed);
+            update(elapsed, datastats);
             updates++;
 
             fps += (elapsed * 0.000001);
@@ -355,6 +422,36 @@ public class Application extends JPanel implements KeyListener {
     }
 
     private void create() {
+        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.80,32);
+        score.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
+        score.borderColor = Color.BLACK;
+        score.font = getFont().deriveFont(20.0f);
+        score.color = Color.WHITE;
+        score.shadowWidth = 3;
+        score.borderWidth = 2;
+        score.text = "%05d";
+        score.value = 0;
+        score.priority = 20;
+        score.type = Entity.STATIC;
+
+        addEntity(score);
+
+        TextEntity life = new TextEntity("life", 10,bufferResolution.getHeight() * 0.90);
+        life.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
+        life.borderColor = Color.BLACK;
+        life.font = getFont().deriveFont(14.0f);
+        life.color = Color.WHITE;
+        life.shadowWidth = 3;
+        life.borderWidth = 2;
+        life.text = "%02d";
+        life.value = 3;
+        life.priority = 20;
+        life.type = Entity.STATIC;
+
+        addEntity(life);
+
+
+
         Entity player = new Entity("player",
                 (int) ((bufferResolution.getWidth() - 16) * 0.5),
                 (int) ((bufferResolution.getHeight() - 16) * 0.5),
@@ -362,11 +459,12 @@ public class Application extends JPanel implements KeyListener {
         player.priority = 10;
         player.setAttribute("speedStep", 1);
         addEntity(player);
-        addEntities(createStarfield("star_%d", 4000));
+
+        addEntities(createStarfield("star_%d", 15000));
+
         camera = new Camera("cam01", bufferResolution.width, bufferResolution.height);
         camera.setTarget(player);
         camera.setTween(0.02);
-
     }
 
     private List<Entity> createStarfield(String namePrefix, int nbStars) {
@@ -378,10 +476,11 @@ public class Application extends JPanel implements KeyListener {
                     String.format(namePrefix, i),
                     x - playArea.getWidth(),
                     y - playArea.getHeight(),
-                    1, 0);
+                    1, 1);
             star.priority = 1;
-            star.layer = (int) (Math.random() * 3) + 1;
-            star.type = Entity.STATIC;
+            star.constrainedToPlayArea = false;
+            star.layer = (int) (Math.random() * 5) + 1;
+            star.type = Entity.DYNAMIC;
             star.color = Color.YELLOW;
             star.setSpeed(0.2, 0.2);
             stars.add(star);
@@ -392,6 +491,11 @@ public class Application extends JPanel implements KeyListener {
     private void input() {
         Entity player = entities.get("player");
         int step = player.getAttribute("speedStep", 2);
+        if (ctrlKey)
+            step = step * 4;
+        if (shiftKey)
+            step = step * 2;
+
         if (keys[KeyEvent.VK_UP]) {
             player.dy = -step;
         }
@@ -411,27 +515,30 @@ public class Application extends JPanel implements KeyListener {
         entities.values().stream()
                 .filter(e -> e.name.startsWith("star_"))
                 .forEach(e -> {
-                    e.setSpeed(-player.dx * (e.layer * 0.3), -player.dy * (e.layer * 0.3));
-                    e.color = new Color((e.layer * 0.3f), (e.layer * 0.3f), (e.layer * 0.3f));
+                    e.setSpeed(-player.dx * (e.layer * 0.2), -player.dy * (e.layer * 0.2));
+                    e.color = new Color((e.layer * 0.2f), (e.layer * 0.2f), (e.layer * 0.2f));
                 });
     }
 
-    private void update(long elapsed) {
+    private void update(long elapsed, Map<String, Object> datastats) {
         int time = (int) (elapsed * 0.0000001);
         entities.values().stream().filter(e -> e.isActive()).forEach(
                 e -> {
                     e.update(time);
                     constrainToViewport(e);
-
                 });
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);
         }
-
+        long renderedEntities = entities.values().stream()
+                .filter(e -> e.isActive())
+                .filter(e -> inViewport(camera, e) || e.type == Entity.STATIC)
+                .sorted((a, b) -> a.priority > b.priority ? 1 : -1).count();
+        datastats.put("rend", renderedEntities);
     }
 
     protected void constrainToViewport(Entity e) {
-        if (e.type == Entity.STATIC)
+        if (!e.constrainedToPlayArea)
             return;
         if (e.x < 0) {
             e.x = 0;
@@ -466,7 +573,9 @@ public class Application extends JPanel implements KeyListener {
             g.translate(camera.x, camera.y);
         }
         // draw entities
-        entities.values().stream().filter(e -> e.isActive())
+        entities.values().stream()
+                .filter(e -> e.isActive())
+                .filter(e -> inViewport(camera, e) || e.type == Entity.STATIC)
                 .sorted((a, b) -> a.priority > b.priority ? 1 : -1)
                 .forEach(
                         e -> {
@@ -488,15 +597,20 @@ public class Application extends JPanel implements KeyListener {
                 null);
         gScreen.setColor(Color.ORANGE);
         gScreen.drawString(
-                String.format("fps:%d | ups:%d | obj:%d | cam:%s",
+                String.format("[ fps:%d | ups:%d | obj:%d | rend:%d | cam:%s ]",
                         datastats.get("FPS"),
                         datastats.get("UPS"),
                         datastats.get("nbObj"),
+                        datastats.get("rend"),
                         camera),
                 20, frame.getHeight() - 20);
         gScreen.dispose();
 
         frame.getBufferStrategy().show();
+    }
+
+    private boolean inViewport(Camera cam, Entity e) {
+        return cam.getBounds2D().contains(e.getBounds2D());
     }
 
     private void dispose() {
@@ -527,6 +641,14 @@ public class Application extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         keys[e.getKeyCode()] = true;
+        checkMetaKeys(e);
+    }
+
+    private void checkMetaKeys(KeyEvent e) {
+        ctrlKey = e.isControlDown();
+        shiftKey = e.isShiftDown();
+        altKey = e.isAltDown();
+        metaKey = e.isMetaDown();
     }
 
     @Override
