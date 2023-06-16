@@ -29,7 +29,7 @@ import javax.swing.WindowConstants;
  * @author Frédéric
  * @since 1.0.0
  */
-public class Test002App extends JPanel implements KeyListener {
+public class Application extends JPanel implements KeyListener {
 
     /**
      * Classe interne représentant une entité dans le jeu.
@@ -206,7 +206,7 @@ public class Test002App extends JPanel implements KeyListener {
 
     private Map<String, Entity> entities = new HashMap<>();
 
-    public Test002App() {
+    public Application() {
         messages = ResourceBundle.getBundle("i18n/messages");
     }
 
@@ -543,7 +543,7 @@ public class Test002App extends JPanel implements KeyListener {
     }
 
     public static void main(String[] argc) {
-        Test002App app = new Test002App();
+        Application app = new Application();
         app.run(argc);
     }
 
