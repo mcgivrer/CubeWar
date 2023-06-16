@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.awt.Color;
@@ -15,6 +16,7 @@ import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
@@ -29,11 +31,21 @@ import javax.swing.WindowConstants;
  */
 public class Test002App extends JPanel implements KeyListener {
 
+    /**
+     * Classe interne représentant une entité dans le jeu.
+     * 
+     * <p>
+     * Chaque entité possède un nom, une position, une taille, une vitesse, une
+     * durée de vie, des attributs et des propriétés graphiques.
+     * </p>
+     */
     public class Entity {
+        final static int STATIC = 1;
+        final static int DYNAMIC = 2;
         String name;
-        int x, y;
+        double x, y;
         int width, height;
-        int dx, dy;
+        double dx, dy;
         private boolean active = true;
 
         int duration = -1;
@@ -44,8 +56,19 @@ public class Test002App extends JPanel implements KeyListener {
         int priority = 1;
 
         Map<String, Object> attributes = new HashMap<>();
+        public int type;
+        public int layer;
 
-        public Entity(String n, int x, int y, int w, int h) {
+        /**
+         * Constructeur de l'entité.
+         * 
+         * @param n le nom de l'entité
+         * @param x la position en x de l'entité
+         * @param y la position en y de l'entité
+         * @param w la largeur de l'entité
+         * @param h la hauteur de l'entité
+         */
+        public Entity(String n, double x, double y, int w, int h) {
             this.name = n;
             this.x = x;
             this.y = y;
@@ -54,10 +77,20 @@ public class Test002App extends JPanel implements KeyListener {
             this.active = true;
         }
 
+        /**
+         * Vérifie si l'entité est active.
+         * 
+         * @return true si l'entité est active, false sinon
+         */
         public boolean isActive() {
             return this.active;
         }
 
+        /**
+         * Met à jour l'entité.
+         * 
+         * @param elapsed le temps écoulé depuis la dernière mise à jour
+         */
         public void update(int elapsed) {
             x += dx * elapsed;
             y += dy * elapsed;
@@ -68,6 +101,11 @@ public class Test002App extends JPanel implements KeyListener {
             }
         }
 
+        /**
+         * Définit si l'entité est active ou non.
+         * 
+         * @param active true pour activer l'entité, false pour la désactiver
+         */
         public void setActive(boolean active) {
             this.active = active;
             if (duration != -1) {
@@ -75,24 +113,74 @@ public class Test002App extends JPanel implements KeyListener {
             }
         }
 
+        /**
+         * Dessine l'entité.
+         * 
+         * @param g le contexte graphique sur lequel dessiner
+         */
         public void draw(Graphics2D g) {
             if (fillColor != null) {
                 g.setColor(fillColor);
-                g.fillRect(x, y, width, height);
+                g.fillRect((int) x, (int) y, width, height);
             }
             if (color != null) {
                 g.setColor(color);
-                g.drawRect(x, y, width, height);
+                g.drawRect((int) x, (int) y, width, height);
             }
         }
 
+        /**
+         * Ajoute un attribut à l'entité.
+         * 
+         * @param key   la clé de l'attribut
+         * @param value la valeur de l'attribut
+         */
         public <T> void setAttribute(String attrName, T attrValue) {
             attributes.put(attrName, attrValue);
         }
 
+        /**
+         * Récupère la valeur de l'attribut spécifié.
+         * 
+         * @param key la clé de l'attribut
+         * @return la valeur de l'attribut, ou null si l'attribut n'existe pas
+         */
         public <T> T getAttribute(String attrName, T defaultValue) {
             return (T) attributes.getOrDefault(attrName, defaultValue);
         }
+
+        public void setSpeed(double dx, double dy) {
+            this.dx = dx;
+            this.dy = dy;
+        }
+    }
+
+    public class Camera extends Entity {
+
+        private Entity target;
+        private double tween;
+
+        public Camera(String n, int vpWidth, int vpHeight) {
+            super(n, 0, 0, vpWidth, vpHeight);
+        }
+
+        public void setTarget(Entity t) {
+            this.target = t;
+        }
+
+        public void setTween(double t) {
+            this.tween = t;
+        }
+
+        public void update(int elapsed) {
+            this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
+            this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
+        }
+
+        public String toString() {
+            return "[" + x + "," + y + "]";
+        }
+
     }
 
     private int FPS = 60;
@@ -110,6 +198,9 @@ public class Test002App extends JPanel implements KeyListener {
 
     private JFrame frame;
     private BufferedImage buffer;
+
+    private Rectangle2D playArea;
+    private Camera camera;
 
     private boolean keys[] = new boolean[1024];
 
@@ -178,14 +269,22 @@ public class Test002App extends JPanel implements KeyListener {
         exit = Boolean.parseBoolean(config.getProperty("app.exit"));
         title = messages.getString("app.name");
         version = messages.getString("app.version");
+        // Window size
         String[] winSizeArgs = config.getProperty("app.window.size").split("x");
         winSize = new Dimension(
                 Integer.parseInt(winSizeArgs[0]),
                 Integer.parseInt(winSizeArgs[1]));
+        // resolution
         String[] resoArgs = config.getProperty("app.render.resolution").split("x");
         bufferResolution = new Dimension(
                 Integer.parseInt(resoArgs[0]),
                 Integer.parseInt(resoArgs[1]));
+        // play area
+        String[] paArgs = config.getProperty("app.physic.playarea").split("x");
+        playArea = new Rectangle2D.Double(
+                0, 0,
+                Integer.parseInt(paArgs[0]),
+                Integer.parseInt(paArgs[1]));
     }
 
     private void parseArgs(List<String> lArgs) {
@@ -211,38 +310,40 @@ public class Test002App extends JPanel implements KeyListener {
     private void loop() {
         long start = System.nanoTime();
         long previous = start;
-        long frames = 0;
         long elapsedTime = 0;
-        int fps = 0, ups = 0;
-        int realFPS = 0, realUPS = 0;
+        int fps = 0;
+        int realFPS = 0;
+        int realUPS = 0;
+        int frames = 0;
+        int updates = 0;
         Map<String, Object> datastats = new HashMap<>();
         do {
             start = System.nanoTime();
             long elapsed = start - previous;
 
             input();
-            ups += 1;
-            if (ups < UPS && !pause) {
-                update(elapsed);
-            } else {
-                ups = 0;
-            }
-            fps += 1;
-            if (fps < FPS && !pause) {
+
+            update(elapsed);
+            updates++;
+
+            fps += (elapsed * 0.000001);
+            if (fps < (1000 / FPS) && !pause) {
                 draw(datastats);
                 frames++;
             } else {
                 fps = 0;
             }
             previous = start;
-            elapsedTime += elapsed;
-            if (elapsedTime > 1000000000) {
-                realFPS = fps;
-                realUPS = ups;
-                fps = 0;
-                ups = 0;
+            elapsedTime += (elapsed * 0.000001);
+            if (elapsedTime > 1000) {
+                realFPS = frames;
+                realUPS = updates;
                 datastats.put("FPS", realFPS);
                 datastats.put("UPS", realUPS);
+                datastats.put("nbObj", entities.size());
+                elapsedTime = 0;
+                frames = 0;
+                updates = 0;
             }
             try {
                 Thread.sleep(1000 / UPS);
@@ -261,18 +362,28 @@ public class Test002App extends JPanel implements KeyListener {
         player.priority = 10;
         player.setAttribute("speedStep", 1);
         addEntity(player);
-        addEntities(createStarfield(400));
+        addEntities(createStarfield("star_%d", 4000));
+        camera = new Camera("cam01", bufferResolution.width, bufferResolution.height);
+        camera.setTarget(player);
+        camera.setTween(0.02);
+
     }
 
-    private List<Entity> createStarfield(int nbStars) {
+    private List<Entity> createStarfield(String namePrefix, int nbStars) {
         List<Entity> stars = new ArrayList<>();
         for (int i = 0; i < nbStars; i++) {
-            Entity star = new Entity("start_" + i,
-                    (int) (Math.random() * bufferResolution.getWidth()),
-                    (int) (Math.random() * bufferResolution.getHeight()),
-                    1, 1);
+            double x = Math.random() * (playArea.getWidth() * 3);
+            double y = Math.random() * (playArea.getHeight() * 3);
+            Entity star = new Entity(
+                    String.format(namePrefix, i),
+                    x - playArea.getWidth(),
+                    y - playArea.getHeight(),
+                    1, 0);
             star.priority = 1;
+            star.layer = (int) (Math.random() * 3) + 1;
+            star.type = Entity.STATIC;
             star.color = Color.YELLOW;
+            star.setSpeed(0.2, 0.2);
             stars.add(star);
         }
         return stars;
@@ -281,8 +392,6 @@ public class Test002App extends JPanel implements KeyListener {
     private void input() {
         Entity player = entities.get("player");
         int step = player.getAttribute("speedStep", 2);
-        player.dx = 0;
-        player.dy = 0;
         if (keys[KeyEvent.VK_UP]) {
             player.dy = -step;
         }
@@ -296,8 +405,15 @@ public class Test002App extends JPanel implements KeyListener {
         }
         if (keys[KeyEvent.VK_RIGHT]) {
             player.dx = step;
-
         }
+        player.dx *= 0.98;
+        player.dy *= 0.98;
+        entities.values().stream()
+                .filter(e -> e.name.startsWith("star_"))
+                .forEach(e -> {
+                    e.setSpeed(-player.dx * (e.layer * 0.3), -player.dy * (e.layer * 0.3));
+                    e.color = new Color((e.layer * 0.3f), (e.layer * 0.3f), (e.layer * 0.3f));
+                });
     }
 
     private void update(long elapsed) {
@@ -306,21 +422,28 @@ public class Test002App extends JPanel implements KeyListener {
                 e -> {
                     e.update(time);
                     constrainToViewport(e);
+
                 });
+        if (Optional.ofNullable(camera).isPresent()) {
+            camera.update(time);
+        }
+
     }
 
     protected void constrainToViewport(Entity e) {
+        if (e.type == Entity.STATIC)
+            return;
         if (e.x < 0) {
             e.x = 0;
         }
-        if (e.x + e.width > buffer.getWidth()) {
-            e.x = buffer.getWidth() - e.width;
+        if (e.x + e.width > playArea.getWidth()) {
+            e.x = playArea.getWidth() - e.width;
         }
         if (e.y < 0) {
             e.y = 0;
         }
-        if (e.y + e.height > buffer.getHeight()) {
-            e.y = buffer.getHeight() - e.height;
+        if (e.y + e.height > playArea.getHeight()) {
+            e.y = playArea.getHeight() - e.height;
         }
     }
 
@@ -333,11 +456,28 @@ public class Test002App extends JPanel implements KeyListener {
         // clear buffer
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
-
+        // draw playArea
+        if (camera != null) {
+            g.translate(-camera.x, -camera.y);
+        }
+        g.setColor(Color.BLUE);
+        g.draw(playArea);
+        if (camera != null) {
+            g.translate(camera.x, camera.y);
+        }
         // draw entities
-        entities.values().stream().filter(e -> e.isActive()).sorted((a, b) -> a.priority > b.priority ? 1 : -1)
+        entities.values().stream().filter(e -> e.isActive())
+                .sorted((a, b) -> a.priority > b.priority ? 1 : -1)
                 .forEach(
-                        e -> e.draw(g));
+                        e -> {
+                            if (e.type != Entity.STATIC) {
+                                g.translate(-camera.x, -camera.y);
+                            }
+                            e.draw(g);
+                            if (e.type != Entity.STATIC) {
+                                g.translate(camera.x, camera.y);
+                            }
+                        });
         g.dispose();
 
         // copy to JFrame
@@ -347,7 +487,13 @@ public class Test002App extends JPanel implements KeyListener {
                 0, 0, buffer.getWidth(), buffer.getHeight(),
                 null);
         gScreen.setColor(Color.ORANGE);
-        gScreen.drawString("fps:%d | ups:%d", 20, frame.getHeight() - 20);
+        gScreen.drawString(
+                String.format("fps:%d | ups:%d | obj:%d | cam:%s",
+                        datastats.get("FPS"),
+                        datastats.get("UPS"),
+                        datastats.get("nbObj"),
+                        camera),
+                20, frame.getHeight() - 20);
         gScreen.dispose();
 
         frame.getBufferStrategy().show();
