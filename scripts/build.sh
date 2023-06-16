@@ -9,7 +9,7 @@ export AUTHOR_NAME='Frédéric Delorme'
 export VENDOR_NAME=frederic.delorme@gmail.com
 export MAIN_CLASS=com.demoing.app.core.Application
 export JAVADOC_CLASSPATH="com.demoing.app.core com.demoing.app.scenes"
-export SOURCE_VERSION=17
+export SOURCE_VERSION=19
 export SRC_ENCODING=UTF-8
 # the tools and sources versions
 export GIT_COMMIT_ID=$(git rev-parse HEAD)
@@ -25,7 +25,7 @@ export BUILD=${TARGET}/build
 export CLASSES=${TARGET}/classes
 export RESOURCES=${SRC}/main/resources
 export TESTRESOURCES=${SRC}/test/resources
-export COMPILATION_OPTS="--enable-preview -Xlint:preview"
+export COMPILATION_OPTS="--enable-preview -Xlint:preview -g:source,lines,vars"
 export JAR_NAME=${PROGRAM_NAME}-${PROGRAM_VERSION}.jar
 # -Xlint:unchecked -Xlint:preview"
 export JAR_OPTS=--enable-preview
@@ -57,7 +57,13 @@ function compile() {
   rm -Rf ${CLASSES}/*
   echo "|_ 2. compile sources from '${SRC}/main' ..."
   find ${SRC}/main -name '*.java' >${TARGET}/sources.lst
-  javac ${COMPILATION_OPTS} @${LIBS}/options.txt @${TARGET}/sources.lst -cp ${CLASSES}
+  javac -source ${SOURCE_VERSION} \
+    -target ${SOURCE_VERSION} \
+    -encoding ${SRC_ENCODING} \
+    ${COMPILATION_OPTS} \
+    -classpath "${CLASSES};." \
+    @${TARGET}/sources.lst \
+    -sourcepath src/main/java/,src/main/resources
   echo "   done."
 }
 #
@@ -70,14 +76,14 @@ function generatedoc() {
   # Compile class files
   rm -Rf ${TARGET}/javadoc/*
   echo "|_ 2-5. generate javadoc from '${JAVADOC_CLASSPATH}' ..."
-  #java -jar ./lib/tools/markdown2html-0.3.1.jar <README.md >${TARGET}/javadoc/overview.html
+  java -jar ./lib/tools/markdown2html-0.3.1.jar <README.md >${TARGET}/javadoc/overview.html
   javadoc ${JAR_OPTS} -source ${SOURCE_VERSION} \
     \
     -quiet -author -use -version \
     -doctitle "<h1>${PROGRAM_TITLE}</h1>" \
     -d ${TARGET}/javadoc \
-    -sourcepath ${SRC}/main/java ${JAVADOC_CLASSPATH} >>target/build.log #  -overview ${TARGET}/javadoc/overview.html \
-  echo "   done."
+    -sourcepath ${SRC}/main/java ${JAVADOC_CLASSPATH} \
+    echo "   done." >>target/build.log #  -overview ${TARGET}/javadoc/overview.html \
 
 }
 #
@@ -92,7 +98,16 @@ function executeTests() {
   echo "compile test classes"
   #list test sources
   find ./src/test -name '*.java' >${TARGET}/test-sources.lst
-  javac -source 17 -encoding ${SRC}_ENCODING ${COMPILATION_OPTS} -cp "$LIB_TEST;${CLASSES};." -d ${TARGET}/test-classes @${TARGET}/test-sources.lst
+
+  javac -source ${SOURCE_VERSION} \
+    -target ${SOURCE_VERSION} \
+    -encoding ${SRC_ENCODING} \
+    ${COMPILATION_OPTS} \
+    -g:source,lines,vars \
+    -classpath "$LIB_TEST;${CLASSES};." \
+    -d ${TARGET}/test-classes @${TARGET}/test-sources.lst \
+    -sourcepath src/main/java/,src/main/resources
+
   echo "execute tests through JUnit"
   java ${JAR_OPTS} -jar "$LIB_TEST" --class-path "${CLASSES};${TARGET}/test-classes;${SRC}/test/resources;" --scan-class-path
   echo "done."
