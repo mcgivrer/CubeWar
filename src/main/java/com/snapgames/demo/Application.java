@@ -27,7 +27,29 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 /**
- * main class for project Test002
+ * Main {@link Application} class for project Test002
+ * <p>
+ * Some basic minimalist good practice round Java development, without external library, using only the JDK (20).
+ * Only added the JUnit library to execute unit tests.
+ * <p>
+ * This {@link Application} class will manage a bunch of {@link Entity} or {@link TextEntity} and a {@link Camera} to display
+ * amazing things on the rendering buffer before displaying  it on the {@link JFrame} window.
+ * <p>
+ * It also maintains some basic physic math about moves for the {@link Entity#active}.
+ * <p>
+ * {@link Entity} can be from 2 physic nature:
+ * <ul>
+ *     <li><code>{@link Entity#STATIC}</code>, stick to the display screen,</li>
+ *     <li><code>{@link Entity#DYNAMIC}</code>, move according to the first Newton's law on movement.</li>
+ * </ul>
+ * <p>
+ * And this {@link Entity} can be :
+ * <ul>
+ *     <li><code>{@link Entity#TYPE_POINT}</code> to be drawn as a simple 2D point,</li>
+ *     <li><code>{@link Entity#TYPE_LINE}</code> to be drawn as a 2D line from (x,y) to (width,height),</li>
+ *     <li><code>{@link Entity#TYPE_RECTANGLE}</code> to be drawn as a 2D rectangle at (x,y) of size (width,height),</li>
+ *     <li><code>{@link Entity#TYPE_ELLIPSE}</code> to be drawn as a 2D ellipse at (x,y) with (r1=width and r2=height).</li>
+ * </ul>
  *
  * @author Frédéric
  * @since 1.0.0
@@ -36,7 +58,7 @@ public class Application extends JPanel implements KeyListener {
 
     /**
      * Classe interne représentant une entité dans le jeu.
-     * 
+     *
      * <p>
      * Chaque entité possède un nom, une position, une taille, une vitesse, une
      * durée de vie, des attributs et des propriétés graphiques.
@@ -47,7 +69,7 @@ public class Application extends JPanel implements KeyListener {
         final static int DYNAMIC = 2;
         final static int TYPE_POINT = 1;
         final static int TYPE_LINE = 2;
-        final static int TYPE_RECTANGULE = 3;
+        final static int TYPE_RECTANGLE = 3;
         final static int TYPE_ELLIPSE = 4;
         String name;
         double x, y;
@@ -70,7 +92,7 @@ public class Application extends JPanel implements KeyListener {
 
         /**
          * Constructeur de l'entité.
-         * 
+         *
          * @param n le nom de l'entité
          * @param x la position en x de l'entité
          * @param y la position en y de l'entité
@@ -84,12 +106,12 @@ public class Application extends JPanel implements KeyListener {
             this.width = w;
             this.height = h;
             this.active = true;
-            this.type = TYPE_RECTANGULE;
+            this.type = TYPE_RECTANGLE;
         }
 
         /**
          * Vérifie si l'entité est active.
-         * 
+         *
          * @return true si l'entité est active, false sinon
          */
         public boolean isActive() {
@@ -98,7 +120,7 @@ public class Application extends JPanel implements KeyListener {
 
         /**
          * Met à jour l'entité.
-         * 
+         *
          * @param elapsed le temps écoulé depuis la dernière mise à jour
          */
         public void update(int elapsed) {
@@ -111,7 +133,7 @@ public class Application extends JPanel implements KeyListener {
 
         /**
          * Définit si l'entité est active ou non.
-         * 
+         *
          * @param active true pour activer l'entité, false pour la désactiver
          */
         public void setActive(boolean active) {
@@ -123,7 +145,7 @@ public class Application extends JPanel implements KeyListener {
 
         /**
          * Dessine l'entité.
-         * 
+         *
          * @param g le contexte graphique sur lequel dessiner
          */
         public void draw(Graphics2D g) {
@@ -140,7 +162,7 @@ public class Application extends JPanel implements KeyListener {
                         g.drawLine((int) x, (int) y, width, height);
                     }
                 }
-                case TYPE_RECTANGULE -> {
+                case TYPE_RECTANGLE -> {
                     if (fillColor != null) {
                         g.setColor(fillColor);
                         g.fillRect((int) x, (int) y, width, height);
@@ -168,9 +190,9 @@ public class Application extends JPanel implements KeyListener {
 
         /**
          * Ajoute un attribut à l'entité.
-         * 
-         * @param key   la clé de l'attribut
-         * @param value la valeur de l'attribut
+         *
+         * @param attrName  la clé de l'attribut
+         * @param attrValue la valeur de l'attribut
          */
         public <T> void setAttribute(String attrName, T attrValue) {
             attributes.put(attrName, attrValue);
@@ -178,8 +200,8 @@ public class Application extends JPanel implements KeyListener {
 
         /**
          * Récupère la valeur de l'attribut spécifié.
-         * 
-         * @param key la clé de l'attribut
+         *
+         * @param attrName la clé de l'attribut
          * @return la valeur de l'attribut, ou null si l'attribut n'existe pas
          */
         public <T> T getAttribute(String attrName, T defaultValue) {
@@ -284,12 +306,13 @@ public class Application extends JPanel implements KeyListener {
 
     private ResourceBundle messages;
     private Properties config = new Properties();
-    private boolean exit = false;
-    private int debug = 0;
-    private boolean pause = false;
-    private Dimension winSize;
-    private Dimension bufferResolution;
-    private double maxEntitySpeed;
+
+    protected boolean exit = false;
+    protected int debug = 0;
+    protected boolean pause = false;
+    protected Dimension winSize;
+    protected Dimension bufferResolution;
+    protected double maxEntitySpeed;
 
     private String title = "no-title";
     private String version = "0.0.0";
@@ -297,7 +320,7 @@ public class Application extends JPanel implements KeyListener {
     private JFrame frame;
     private BufferedImage buffer;
 
-    private Rectangle2D playArea;
+    protected Rectangle2D playArea;
     private Camera camera;
 
     private boolean keys[] = new boolean[1024];
@@ -307,6 +330,7 @@ public class Application extends JPanel implements KeyListener {
     private boolean shiftKey;
     private boolean altKey;
     private boolean metaKey;
+    private String pathToConfigFile = "/config.properties";
 
     public Application() {
         messages = ResourceBundle.getBundle("i18n/messages");
@@ -323,14 +347,15 @@ public class Application extends JPanel implements KeyListener {
     private void init(String[] args) {
         List<String> lArgs = Arrays.asList(args);
         try {
-            config.load(this.getClass().getResourceAsStream("/config.properties"));
+            parseArgs(lArgs);
+            config.load(Application.class.getClassLoader().getResourceAsStream(pathToConfigFile));
             parseConfig(config);
         } catch (IOException e) {
-            System.err.println(String.format("unable to read configuration file: %s", e.getMessage()));
+            System.err.println(String.format(">> <?> unable to read configuration file: %s", e.getMessage()));
         }
 
         parseArgs(lArgs);
-        System.out.printf("Initialization application %s (%s)%n",
+        System.out.printf(">> Initialization application %s (%s)%n",
                 title,
                 version);
     }
@@ -407,14 +432,18 @@ public class Application extends JPanel implements KeyListener {
             switch (arg[0]) {
                 case "x", "exit" -> {
                     exit = Boolean.parseBoolean(arg[1]);
-                    System.out.println(String.format("argument exit set to %s", arg[1]));
+                    System.out.println(String.format(">> <!> argument 'exit' set to %s", arg[1]));
                 }
                 case "t", "title" -> {
                     title = arg[1];
-                    System.out.println(String.format("argument title set to %s", arg[1]));
+                    System.out.println(String.format(">> <!> argument 'title' set to %s", arg[1]));
+                }
+                case "cp", "configPath" -> {
+                    pathToConfigFile = arg[1];
+                    System.out.println(String.format(">> <!> argument 'configuration file path' set to %s", arg[1]));
                 }
                 default -> {
-                    System.err.println(String.format("unknown argument: %s in %s", arg[0], s));
+                    System.err.println(String.format(">> <?> unknown argument: %s in %s", arg[0], s));
                 }
             }
         });
@@ -636,7 +665,7 @@ public class Application extends JPanel implements KeyListener {
 
     /**
      * Draw all {@link Application} the Entityies on window.
-     * 
+     *
      * @param datastats a set of metadata to be displayed on screen as debug
      *                  purpose. (only if Application#debug >0)
      */
@@ -714,9 +743,11 @@ public class Application extends JPanel implements KeyListener {
         return cam.getBounds2D().contains(e.getBounds2D());
     }
 
-    private void dispose() {
+    public void dispose() {
         entities.clear();
-        frame.dispose();
+        if (Optional.ofNullable(frame).isPresent()) {
+            frame.dispose();
+        }
         System.out.printf("End of application %s%n", title);
     }
 
@@ -770,7 +801,7 @@ public class Application extends JPanel implements KeyListener {
      * <p>
      * the String is composed on the format "[ entry1:value1 | entry2:value2 ]"
      * where, in e the map :
-     * 
+     *
      * <pre>
      * Maps.of("1_entry1","value1","2_entry2","value2",...);
      * </pre>
@@ -782,10 +813,10 @@ public class Application extends JPanel implements KeyListener {
      * @param end        the character to end the string with.
      * @param delimiter  the character to seperate each entry.
      * @return a concatenated {@link String} based on the {@link Map}
-     *         {@link java.util.Map.Entry}.
+     * {@link java.util.Map.Entry}.
      */
     public static String prepareStatsString(Map<String, Object> attributes, String start, String delimiter,
-            String end) {
+                                            String end) {
         return start + attributes.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
             String value = "";
             switch (entry.getValue().getClass().getSimpleName()) {
