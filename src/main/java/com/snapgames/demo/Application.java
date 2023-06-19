@@ -488,16 +488,29 @@ public class Application extends JPanel implements KeyListener {
 
         addEntity(score);
 
-        TextEntity life = new TextEntity("life", 10, bufferResolution.getHeight() * 0.90);
+        TextEntity heart = new TextEntity("heart", 10, bufferResolution.getHeight() * 0.90);
+        heart.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
+        heart.borderColor = Color.BLACK;
+        heart.font = getFont().deriveFont(16.0f);
+        heart.color = Color.RED;
+        heart.shadowWidth = 3;
+        heart.borderWidth = 2;
+        heart.text = "\u2764";
+        heart.priority = 20;
+        heart.physicType = Entity.STATIC;
+
+        addEntity(heart);
+
+        TextEntity life = new TextEntity("life", 20, bufferResolution.getHeight() * 0.90);
         life.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
         life.borderColor = Color.BLACK;
-        life.font = getFont().deriveFont(14.0f);
+        life.font = getFont().deriveFont(12.0f);
         life.color = Color.WHITE;
-        life.shadowWidth = 3;
-        life.borderWidth = 2;
+        life.shadowWidth = 2;
+        life.borderWidth = 1;
         life.text = "%02d";
         life.value = 3;
-        life.priority = 20;
+        life.priority = 21;
         life.physicType = Entity.STATIC;
 
         addEntity(life);
