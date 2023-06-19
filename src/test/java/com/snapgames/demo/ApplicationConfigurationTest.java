@@ -76,5 +76,11 @@ public class ApplicationConfigurationTest {
         assertEquals(64.0, application.maxEntitySpeed, 0.0, "Physic maximum speed configuration has not ben set correctly.");
     }
 
+    @Test
+    public void applicationHasWorldConfiguration() {
+        application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
+        Application.World w = new Application.World("amazing").setGravity(0.981).setPlayArea(new Rectangle2D.Double(0, 0, 1024, 1024));
+        assertEquals(w.toString(), application.world.toString(), "Physic World configuration has not ben set correctly.");
+    }
 
 }
