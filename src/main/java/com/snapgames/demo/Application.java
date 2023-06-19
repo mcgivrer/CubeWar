@@ -1,6 +1,7 @@
 package com.snapgames.demo;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -307,6 +308,10 @@ public class Application extends JPanel implements KeyListener {
     private ResourceBundle messages;
     private Properties config = new Properties();
 
+    /**
+     * Configuration variables
+     */
+    protected String pathToConfigFile = "/config.properties";
     protected boolean exit = false;
     protected int debug = 0;
     protected boolean pause = false;
@@ -317,12 +322,18 @@ public class Application extends JPanel implements KeyListener {
     private String title = "no-title";
     private String version = "0.0.0";
 
+    /**
+     * Graphics components
+     */
     private JFrame frame;
     private BufferedImage buffer;
 
     protected Rectangle2D playArea;
     private Camera camera;
 
+    /**
+     * Key listener components
+     */
     private boolean keys[] = new boolean[1024];
 
     private Map<String, Entity> entities = new HashMap<>();
@@ -330,8 +341,12 @@ public class Application extends JPanel implements KeyListener {
     private boolean shiftKey;
     private boolean altKey;
     private boolean metaKey;
-    private String pathToConfigFile = "/config.properties";
 
+    /**
+     * Create the {@link Application}.
+     * <p>
+     * The default message file (from i18n/messages.properties) is loaded.
+     */
     public Application() {
         messages = ResourceBundle.getBundle("i18n/messages");
     }
@@ -346,18 +361,139 @@ public class Application extends JPanel implements KeyListener {
 
     private void init(String[] args) {
         List<String> lArgs = Arrays.asList(args);
+        parseArgs(lArgs);
         try {
-            parseArgs(lArgs);
-            config.load(Application.class.getClassLoader().getResourceAsStream(pathToConfigFile));
-            parseConfig(config);
+            InputStream inConfigStream = Application.class.getClassLoader().getResourceAsStream(pathToConfigFile);
+            if (inConfigStream == null) {
+                inConfigStream = Application.class.getResourceAsStream(pathToConfigFile);
+                System.out.println(">> <!> load configuration from class path.");
+            } else {
+                System.out.println(">> <!> load configuration from class loader path.");
+            }
+            if (inConfigStream != null) {
+                config.load(inConfigStream);
+                parseConfig(config);
+            } else {
+                System.err.printf(">> <?> Unable to read configuration from '%s'.%n", pathToConfigFile);
+                System.exit(-1);
+            }
         } catch (IOException e) {
-            System.err.println(String.format(">> <?> unable to read configuration file: %s", e.getMessage()));
+            System.err.printf(">> <?> unable to read configuration file: %s%n", e.getMessage());
         }
 
         parseArgs(lArgs);
         System.out.printf(">> Initialization application %s (%s)%n",
                 title,
                 version);
+    }
+
+    /**
+     * Parse the properties configuration file to extract config values from.
+     *
+     * @param config {@link Properties} instance to be parsed.
+     */
+    private void parseConfig(Properties config) {
+
+        // --- Configuration information ---
+
+        // debug level (0-5 where 0=off and 5 max debug info)
+        debug = getParsedInt(config, "app.debug", "0");
+        // exit flag to let test only ONE loop execution.
+        exit = getParsedBoolean(config, "app.exit", "false");
+        // Window size
+        winSize = getDimension(config, "app.window.size", "640x400");
+        // resolution
+        bufferResolution = getDimension(config, "app.render.resolution", "320x200");
+        // play area
+        playArea = getRectangle2D(config, "app.physic.playarea", "1000x1000");
+        // Maximum speed for Entity.
+        maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.speed.max", "16.0"));
+
+        // --- Translated information ---
+        // Application name.
+        title = Optional.of(messages.getString("app.name")).orElse("-Test002-");
+        // Version of the application.
+        version = Optional.of(messages.getString("app.version")).orElse("-1.0.0-");
+
+    }
+
+    /**
+     * Retrieve the key boolean value from the config. if nof exists, return the default value.
+     *
+     * @param config       the Properties instance to be parsed in.
+     * @param key          the key for the required boolean value.
+     * @param defaultValue the default boolean value for the key entry if it not exists in.
+     * @return boolean value.
+     */
+    private static boolean getParsedBoolean(Properties config, String key, String defaultValue) {
+        return Boolean.parseBoolean(config.getProperty(key, defaultValue));
+    }
+
+    /**
+     * Retrieve the key Integer value from the config. if nof exists, return the default value.
+     *
+     * @param config       the Properties instance to be parsed in.
+     * @param key          the key for the required Integer value.
+     * @param defaultValue the default Integer value for the key entry if it not exists in.
+     * @return Integer value.
+     */
+    private static int getParsedInt(Properties config, String key, String defaultValue) {
+        return Integer.parseInt(config.getProperty(key, defaultValue));
+    }
+
+    /**
+     * Retrieve the key Rectangle2D value from the config. if nof exists, return the default value.
+     *
+     * @param config       the Properties instance to be parsed in.
+     * @param key          the key for the required Rectangle2D value.
+     * @param defaultValue the default Rectangle2D value for the key entry if it not exists in.
+     * @return Rectangle2D value.
+     */
+    private Rectangle2D getRectangle2D(Properties config, String key, String defaultValue) {
+        String[] paArgs = config.getProperty(key, defaultValue).split("x");
+        return new Rectangle2D.Double(
+                0, 0,
+                Integer.parseInt(paArgs[0]),
+                Integer.parseInt(paArgs[1]));
+    }
+
+    /**
+     * Retrieve the key Dimension value from the config. if nof exists, return the default value.
+     *
+     * @param config       the Properties instance to be parsed in.
+     * @param key          the key for the required Dimension value.
+     * @param defaultValue the default Dimension value for the key entry if it not exists in.
+     * @return Dimension value.
+     */
+    private Dimension getDimension(Properties config, String key, String defaultValue) {
+        String[] winSizeArgs = config.getProperty(key, defaultValue).split("x");
+        return new Dimension(
+                Integer.parseInt(winSizeArgs[0]),
+                Integer.parseInt(winSizeArgs[1]));
+    }
+
+    private void parseArgs(List<String> lArgs) {
+        lArgs.forEach(s -> {
+            System.out.printf("- process arg: '%s'%n", s);
+            String[] arg = s.split("=");
+            switch (arg[0]) {
+                case "x", "exit" -> {
+                    exit = Boolean.parseBoolean(arg[1]);
+                    System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
+                }
+                case "t", "title" -> {
+                    title = arg[1];
+                    System.out.printf(">> <!> argument 'title' set to %s%n", arg[1]);
+                }
+                case "cp", "configPath" -> {
+                    pathToConfigFile = arg[1];
+                    System.out.printf(">> <!> argument 'configuration file path' set to %s%n", arg[1]);
+                }
+                default -> {
+                    System.err.printf(">> <?> unknown argument: %s in %s%n", arg[0], s);
+                }
+            }
+        });
     }
 
     private JFrame createWindow() {
@@ -390,63 +526,6 @@ public class Application extends JPanel implements KeyListener {
     private void clearWindow(JFrame frame) {
         frame.setBackground(Color.BLACK);
         frame.getGraphics().fillRect(0, 0, frame.getWidth(), frame.getHeight());
-    }
-
-    private void parseConfig(Properties config) {
-        // debug level (0-5 where 0=off and 5 max debug info)
-        debug = Integer.parseInt(config.getProperty("app.debug", "0"));
-        // exit flag to let test only ONE loop execution.
-        exit = Boolean.parseBoolean(config.getProperty("app.exit"));
-        // Window size
-        // file deepcode ignore CallOnNull: <please specify a reason of ignoring this>
-        String[] winSizeArgs = config.getProperty("app.window.size", "640x400").split("x");
-        winSize = new Dimension(
-                Integer.parseInt(winSizeArgs[0]),
-                Integer.parseInt(winSizeArgs[1]));
-        // resolution
-        String[] resoArgs = config.getProperty("app.render.resolution", "320x200").split("x");
-        bufferResolution = new Dimension(
-                Integer.parseInt(resoArgs[0]),
-                Integer.parseInt(resoArgs[1]));
-        // play area
-        String[] paArgs = config.getProperty("app.physic.playarea", "1000x1000").split("x");
-        playArea = new Rectangle2D.Double(
-                0, 0,
-                Integer.parseInt(paArgs[0]),
-                Integer.parseInt(paArgs[1]));
-        // Maximum speed for Entity.
-        maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.speed.max", "16.0"));
-
-        // --- Translated information ---
-        // Applicaiton name.
-        title = Optional.of(messages.getString("app.name")).orElse("-Test002-");
-        // version of the application.
-        version = Optional.of(messages.getString("app.version")).orElse("-1.0.0-");
-
-    }
-
-    private void parseArgs(List<String> lArgs) {
-        lArgs.forEach(s -> {
-            System.out.println(String.format("- arg: %s", s));
-            String[] arg = s.split("=");
-            switch (arg[0]) {
-                case "x", "exit" -> {
-                    exit = Boolean.parseBoolean(arg[1]);
-                    System.out.println(String.format(">> <!> argument 'exit' set to %s", arg[1]));
-                }
-                case "t", "title" -> {
-                    title = arg[1];
-                    System.out.println(String.format(">> <!> argument 'title' set to %s", arg[1]));
-                }
-                case "cp", "configPath" -> {
-                    pathToConfigFile = arg[1];
-                    System.out.println(String.format(">> <!> argument 'configuration file path' set to %s", arg[1]));
-                }
-                default -> {
-                    System.err.println(String.format(">> <?> unknown argument: %s in %s", arg[0], s));
-                }
-            }
-        });
     }
 
     private void loop() {
@@ -748,7 +827,7 @@ public class Application extends JPanel implements KeyListener {
         if (Optional.ofNullable(frame).isPresent()) {
             frame.dispose();
         }
-        System.out.printf("End of application %s%n", title);
+        System.out.printf(">> End of application %s%n", title);
     }
 
     private Entity addEntity(Entity e) {
