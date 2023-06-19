@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -44,6 +45,10 @@ public class Application extends JPanel implements KeyListener {
     public class Entity {
         final static int STATIC = 1;
         final static int DYNAMIC = 2;
+        final static int TYPE_POINT = 1;
+        final static int TYPE_LINE = 2;
+        final static int TYPE_RECTANGULE = 3;
+        final static int TYPE_ELLIPSE = 4;
         String name;
         double x, y;
         int width, height;
@@ -58,6 +63,7 @@ public class Application extends JPanel implements KeyListener {
         int priority = 1;
 
         Map<String, Object> attributes = new HashMap<>();
+        public int physicType;
         public int type;
         public int layer;
         public boolean constrainedToPlayArea = true;
@@ -78,6 +84,7 @@ public class Application extends JPanel implements KeyListener {
             this.width = w;
             this.height = h;
             this.active = true;
+            this.type = TYPE_RECTANGULE;
         }
 
         /**
@@ -95,8 +102,6 @@ public class Application extends JPanel implements KeyListener {
          * @param elapsed le temps écoulé depuis la dernière mise à jour
          */
         public void update(int elapsed) {
-            x += dx * elapsed;
-            y += dy * elapsed;
             if (life + elapsed > duration && duration != -1) {
                 active = false;
             } else {
@@ -122,13 +127,42 @@ public class Application extends JPanel implements KeyListener {
          * @param g le contexte graphique sur lequel dessiner
          */
         public void draw(Graphics2D g) {
-            if (fillColor != null) {
-                g.setColor(fillColor);
-                g.fillRect((int) x, (int) y, width, height);
-            }
-            if (color != null) {
-                g.setColor(color);
-                g.drawRect((int) x, (int) y, width, height);
+            switch (type) {
+                case TYPE_POINT -> {
+                    if (color != null) {
+                        g.setColor(color);
+                        g.drawRect((int) x, (int) y, 1, 1);
+                    }
+                }
+                case TYPE_LINE -> {
+                    if (color != null) {
+                        g.setColor(color);
+                        g.drawLine((int) x, (int) y, width, height);
+                    }
+                }
+                case TYPE_RECTANGULE -> {
+                    if (fillColor != null) {
+                        g.setColor(fillColor);
+                        g.fillRect((int) x, (int) y, width, height);
+                    }
+                    if (color != null) {
+                        g.setColor(color);
+                        g.drawRect((int) x, (int) y, width, height);
+                    }
+                }
+                case TYPE_ELLIPSE -> {
+                    if (fillColor != null) {
+                        g.setColor(fillColor);
+                        g.fillRect((int) x, (int) y, width, height);
+                    }
+                    if (color != null) {
+                        g.setColor(color);
+                        g.drawRect((int) x, (int) y, width, height);
+                    }
+                }
+                default -> {
+                    System.err.printf("Unknown Entity type %d%n", type);
+                }
             }
         }
 
@@ -160,6 +194,10 @@ public class Application extends JPanel implements KeyListener {
         public Rectangle2D getBounds2D() {
             return new Rectangle2D.Double(x, y, width, height);
         }
+
+        public String toString() {
+            return String.format("%s:pos[%.02f,%.02f]", name, x, y);
+        }
     }
 
     /**
@@ -186,11 +224,6 @@ public class Application extends JPanel implements KeyListener {
             this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
             this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
         }
-
-        public String toString() {
-            return String.format("[%.02f,%.02f]", x, y);
-        }
-
     }
 
     public class TextEntity extends Entity {
@@ -252,9 +285,11 @@ public class Application extends JPanel implements KeyListener {
     private ResourceBundle messages;
     private Properties config = new Properties();
     private boolean exit = false;
+    private int debug = 0;
     private boolean pause = false;
     private Dimension winSize;
     private Dimension bufferResolution;
+    private double maxEntitySpeed;
 
     private String title = "no-title";
     private String version = "0.0.0";
@@ -333,25 +368,36 @@ public class Application extends JPanel implements KeyListener {
     }
 
     private void parseConfig(Properties config) {
+        // debug level (0-5 where 0=off and 5 max debug info)
+        debug = Integer.parseInt(config.getProperty("app.debug", "0"));
+        // exit flag to let test only ONE loop execution.
         exit = Boolean.parseBoolean(config.getProperty("app.exit"));
-        title = messages.getString("app.name");
-        version = messages.getString("app.version");
         // Window size
-        String[] winSizeArgs = config.getProperty("app.window.size").split("x");
+        // file deepcode ignore CallOnNull: <please specify a reason of ignoring this>
+        String[] winSizeArgs = config.getProperty("app.window.size", "640x400").split("x");
         winSize = new Dimension(
                 Integer.parseInt(winSizeArgs[0]),
                 Integer.parseInt(winSizeArgs[1]));
         // resolution
-        String[] resoArgs = config.getProperty("app.render.resolution").split("x");
+        String[] resoArgs = config.getProperty("app.render.resolution", "320x200").split("x");
         bufferResolution = new Dimension(
                 Integer.parseInt(resoArgs[0]),
                 Integer.parseInt(resoArgs[1]));
         // play area
-        String[] paArgs = config.getProperty("app.physic.playarea").split("x");
+        String[] paArgs = config.getProperty("app.physic.playarea", "1000x1000").split("x");
         playArea = new Rectangle2D.Double(
                 0, 0,
                 Integer.parseInt(paArgs[0]),
                 Integer.parseInt(paArgs[1]));
+        // Maximum speed for Entity.
+        maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.speed.max", "16.0"));
+
+        // --- Translated information ---
+        // Applicaiton name.
+        title = Optional.of(messages.getString("app.name")).orElse("-Test002-");
+        // version of the application.
+        version = Optional.of(messages.getString("app.version")).orElse("-1.0.0-");
+
     }
 
     private void parseArgs(List<String> lArgs) {
@@ -383,7 +429,9 @@ public class Application extends JPanel implements KeyListener {
         int realUPS = 0;
         int frames = 0;
         int updates = 0;
+        int wait = 0;
         Map<String, Object> datastats = new HashMap<>();
+        datastats.put("9_cam", camera);
         do {
             start = System.nanoTime();
             long elapsed = start - previous;
@@ -405,24 +453,28 @@ public class Application extends JPanel implements KeyListener {
             if (elapsedTime > 1000) {
                 realFPS = frames;
                 realUPS = updates;
-                datastats.put("FPS", realFPS);
-                datastats.put("UPS", realUPS);
-                datastats.put("nbObj", entities.size());
+                datastats.put("0_debug", debug);
+                datastats.put("1_FPS", realFPS);
+                datastats.put("2_UPS", realUPS);
+                datastats.put("3_nbObj", entities.size());
+                datastats.put("4_wait", wait);
                 elapsedTime = 0;
                 frames = 0;
                 updates = 0;
             }
+            wait = (int) ((1000.0 / UPS) - elapsed * 0.0000001);
             try {
-                Thread.sleep(1000 / UPS);
+                Thread.sleep((wait > 1 ? wait : 1));
             } catch (InterruptedException e) {
+                Thread.interrupted();
                 System.err.printf("Error while waiting for next update/frame %s%n",
-                        e.getStackTrace().toString());
+                        Arrays.toString(e.getStackTrace()));
             }
         } while (!exit);
     }
 
     private void create() {
-        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.80,32);
+        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.80, 32);
         score.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
         score.borderColor = Color.BLACK;
         score.font = getFont().deriveFont(20.0f);
@@ -432,11 +484,11 @@ public class Application extends JPanel implements KeyListener {
         score.text = "%05d";
         score.value = 0;
         score.priority = 20;
-        score.type = Entity.STATIC;
+        score.physicType = Entity.STATIC;
 
         addEntity(score);
 
-        TextEntity life = new TextEntity("life", 10,bufferResolution.getHeight() * 0.90);
+        TextEntity life = new TextEntity("life", 10, bufferResolution.getHeight() * 0.90);
         life.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
         life.borderColor = Color.BLACK;
         life.font = getFont().deriveFont(14.0f);
@@ -446,11 +498,9 @@ public class Application extends JPanel implements KeyListener {
         life.text = "%02d";
         life.value = 3;
         life.priority = 20;
-        life.type = Entity.STATIC;
+        life.physicType = Entity.STATIC;
 
         addEntity(life);
-
-
 
         Entity player = new Entity("player",
                 (int) ((bufferResolution.getWidth() - 16) * 0.5),
@@ -460,7 +510,7 @@ public class Application extends JPanel implements KeyListener {
         player.setAttribute("speedStep", 1);
         addEntity(player);
 
-        addEntities(createStarfield("star_%d", 15000));
+        addEntities(createStarfield("star_%d", 2000));
 
         camera = new Camera("cam01", bufferResolution.width, bufferResolution.height);
         camera.setTarget(player);
@@ -480,7 +530,7 @@ public class Application extends JPanel implements KeyListener {
             star.priority = 1;
             star.constrainedToPlayArea = false;
             star.layer = (int) (Math.random() * 5) + 1;
-            star.type = Entity.DYNAMIC;
+            star.physicType = Entity.DYNAMIC;
             star.color = Color.YELLOW;
             star.setSpeed(0.2, 0.2);
             stars.add(star);
@@ -524,7 +574,7 @@ public class Application extends JPanel implements KeyListener {
         int time = (int) (elapsed * 0.0000001);
         entities.values().stream().filter(e -> e.isActive()).forEach(
                 e -> {
-                    e.update(time);
+                    updateEntity(e, time);
                     constrainToViewport(e);
                 });
         if (Optional.ofNullable(camera).isPresent()) {
@@ -532,9 +582,26 @@ public class Application extends JPanel implements KeyListener {
         }
         long renderedEntities = entities.values().stream()
                 .filter(e -> e.isActive())
-                .filter(e -> inViewport(camera, e) || e.type == Entity.STATIC)
+                .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
                 .sorted((a, b) -> a.priority > b.priority ? 1 : -1).count();
-        datastats.put("rend", renderedEntities);
+        datastats.put("5_rend", renderedEntities);
+    }
+
+    private void updateEntity(Entity e, int elapsed) {
+        constrainToPhysic(e);
+        e.x += e.dx * elapsed;
+        e.y += e.dy * elapsed;
+        e.update(elapsed);
+    }
+
+    private void constrainToPhysic(Entity e) {
+        // maximize speed.
+        if (Math.abs(e.dx) > maxEntitySpeed) {
+            e.dx = Math.signum(e.dx) * maxEntitySpeed;
+        }
+        if (Math.abs(e.dy) > maxEntitySpeed) {
+            e.dy = Math.signum(e.dy) * maxEntitySpeed;
+        }
     }
 
     protected void constrainToViewport(Entity e) {
@@ -554,37 +621,45 @@ public class Application extends JPanel implements KeyListener {
         }
     }
 
+    /**
+     * Draw all {@link Application} the Entityies on window.
+     * 
+     * @param datastats a set of metadata to be displayed on screen as debug
+     *                  purpose. (only if Application#debug >0)
+     */
     private void draw(Map<String, Object> datastats) {
 
         // prepare rendering buffer
         Graphics2D g = buffer.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
         // clear buffer
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+
         // draw playArea
-        if (camera != null) {
-            g.translate(-camera.x, -camera.y);
-        }
+        moveFromCameraPoV(g, -1);
+        drawGrid(g, playArea);
         g.setColor(Color.BLUE);
         g.draw(playArea);
-        if (camera != null) {
-            g.translate(camera.x, camera.y);
-        }
+        moveFromCameraPoV(g, 1);
+
         // draw entities
         entities.values().stream()
                 .filter(e -> e.isActive())
-                .filter(e -> inViewport(camera, e) || e.type == Entity.STATIC)
+                .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
                 .sorted((a, b) -> a.priority > b.priority ? 1 : -1)
                 .forEach(
                         e -> {
-                            if (e.type != Entity.STATIC) {
-                                g.translate(-camera.x, -camera.y);
+                            if (e.physicType != Entity.STATIC) {
+                                moveFromCameraPoV(g, -1);
                             }
                             e.draw(g);
-                            if (e.type != Entity.STATIC) {
-                                g.translate(camera.x, camera.y);
+                            if (e.physicType != Entity.STATIC) {
+                                moveFromCameraPoV(g, 1);
                             }
                         });
         g.dispose();
@@ -595,18 +670,31 @@ public class Application extends JPanel implements KeyListener {
                 buffer, 0, 0, frame.getWidth(), frame.getHeight(),
                 0, 0, buffer.getWidth(), buffer.getHeight(),
                 null);
-        gScreen.setColor(Color.ORANGE);
-        gScreen.drawString(
-                String.format("[ fps:%d | ups:%d | obj:%d | rend:%d | cam:%s ]",
-                        datastats.get("FPS"),
-                        datastats.get("UPS"),
-                        datastats.get("nbObj"),
-                        datastats.get("rend"),
-                        camera),
-                20, frame.getHeight() - 20);
+        if (debug > 0) {
+            gScreen.setColor(Color.ORANGE);
+            gScreen.drawString(
+                    prepareStatsString(datastats, "[ ", " | ", " ]"),
+                    20, frame.getHeight() - 20);
+        }
         gScreen.dispose();
-
+        // switch to next availbale drawing buffer
         frame.getBufferStrategy().show();
+    }
+
+    private void moveFromCameraPoV(Graphics2D g, double direction) {
+        if (camera != null) {
+            g.translate(direction * camera.x, direction * camera.y);
+        }
+    }
+
+    private void drawGrid(Graphics2D g, Rectangle2D playArea) {
+        g.setColor(Color.DARK_GRAY);
+        for (int x = 0; x < playArea.getWidth(); x += 32) {
+            g.drawRect(x, 0, 32, (int) playArea.getHeight());
+        }
+        for (int y = 0; y < playArea.getWidth(); y += 32) {
+            g.drawRect(0, y, (int) playArea.getWidth(), 32);
+        }
     }
 
     private boolean inViewport(Camera cam, Entity e) {
@@ -662,6 +750,46 @@ public class Application extends JPanel implements KeyListener {
                 // nothing to do !
             }
         }
+    }
+
+    /**
+     * Create a String from all the {@link java.util.Map.Entry} of a {@link Map}.
+     * <p>
+     * the String is composed on the format "[ entry1:value1 | entry2:value2 ]"
+     * where, in e the map :
+     * 
+     * <pre>
+     * Maps.of("1_entry1","value1","2_entry2","value2",...);
+     * </pre>
+     * <p>
+     * this will sort the Entry on the `[9]` from the `[9]_[keyname]` key name.
+     *
+     * @param attributes the {@link Map} of value to be displayed.
+     * @param start      the character to start the string with.
+     * @param end        the character to end the string with.
+     * @param delimiter  the character to seperate each entry.
+     * @return a concatenated {@link String} based on the {@link Map}
+     *         {@link java.util.Map.Entry}.
+     */
+    public static String prepareStatsString(Map<String, Object> attributes, String start, String delimiter,
+            String end) {
+        return start + attributes.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
+            String value = "";
+            switch (entry.getValue().getClass().getSimpleName()) {
+                case "Double", "double", "Float", "float" -> {
+                    value = String.format("%04.2f", entry.getValue());
+                }
+                case "Integer", "int" -> {
+                    value = String.format("%5d", entry.getValue());
+                }
+                default -> {
+                    value = entry.getValue().toString();
+                }
+            }
+            return entry.getKey().substring(((String) entry.getKey().toString()).indexOf('_') + 1)
+                    + ":"
+                    + value;
+        }).collect(Collectors.joining(delimiter)) + end;
     }
 
     public static void main(String[] argc) {
