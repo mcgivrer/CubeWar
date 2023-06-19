@@ -7,10 +7,9 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ApplicationConfigurationTest {
     private Application application;
 
@@ -25,6 +24,20 @@ public class ApplicationConfigurationTest {
             application.dispose();
         }
         application = null;
+    }
+
+    @Test
+    @Order(1)
+    public void applicationHasExitArgument() {
+        application.run(new String[]{"exit=true"});
+        assertTrue(application.exit, "Exit has not ben set correctly.");
+    }
+
+    @Test
+    @Order(2)
+    public void applicationHasConfigurationPathArgument() {
+        application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
+        assertEquals("./test-config.properties", application.pathToConfigFile, "Configruation properties file path has not ben set correctly.");
     }
 
     @Test
