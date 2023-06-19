@@ -57,6 +57,7 @@ import javax.swing.WindowConstants;
  */
 public class Application extends JPanel implements KeyListener {
 
+
     /**
      * Classe interne représentant une entité dans le jeu.
      *
@@ -302,6 +303,35 @@ public class Application extends JPanel implements KeyListener {
 
     }
 
+    public static class World {
+        String name = "defaultWorld";
+        Rectangle2D playArea;
+        double gravity;
+
+        public World(String name) {
+            this.name = name;
+        }
+
+        public World setGravity(double g) {
+            this.gravity = g;
+            return this;
+        }
+
+        public World setPlayArea(Rectangle2D pa) {
+            this.playArea = pa;
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return "World{" +
+                    "name='" + name + '\'' +
+                    ", playArea=(" + playArea.getWidth() + "x" + playArea.getHeight() + ")" +
+                    ", gravity=" + gravity +
+                    '}';
+        }
+    }
+
     private int FPS = 60;
     private int UPS = 120;
 
@@ -328,8 +358,11 @@ public class Application extends JPanel implements KeyListener {
     private JFrame frame;
     private BufferedImage buffer;
 
+    @Deprecated
     protected Rectangle2D playArea;
     private Camera camera;
+
+    public World world;
 
     /**
      * Key listener components
@@ -409,6 +442,8 @@ public class Application extends JPanel implements KeyListener {
         // Maximum speed for Entity.
         maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.speed.max", "16.0"));
 
+        world = getWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
+
         // --- Translated information ---
         // Application name.
         title = Optional.of(messages.getString("app.name")).orElse("-Test002-");
@@ -470,6 +505,27 @@ public class Application extends JPanel implements KeyListener {
         return new Dimension(
                 Integer.parseInt(winSizeArgs[0]),
                 Integer.parseInt(winSizeArgs[1]));
+    }
+
+    /**
+     * Retrieve the key World object from the config. if not exists, return the default value
+     * (value format is <code>"world([name],[gravity],([width]x[height]))"</code>).
+     *
+     * @param config       the Properties instance to be parsed in.
+     * @param key          the key for the required World value.
+     * @param defaultValue the default World value for the key entry if it not exists in.
+     * @return World value.
+     */
+    private World getWorld(Properties config, String key, String defaultValue) {
+        String value = config.getProperty(key, defaultValue);
+        String[] wArgs = value.substring("world(".length(), value.length() - ")".length()).split(",");
+        double g = Double.parseDouble(wArgs[1]);
+        String[] paArgs = wArgs[2].substring("(".length(), wArgs[2].length() - ")".length()).split("x");
+        Rectangle2D pa = new Rectangle2D.Double(
+                0, 0,
+                Integer.parseInt(paArgs[0]),
+                Integer.parseInt(paArgs[0]));
+        return new World(wArgs[0]).setGravity(g).setPlayArea(pa);
     }
 
     private void parseArgs(List<String> lArgs) {
@@ -641,12 +697,12 @@ public class Application extends JPanel implements KeyListener {
     private List<Entity> createStarfield(String namePrefix, int nbStars) {
         List<Entity> stars = new ArrayList<>();
         for (int i = 0; i < nbStars; i++) {
-            double x = Math.random() * (playArea.getWidth() * 3);
+            double x = Math.random() * (world.playArea.getWidth() * 3);
             double y = Math.random() * (playArea.getHeight() * 3);
             Entity star = new Entity(
                     String.format(namePrefix, i),
-                    x - playArea.getWidth(),
-                    y - playArea.getHeight(),
+                    x - world.playArea.getWidth(),
+                    y - world.playArea.getHeight(),
                     1, 1);
             star.priority = 1;
             star.constrainedToPlayArea = false;
@@ -731,14 +787,14 @@ public class Application extends JPanel implements KeyListener {
         if (e.x < 0) {
             e.x = 0;
         }
-        if (e.x + e.width > playArea.getWidth()) {
-            e.x = playArea.getWidth() - e.width;
+        if (e.x + e.width > world.playArea.getWidth()) {
+            e.x = world.playArea.getWidth() - e.width;
         }
         if (e.y < 0) {
             e.y = 0;
         }
-        if (e.y + e.height > playArea.getHeight()) {
-            e.y = playArea.getHeight() - e.height;
+        if (e.y + e.height > world.playArea.getHeight()) {
+            e.y = world.playArea.getHeight() - e.height;
         }
     }
 
@@ -763,9 +819,9 @@ public class Application extends JPanel implements KeyListener {
 
         // draw playArea
         moveFromCameraPoV(g, -1);
-        drawGrid(g, playArea);
+        drawGrid(g, world.playArea);
         g.setColor(Color.BLUE);
-        g.draw(playArea);
+        g.draw(world.playArea);
         moveFromCameraPoV(g, 1);
 
         // draw entities
