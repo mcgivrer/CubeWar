@@ -30,33 +30,41 @@ import javax.swing.WindowConstants;
 /**
  * Main {@link Application} class for project Test002
  * <p>
- * Some basic minimalist good practice round Java development, without external library, using only the JDK (20).
+ * Some basic minimalist good practice round Java development, without external
+ * library, using only the JDK (20).
  * Only added the JUnit library to execute unit tests.
  * <p>
- * This {@link Application} class will manage a bunch of {@link Entity} or {@link TextEntity} and a {@link Camera} to display
- * amazing things on the rendering buffer before displaying  it on the {@link JFrame} window.
+ * This {@link Application} class will manage a bunch of {@link Entity} or
+ * {@link TextEntity} and a {@link Camera} to display
+ * amazing things on the rendering buffer before displaying it on the
+ * {@link JFrame} window.
  * <p>
- * It also maintains some basic physic math about moves for the {@link Entity#active}.
+ * It also maintains some basic physic math about moves for the
+ * {@link Entity#active}.
  * <p>
  * {@link Entity} can be from 2 physic nature:
  * <ul>
- *     <li><code>{@link Entity#STATIC}</code>, stick to the display screen,</li>
- *     <li><code>{@link Entity#DYNAMIC}</code>, move according to the first Newton's law on movement.</li>
+ * <li><code>{@link Entity#STATIC}</code>, stick to the display screen,</li>
+ * <li><code>{@link Entity#DYNAMIC}</code>, move according to the first Newton's
+ * law on movement.</li>
  * </ul>
  * <p>
  * And this {@link Entity} can be :
  * <ul>
- *     <li><code>{@link Entity#TYPE_POINT}</code> to be drawn as a simple 2D point,</li>
- *     <li><code>{@link Entity#TYPE_LINE}</code> to be drawn as a 2D line from (x,y) to (width,height),</li>
- *     <li><code>{@link Entity#TYPE_RECTANGLE}</code> to be drawn as a 2D rectangle at (x,y) of size (width,height),</li>
- *     <li><code>{@link Entity#TYPE_ELLIPSE}</code> to be drawn as a 2D ellipse at (x,y) with (r1=width and r2=height).</li>
+ * <li><code>{@link Entity#TYPE_POINT}</code> to be drawn as a simple 2D
+ * point,</li>
+ * <li><code>{@link Entity#TYPE_LINE}</code> to be drawn as a 2D line from (x,y)
+ * to (width,height),</li>
+ * <li><code>{@link Entity#TYPE_RECTANGLE}</code> to be drawn as a 2D rectangle
+ * at (x,y) of size (width,height),</li>
+ * <li><code>{@link Entity#TYPE_ELLIPSE}</code> to be drawn as a 2D ellipse at
+ * (x,y) with (r1=width and r2=height).</li>
  * </ul>
  *
  * @author Frédéric
  * @since 1.0.0
  */
 public class Application extends JPanel implements KeyListener {
-
 
     /**
      * Classe interne représentant une entité dans le jeu.
@@ -66,7 +74,7 @@ public class Application extends JPanel implements KeyListener {
      * durée de vie, des attributs et des propriétés graphiques.
      * </p>
      */
-    public class Entity {
+    public class Entity<T extends Entity<?>> {
         final static int STATIC = 1;
         final static int DYNAMIC = 2;
         final static int TYPE_POINT = 1;
@@ -74,9 +82,14 @@ public class Application extends JPanel implements KeyListener {
         final static int TYPE_RECTANGLE = 3;
         final static int TYPE_ELLIPSE = 4;
         String name;
-        double x, y;
-        int width, height;
-        double dx, dy;
+        double x;
+        double y;
+        double rotation;
+        int width;
+        int height;
+        double dx;
+        double dy;
+        double drotation;
         private boolean active = true;
 
         int duration = -1;
@@ -91,6 +104,7 @@ public class Application extends JPanel implements KeyListener {
         public int type;
         public int layer;
         public boolean constrainedToPlayArea = true;
+        public boolean stickToCamera;
 
         /**
          * Constructeur de l'entité.
@@ -109,15 +123,7 @@ public class Application extends JPanel implements KeyListener {
             this.height = h;
             this.active = true;
             this.type = TYPE_RECTANGLE;
-        }
-
-        /**
-         * Vérifie si l'entité est active.
-         *
-         * @return true si l'entité est active, false sinon
-         */
-        public boolean isActive() {
-            return this.active;
+            this.stickToCamera = false;
         }
 
         /**
@@ -138,11 +144,21 @@ public class Application extends JPanel implements KeyListener {
          *
          * @param active true pour activer l'entité, false pour la désactiver
          */
-        public void setActive(boolean active) {
+        public T setActive(boolean active) {
             this.active = active;
             if (duration != -1) {
                 life = duration;
             }
+            return (T) this;
+        }
+
+        /**
+         * Vérifie si l'entité est active.
+         *
+         * @return true si l'entité est active, false sinon
+         */
+        public boolean isActive() {
+            return this.active;
         }
 
         /**
@@ -196,8 +212,9 @@ public class Application extends JPanel implements KeyListener {
          * @param attrName  la clé de l'attribut
          * @param attrValue la valeur de l'attribut
          */
-        public <T> void setAttribute(String attrName, T attrValue) {
+        public T setAttribute(String attrName, Object attrValue) {
             attributes.put(attrName, attrValue);
+            return (T) this;
         }
 
         /**
@@ -206,13 +223,36 @@ public class Application extends JPanel implements KeyListener {
          * @param attrName la clé de l'attribut
          * @return la valeur de l'attribut, ou null si l'attribut n'existe pas
          */
-        public <T> T getAttribute(String attrName, T defaultValue) {
-            return (T) attributes.getOrDefault(attrName, defaultValue);
+        public <Y> Y getAttribute(String attrName, Y defaultValue) {
+            return (Y) attributes.getOrDefault(attrName, defaultValue);
         }
 
-        public void setSpeed(double dx, double dy) {
+        public T setSpeed(double dx, double dy) {
             this.dx = dx;
             this.dy = dy;
+            return (T) this;
+        }
+
+        public T setPosition(double x, double y) {
+            this.x = x;
+            this.y = y;
+            return (T) this;
+        }
+
+        public T setSize(int w, int h) {
+            this.width = w;
+            this.height = h;
+            return (T) this;
+        }
+
+        public T setRotation(double r) {
+            this.rotation = r;
+            return (T) this;
+        }
+
+        public T setRotationSpeed(double dr) {
+            this.drotation = dr;
+            return (T) this;
         }
 
         public Rectangle2D getBounds2D() {
@@ -222,12 +262,55 @@ public class Application extends JPanel implements KeyListener {
         public String toString() {
             return String.format("%s:pos[%.02f,%.02f]", name, x, y);
         }
+
+        public T setStickToCamera(boolean b) {
+            this.stickToCamera = b;
+            return (T) this;
+        }
+
+        public T setPhysicType(int t) {
+            this.physicType = t;
+            return (T) this;
+        }
+
+        public T setColor(Color c) {
+            this.color = c;
+            return (T) this;
+        }
+
+        public T setFillColor(Color c) {
+            this.fillColor = c;
+            return (T) this;
+        }
+
+        public T setPriority(int t) {
+            this.priority = t;
+            return (T) this;
+        }
+
+        public T setConstrainedToPlayArea(boolean ctpa) {
+            this.constrainedToPlayArea = ctpa;
+            return (T) this;
+        }
+
+        public T setLayer(int l) {
+            this.layer = l;
+            return (T) this;
+        }
     }
 
     /**
      * La {@link Camera} qui permet de suivre une entité {@link Entity}.
+     * 
+     * The {@link Camera} object intends to track another {@link Entity} across the
+     * play area (now defined in the {@link World#playArea} object).
+     * 
+     * So to use it, just add it to the scene, and set the {@link Camera#target}'s
+     * {@link Entity} and
+     * a {@link Camera#tween} factor to set the {@link Camera} velocity onthe
+     * tracking.
      */
-    public class Camera extends Entity {
+    public class Camera extends Entity<Camera> {
 
         private Entity target;
         private double tween;
@@ -245,12 +328,13 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public void update(int elapsed) {
+            this.rotation += drotation;
             this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
             this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
         }
     }
 
-    public class TextEntity extends Entity {
+    public class TextEntity extends Entity<TextEntity> {
         String text;
         Font font;
         Object value;
@@ -301,6 +385,40 @@ public class Application extends JPanel implements KeyListener {
             }
         }
 
+        public TextEntity setShadowColor(Color sc) {
+            this.shadowColor = sc;
+            return this;
+        }
+
+        public TextEntity setShadowWidth(int sw) {
+            this.shadowWidth = sw;
+            return this;
+        }
+
+        public TextEntity setBorderColor(Color bc) {
+            this.borderColor = bc;
+            return this;
+        }
+
+        public TextEntity setBorderWidth(int bw) {
+            this.borderWidth = bw;
+            return this;
+        }
+
+        public TextEntity setFont(Font f) {
+            this.font = f;
+            return this;
+        }
+
+        public TextEntity setText(String t) {
+            this.text = t;
+            return this;
+        }
+
+        public TextEntity setValue(Object v) {
+            this.value = v;
+            return this;
+        }
     }
 
     public static class World {
@@ -332,8 +450,9 @@ public class Application extends JPanel implements KeyListener {
         }
     }
 
-    private int FPS = 60;
-    private int UPS = 120;
+    private static int FPS = 60;
+    private static int UPS = 120;
+    private static double PIXEL_METER_RATIO = 12.0;
 
     private ResourceBundle messages;
     private Properties config = new Properties();
@@ -358,8 +477,6 @@ public class Application extends JPanel implements KeyListener {
     private JFrame frame;
     private BufferedImage buffer;
 
-    @Deprecated
-    protected Rectangle2D playArea;
     private Camera camera;
 
     public World world;
@@ -437,8 +554,6 @@ public class Application extends JPanel implements KeyListener {
         winSize = getDimension(config, "app.window.size", "640x400");
         // resolution
         bufferResolution = getDimension(config, "app.render.resolution", "320x200");
-        // play area
-        playArea = getRectangle2D(config, "app.physic.playarea", "1000x1000");
         // Maximum speed for Entity.
         maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.speed.max", "16.0"));
 
@@ -453,11 +568,13 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * Retrieve the key boolean value from the config. if nof exists, return the default value.
+     * Retrieve the key boolean value from the config. if nof exists, return the
+     * default value.
      *
      * @param config       the Properties instance to be parsed in.
      * @param key          the key for the required boolean value.
-     * @param defaultValue the default boolean value for the key entry if it not exists in.
+     * @param defaultValue the default boolean value for the key entry if it not
+     *                     exists in.
      * @return boolean value.
      */
     private static boolean getParsedBoolean(Properties config, String key, String defaultValue) {
@@ -465,11 +582,13 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * Retrieve the key Integer value from the config. if nof exists, return the default value.
+     * Retrieve the key Integer value from the config. if nof exists, return the
+     * default value.
      *
      * @param config       the Properties instance to be parsed in.
      * @param key          the key for the required Integer value.
-     * @param defaultValue the default Integer value for the key entry if it not exists in.
+     * @param defaultValue the default Integer value for the key entry if it not
+     *                     exists in.
      * @return Integer value.
      */
     private static int getParsedInt(Properties config, String key, String defaultValue) {
@@ -477,11 +596,13 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * Retrieve the key Rectangle2D value from the config. if nof exists, return the default value.
+     * Retrieve the key Rectangle2D value from the config. if nof exists, return the
+     * default value.
      *
      * @param config       the Properties instance to be parsed in.
      * @param key          the key for the required Rectangle2D value.
-     * @param defaultValue the default Rectangle2D value for the key entry if it not exists in.
+     * @param defaultValue the default Rectangle2D value for the key entry if it not
+     *                     exists in.
      * @return Rectangle2D value.
      */
     private Rectangle2D getRectangle2D(Properties config, String key, String defaultValue) {
@@ -493,11 +614,13 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * Retrieve the key Dimension value from the config. if nof exists, return the default value.
+     * Retrieve the key Dimension value from the config. if nof exists, return the
+     * default value.
      *
      * @param config       the Properties instance to be parsed in.
      * @param key          the key for the required Dimension value.
-     * @param defaultValue the default Dimension value for the key entry if it not exists in.
+     * @param defaultValue the default Dimension value for the key entry if it not
+     *                     exists in.
      * @return Dimension value.
      */
     private Dimension getDimension(Properties config, String key, String defaultValue) {
@@ -508,12 +631,14 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * Retrieve the key World object from the config. if not exists, return the default value
+     * Retrieve the key World object from the config. if not exists, return the
+     * default value
      * (value format is <code>"world([name],[gravity],([width]x[height]))"</code>).
      *
      * @param config       the Properties instance to be parsed in.
      * @param key          the key for the required World value.
-     * @param defaultValue the default World value for the key entry if it not exists in.
+     * @param defaultValue the default World value for the key entry if it not
+     *                     exists in.
      * @return World value.
      */
     private World getWorld(Properties config, String key, String defaultValue) {
@@ -639,77 +764,78 @@ public class Application extends JPanel implements KeyListener {
 
     private void create() {
         TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.80, 32);
-        score.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
-        score.borderColor = Color.BLACK;
-        score.font = getFont().deriveFont(20.0f);
-        score.color = Color.WHITE;
-        score.shadowWidth = 3;
-        score.borderWidth = 2;
-        score.text = "%05d";
-        score.value = 0;
-        score.priority = 20;
-        score.physicType = Entity.STATIC;
+        score.setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setPhysicType(Entity.STATIC)
+                .setBorderColor(Color.BLACK)
+                .setFont(getFont().deriveFont(20.0f))
+                .setColor(Color.WHITE)
+                .setShadowWidth(3)
+                .setBorderWidth(2)
+                .setText("%05d")
+                .setValue(0)
+                .setPriority(20)
+                .setStickToCamera(true);
 
         addEntity(score);
 
-        TextEntity heart = new TextEntity("heart", 10, bufferResolution.getHeight() * 0.90);
-        heart.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
-        heart.borderColor = Color.BLACK;
-        heart.font = getFont().deriveFont(16.0f);
-        heart.color = Color.RED;
-        heart.shadowWidth = 3;
-        heart.borderWidth = 2;
-        heart.text = "\u2764";
-        heart.priority = 20;
-        heart.physicType = Entity.STATIC;
+        TextEntity heart = new TextEntity("heart", 10, bufferResolution.getHeight() * 0.90)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setBorderColor(Color.BLACK)
+                .setFont(getFont().deriveFont(16.0f))
+                .setColor(Color.RED)
+                .setShadowWidth(3)
+                .setBorderWidth(2)
+                .setText("\u2764")
+                .setPriority(20)
+                .setPhysicType(Entity.STATIC);
 
         addEntity(heart);
 
-        TextEntity life = new TextEntity("life", 20, bufferResolution.getHeight() * 0.90);
-        life.shadowColor = new Color(0.2f, 0.2f, 0.2f, 0.6f);
-        life.borderColor = Color.BLACK;
-        life.font = getFont().deriveFont(12.0f);
-        life.color = Color.WHITE;
-        life.shadowWidth = 2;
-        life.borderWidth = 1;
-        life.text = "%02d";
-        life.value = 3;
-        life.priority = 21;
-        life.physicType = Entity.STATIC;
+        TextEntity life = new TextEntity("life", 20, bufferResolution.getHeight() * 0.90)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setBorderColor(Color.BLACK)
+                .setFont(getFont().deriveFont(16.0f))
+                .setColor(Color.RED)
+                .setShadowWidth(3)
+                .setBorderWidth(2)
+                .setText("%02d")
+                .setValue(3)
+                .setPriority(21)
+                .setPhysicType(Entity.STATIC);
 
         addEntity(life);
 
         Entity player = new Entity("player",
                 (int) ((bufferResolution.getWidth() - 16) * 0.5),
                 (int) ((bufferResolution.getHeight() - 16) * 0.5),
-                16, 16);
-        player.priority = 10;
-        player.setAttribute("speedStep", 1);
+                16, 16)
+                .setPriority(10)
+                .setAttribute("speedStep", 1);
         addEntity(player);
 
-        addEntities(createStarfield("star_%d", 2000));
+        addEntities(createStarfield(world, "star_%d", 2000));
 
         camera = new Camera("cam01", bufferResolution.width, bufferResolution.height);
         camera.setTarget(player);
         camera.setTween(0.02);
     }
 
-    private List<Entity> createStarfield(String namePrefix, int nbStars) {
+    private List<Entity> createStarfield(World world, String namePrefix, int nbStars) {
         List<Entity> stars = new ArrayList<>();
         for (int i = 0; i < nbStars; i++) {
             double x = Math.random() * (world.playArea.getWidth() * 3);
-            double y = Math.random() * (playArea.getHeight() * 3);
+            double y = Math.random() * (world.playArea.getHeight() * 3);
             Entity star = new Entity(
                     String.format(namePrefix, i),
                     x - world.playArea.getWidth(),
                     y - world.playArea.getHeight(),
-                    1, 1);
-            star.priority = 1;
-            star.constrainedToPlayArea = false;
-            star.layer = (int) (Math.random() * 5) + 1;
-            star.physicType = Entity.DYNAMIC;
-            star.color = Color.YELLOW;
-            star.setSpeed(0.2, 0.2);
+                    1, 1)
+                    .setPriority(1)
+                    .setConstrainedToPlayArea(false)
+                    .setLayer((int) (Math.random() * 5) + 1)
+                    .setPhysicType(Entity.DYNAMIC)
+                    .setColor(Color.YELLOW)
+                    .setSpeed(0.2, 0.2);
             stars.add(star);
         }
         return stars;
@@ -717,7 +843,7 @@ public class Application extends JPanel implements KeyListener {
 
     private void input() {
         Entity player = entities.get("player");
-        int step = player.getAttribute("speedStep", 2);
+        int step = (int) player.getAttribute("speedStep", 2);
         if (ctrlKey)
             step = step * 4;
         if (shiftKey)
@@ -736,6 +862,17 @@ public class Application extends JPanel implements KeyListener {
         }
         if (keys[KeyEvent.VK_RIGHT]) {
             player.dx = step;
+        }
+
+        if (keys[KeyEvent.VK_PAGE_UP]) {
+            camera.drotation = 0.001;
+        }
+        if (keys[KeyEvent.VK_PAGE_DOWN]) {
+            camera.drotation = -0.001;
+        }
+        if (keys[KeyEvent.VK_CLEAR]) {
+            camera.drotation = 0.0;
+            camera.rotation = 0.0;
         }
         player.dx *= 0.98;
         player.dy *= 0.98;
@@ -766,8 +903,12 @@ public class Application extends JPanel implements KeyListener {
 
     private void updateEntity(Entity e, int elapsed) {
         constrainToPhysic(e);
+        double gravity = (e.stickToCamera ? 0.0 : world.gravity);
+
+        e.rotation += e.drotation * elapsed;
+        e.y += (e.dy + gravity) * elapsed;
         e.x += e.dx * elapsed;
-        e.y += e.dy * elapsed;
+
         e.update(elapsed);
     }
 
@@ -860,6 +1001,7 @@ public class Application extends JPanel implements KeyListener {
 
     private void moveFromCameraPoV(Graphics2D g, double direction) {
         if (camera != null) {
+            g.rotate(camera.rotation * direction, camera.x * direction * 0.5, camera.y * direction * 0.5);
             g.translate(direction * camera.x, direction * camera.y);
         }
     }
@@ -948,10 +1090,10 @@ public class Application extends JPanel implements KeyListener {
      * @param end        the character to end the string with.
      * @param delimiter  the character to seperate each entry.
      * @return a concatenated {@link String} based on the {@link Map}
-     * {@link java.util.Map.Entry}.
+     *         {@link java.util.Map.Entry}.
      */
     public static String prepareStatsString(Map<String, Object> attributes, String start, String delimiter,
-                                            String end) {
+            String end) {
         return start + attributes.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
             String value = "";
             switch (entry.getValue().getClass().getSimpleName()) {
