@@ -75,6 +75,7 @@ public class Application extends JPanel implements KeyListener {
      * </p>
      */
     public class Entity<T extends Entity<?>> {
+        final static int NONE = 0;
         final static int STATIC = 1;
         final static int DYNAMIC = 2;
         final static int TYPE_POINT = 1;
@@ -90,6 +91,7 @@ public class Application extends JPanel implements KeyListener {
         double dx;
         double dy;
         double drotation;
+        double mass;
         private boolean active = true;
 
         int duration = -1;
@@ -255,6 +257,11 @@ public class Application extends JPanel implements KeyListener {
             return (T) this;
         }
 
+        public T setMass(double m) {
+            this.mass = m;
+            return (T) this;
+        }
+
         public Rectangle2D getBounds2D() {
             return new Rectangle2D.Double(x, y, width, height);
         }
@@ -269,6 +276,7 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public T setPhysicType(int t) {
+            assert (t == NONE || t == STATIC || t == DYNAMIC);
             this.physicType = t;
             return (T) this;
         }
@@ -335,6 +343,9 @@ public class Application extends JPanel implements KeyListener {
     }
 
     public class TextEntity extends Entity<TextEntity> {
+        public static final int ALIGN_LEFT = 1;
+        public static final int ALIGN_CENTER = 2;
+        public static final int ALIGN_RIGHT = 4;
         String text;
         Font font;
         Object value;
@@ -342,6 +353,7 @@ public class Application extends JPanel implements KeyListener {
         Color shadowColor;
         int borderWidth;
         Color borderColor;
+        int textAlign = ALIGN_LEFT;
 
         public TextEntity(String n, double x, double y) {
             super(n, x, y, 0, 0);
@@ -359,14 +371,31 @@ public class Application extends JPanel implements KeyListener {
             }
             this.width = fm.stringWidth(textValue);
             this.height = fm.getHeight();
+            int offsetX = 0;
+            switch (textAlign) {
+                case ALIGN_LEFT -> {
+                    offsetX = 0;
+                }
+                case ALIGN_CENTER -> {
+                    offsetX = (int) (-this.width * 0.5);
+
+                }
+                case ALIGN_RIGHT -> {
+                    offsetX = -this.width;
+                }
+                default -> {
+                    offsetX = 0;
+                    System.err.printf(">> <?> unknown textAlignt %d value for %s%n", textAlign, name);
+                }
+            }
             if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
-                drawShadowText(g, textValue, x, y);
+                drawShadowText(g, textValue, x + offsetX, y);
             }
             if (borderWidth > 0 && Optional.ofNullable(borderColor).isPresent()) {
-                drawBorderText(g, textValue, x, y);
+                drawBorderText(g, textValue, x + offsetX, y);
             }
             g.setColor(color);
-            g.drawString(textValue, (int) x, (int) y);
+            g.drawString(textValue, (int) x + offsetX, (int) y);
         }
 
         private void drawShadowText(Graphics2D g, String textValue, double x, double y) {
@@ -419,6 +448,13 @@ public class Application extends JPanel implements KeyListener {
             this.value = v;
             return this;
         }
+
+        public TextEntity setTextAlign(int ta) {
+            assert (ta == ALIGN_LEFT || ta == ALIGN_CENTER || ta == ALIGN_RIGHT);
+            this.textAlign = ta;
+            return this;
+        }
+
     }
 
     public static class World {
@@ -447,6 +483,20 @@ public class Application extends JPanel implements KeyListener {
                     ", playArea=(" + playArea.getWidth() + "x" + playArea.getHeight() + ")" +
                     ", gravity=" + gravity +
                     '}';
+        }
+    }
+
+    public static class Material {
+        String name;
+        double density;
+        double elasticity;
+        double roughness;
+
+        public Material(String n, double d, double e, double r) {
+            this.name = n;
+            this.density = d;
+            this.elasticity = e;
+            this.roughness = r;
         }
     }
 
@@ -763,7 +813,7 @@ public class Application extends JPanel implements KeyListener {
     }
 
     private void create() {
-        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.80, 32);
+        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.98, 32);
         score.setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
                 .setBorderColor(Color.BLACK)
@@ -774,11 +824,13 @@ public class Application extends JPanel implements KeyListener {
                 .setText("%05d")
                 .setValue(0)
                 .setPriority(20)
+                .setTextAlign(TextEntity.ALIGN_RIGHT)
                 .setStickToCamera(true);
 
         addEntity(score);
 
         TextEntity heart = new TextEntity("heart", 10, bufferResolution.getHeight() * 0.90)
+                .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(getFont().deriveFont(16.0f))
@@ -787,21 +839,22 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText("\u2764")
                 .setPriority(20)
-                .setPhysicType(Entity.STATIC);
+                .setStickToCamera(true);
 
         addEntity(heart);
 
         TextEntity life = new TextEntity("life", 20, bufferResolution.getHeight() * 0.90)
+                .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
-                .setFont(getFont().deriveFont(16.0f))
-                .setColor(Color.RED)
+                .setFont(getFont().deriveFont(12.0f))
+                .setColor(Color.WHITE)
                 .setShadowWidth(3)
                 .setBorderWidth(2)
-                .setText("%02d")
+                .setText("%d")
                 .setValue(3)
                 .setPriority(21)
-                .setPhysicType(Entity.STATIC);
+                .setStickToCamera(true);
 
         addEntity(life);
 
@@ -809,7 +862,9 @@ public class Application extends JPanel implements KeyListener {
                 (int) ((bufferResolution.getWidth() - 16) * 0.5),
                 (int) ((bufferResolution.getHeight() - 16) * 0.5),
                 16, 16)
+                .setPhysicType(Entity.DYNAMIC)
                 .setPriority(10)
+                .setMass(50.0)
                 .setAttribute("speedStep", 1);
         addEntity(player);
 
@@ -817,7 +872,7 @@ public class Application extends JPanel implements KeyListener {
 
         camera = new Camera("cam01", bufferResolution.width, bufferResolution.height);
         camera.setTarget(player);
-        camera.setTween(0.02);
+        camera.setTween(0.2);
     }
 
     private List<Entity> createStarfield(World world, String namePrefix, int nbStars) {
@@ -833,7 +888,7 @@ public class Application extends JPanel implements KeyListener {
                     .setPriority(1)
                     .setConstrainedToPlayArea(false)
                     .setLayer((int) (Math.random() * 5) + 1)
-                    .setPhysicType(Entity.DYNAMIC)
+                    .setPhysicType(Entity.NONE)
                     .setColor(Color.YELLOW)
                     .setSpeed(0.2, 0.2);
             stars.add(star);
@@ -886,27 +941,28 @@ public class Application extends JPanel implements KeyListener {
 
     private void update(long elapsed, Map<String, Object> datastats) {
         int time = (int) (elapsed * 0.0000001);
-        entities.values().stream().filter(e -> e.isActive()).forEach(
-                e -> {
-                    updateEntity(e, time);
-                    constrainToViewport(e);
-                });
+        entities.values().stream().filter(e -> e.isActive()).sorted((a, b) -> a.physicType < b.physicType ? 1 : -1)
+                .forEach(
+                        e -> {
+                            updateEntity(e, time);
+                            constrainToViewport(e);
+                        });
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);
         }
         long renderedEntities = entities.values().stream()
                 .filter(e -> e.isActive())
-                .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
+                .filter(e -> inViewport(camera, e) || e.physicType == Entity.NONE)
                 .sorted((a, b) -> a.priority > b.priority ? 1 : -1).count();
         datastats.put("5_rend", renderedEntities);
     }
 
     private void updateEntity(Entity e, int elapsed) {
         constrainToPhysic(e);
-        double gravity = (e.stickToCamera ? 0.0 : world.gravity);
+        double gravity = (e.stickToCamera || e.physicType == Entity.NONE ? 0.0 : world.gravity);
 
         e.rotation += e.drotation * elapsed;
-        e.y += (e.dy + gravity) * elapsed;
+        e.y += (e.dy + gravity * (e.mass != 0.0 ? e.mass : 1.0)) * elapsed;
         e.x += e.dx * elapsed;
 
         e.update(elapsed);
@@ -927,15 +983,19 @@ public class Application extends JPanel implements KeyListener {
             return;
         if (e.x < 0) {
             e.x = 0;
+            e.dx = 0;
         }
         if (e.x + e.width > world.playArea.getWidth()) {
             e.x = world.playArea.getWidth() - e.width;
+            e.dx = 0;
         }
         if (e.y < 0) {
             e.y = 0;
+            e.dy = 0;
         }
         if (e.y + e.height > world.playArea.getHeight()) {
             e.y = world.playArea.getHeight() - e.height;
+            e.dy = 0;
         }
     }
 
