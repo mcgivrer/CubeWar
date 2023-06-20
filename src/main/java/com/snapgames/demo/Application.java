@@ -20,6 +20,7 @@ import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -75,6 +76,7 @@ public class Application extends JPanel implements KeyListener {
      * </p>
      */
     public class Entity<T extends Entity<?>> {
+        final static int NONE = 0;
         final static int STATIC = 1;
         final static int DYNAMIC = 2;
         final static int TYPE_POINT = 1;
@@ -90,6 +92,7 @@ public class Application extends JPanel implements KeyListener {
         double dx;
         double dy;
         double drotation;
+        double mass;
         private boolean active = true;
 
         int duration = -1;
@@ -101,10 +104,12 @@ public class Application extends JPanel implements KeyListener {
 
         Map<String, Object> attributes = new HashMap<>();
         public int physicType;
+        public Material material;
         public int type;
         public int layer;
         public boolean constrainedToPlayArea = true;
         public boolean stickToCamera;
+        public int contact;
 
         /**
          * Constructeur de l'entité.
@@ -124,6 +129,7 @@ public class Application extends JPanel implements KeyListener {
             this.active = true;
             this.type = TYPE_RECTANGLE;
             this.stickToCamera = false;
+            this.material = Material.DEFAULT;
         }
 
         /**
@@ -255,6 +261,16 @@ public class Application extends JPanel implements KeyListener {
             return (T) this;
         }
 
+        public T setMass(double m) {
+            this.mass = m;
+            return (T) this;
+        }
+
+        public T setMaterial(Material mat) {
+            this.material = mat;
+            return (T) this;
+        }
+
         public Rectangle2D getBounds2D() {
             return new Rectangle2D.Double(x, y, width, height);
         }
@@ -269,6 +285,7 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public T setPhysicType(int t) {
+            assert (t == NONE || t == STATIC || t == DYNAMIC);
             this.physicType = t;
             return (T) this;
         }
@@ -285,6 +302,11 @@ public class Application extends JPanel implements KeyListener {
 
         public T setPriority(int t) {
             this.priority = t;
+            return (T) this;
+        }
+
+        public T setContact(int c) {
+            this.contact = c;
             return (T) this;
         }
 
@@ -335,6 +357,9 @@ public class Application extends JPanel implements KeyListener {
     }
 
     public class TextEntity extends Entity<TextEntity> {
+        public static final int ALIGN_LEFT = 1;
+        public static final int ALIGN_CENTER = 2;
+        public static final int ALIGN_RIGHT = 4;
         String text;
         Font font;
         Object value;
@@ -342,6 +367,7 @@ public class Application extends JPanel implements KeyListener {
         Color shadowColor;
         int borderWidth;
         Color borderColor;
+        int textAlign = ALIGN_LEFT;
 
         public TextEntity(String n, double x, double y) {
             super(n, x, y, 0, 0);
@@ -359,14 +385,31 @@ public class Application extends JPanel implements KeyListener {
             }
             this.width = fm.stringWidth(textValue);
             this.height = fm.getHeight();
+            int offsetX = 0;
+            switch (textAlign) {
+                case ALIGN_LEFT -> {
+                    offsetX = 0;
+                }
+                case ALIGN_CENTER -> {
+                    offsetX = (int) (-this.width * 0.5);
+
+                }
+                case ALIGN_RIGHT -> {
+                    offsetX = -this.width;
+                }
+                default -> {
+                    offsetX = 0;
+                    System.err.printf(">> <?> unknown textAlignt %d value for %s%n", textAlign, name);
+                }
+            }
             if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
-                drawShadowText(g, textValue, x, y);
+                drawShadowText(g, textValue, x + offsetX, y);
             }
             if (borderWidth > 0 && Optional.ofNullable(borderColor).isPresent()) {
-                drawBorderText(g, textValue, x, y);
+                drawBorderText(g, textValue, x + offsetX, y);
             }
             g.setColor(color);
-            g.drawString(textValue, (int) x, (int) y);
+            g.drawString(textValue, (int) x + offsetX, (int) y);
         }
 
         private void drawShadowText(Graphics2D g, String textValue, double x, double y) {
@@ -419,12 +462,20 @@ public class Application extends JPanel implements KeyListener {
             this.value = v;
             return this;
         }
+
+        public TextEntity setTextAlign(int ta) {
+            assert (ta == ALIGN_LEFT || ta == ALIGN_CENTER || ta == ALIGN_RIGHT);
+            this.textAlign = ta;
+            return this;
+        }
+
     }
 
     public static class World {
         String name = "defaultWorld";
         Rectangle2D playArea;
         double gravity;
+        Material material = Material.AIR;
 
         public World(String name) {
             this.name = name;
@@ -447,6 +498,37 @@ public class Application extends JPanel implements KeyListener {
                     ", playArea=(" + playArea.getWidth() + "x" + playArea.getHeight() + ")" +
                     ", gravity=" + gravity +
                     '}';
+        }
+    }
+
+    public static class Material {
+        public static final Material DEFAULT = new Material("defualt", 0.0, 1.0, 1.0);
+        public static final Material RUBBER = new Material("rubber", 0.68, 0.7, 0.98);
+        public static final Material SUPER_BALL = new Material("superball", 0.98, 0.7, 0.998);
+        public static final Material WOOD = new Material("wood", 0.20, 0.65, 0.50);
+        public static final Material STEEL = new Material("steel", 0.10, 1.2, 0.12);
+        public static final Material AIR = new Material("air", 0.0, 0.05, 0.9999);
+        public static final Material WATER = new Material("water", 0.0, 0.90, 0.80);
+        String name;
+        double density;
+        double elasticity;
+        double roughness;
+
+        /**
+         * Craete a new {@link Material} with a name, a density, an elasticity
+         * (bounciness), and
+         * a roughness to compute friction.
+         * 
+         * @param n the name for that {@link Material}.
+         * @param e the elasticity or bounciness for this {@link Material}
+         * @param d the density for this {@link Material}.
+         * @param r the roughness or friction for this {@link Material}
+         */
+        public Material(String n, double e, double d, double r) {
+            this.name = n;
+            this.elasticity = e;
+            this.density = d;
+            this.roughness = r;
         }
     }
 
@@ -486,7 +568,7 @@ public class Application extends JPanel implements KeyListener {
      */
     private boolean keys[] = new boolean[1024];
 
-    private Map<String, Entity> entities = new HashMap<>();
+    private Map<String, Entity<? extends Entity<?>>> entities = new HashMap<>();
     private boolean ctrlKey;
     private boolean shiftKey;
     private boolean altKey;
@@ -762,8 +844,8 @@ public class Application extends JPanel implements KeyListener {
         } while (!exit);
     }
 
-    private void create() {
-        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.80, 32);
+    protected void create() {
+        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.98, 32);
         score.setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
                 .setBorderColor(Color.BLACK)
@@ -774,11 +856,14 @@ public class Application extends JPanel implements KeyListener {
                 .setText("%05d")
                 .setValue(0)
                 .setPriority(20)
-                .setStickToCamera(true);
+                .setTextAlign(TextEntity.ALIGN_RIGHT)
+                .setStickToCamera(true)
+                .setMaterial(Material.RUBBER);
 
         addEntity(score);
 
         TextEntity heart = new TextEntity("heart", 10, bufferResolution.getHeight() * 0.90)
+                .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(getFont().deriveFont(16.0f))
@@ -787,21 +872,22 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText("\u2764")
                 .setPriority(20)
-                .setPhysicType(Entity.STATIC);
+                .setStickToCamera(true);
 
         addEntity(heart);
 
         TextEntity life = new TextEntity("life", 20, bufferResolution.getHeight() * 0.90)
+                .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
-                .setFont(getFont().deriveFont(16.0f))
-                .setColor(Color.RED)
+                .setFont(getFont().deriveFont(12.0f))
+                .setColor(Color.WHITE)
                 .setShadowWidth(3)
                 .setBorderWidth(2)
-                .setText("%02d")
+                .setText("%d")
                 .setValue(3)
                 .setPriority(21)
-                .setPhysicType(Entity.STATIC);
+                .setStickToCamera(true);
 
         addEntity(life);
 
@@ -809,19 +895,23 @@ public class Application extends JPanel implements KeyListener {
                 (int) ((bufferResolution.getWidth() - 16) * 0.5),
                 (int) ((bufferResolution.getHeight() - 16) * 0.5),
                 16, 16)
+                .setPhysicType(Entity.DYNAMIC)
                 .setPriority(10)
-                .setAttribute("speedStep", 1);
+                .setMass(60.0)
+                .setMaterial(Material.SUPER_BALL)
+                .setAttribute("speedStep", 3.0)
+                .setAttribute("speedRotStep", 0.01);
         addEntity(player);
 
         addEntities(createStarfield(world, "star_%d", 2000));
 
         camera = new Camera("cam01", bufferResolution.width, bufferResolution.height);
         camera.setTarget(player);
-        camera.setTween(0.02);
+        camera.setTween(0.2);
     }
 
-    private List<Entity> createStarfield(World world, String namePrefix, int nbStars) {
-        List<Entity> stars = new ArrayList<>();
+    private List<Entity<? extends Entity<?>>> createStarfield(World world, String namePrefix, int nbStars) {
+        List<Entity<? extends Entity<?>>> stars = new ArrayList<>();
         for (int i = 0; i < nbStars; i++) {
             double x = Math.random() * (world.playArea.getWidth() * 3);
             double y = Math.random() * (world.playArea.getHeight() * 3);
@@ -833,86 +923,126 @@ public class Application extends JPanel implements KeyListener {
                     .setPriority(1)
                     .setConstrainedToPlayArea(false)
                     .setLayer((int) (Math.random() * 5) + 1)
-                    .setPhysicType(Entity.DYNAMIC)
+                    .setPhysicType(Entity.NONE)
                     .setColor(Color.YELLOW)
+                    .setMaterial(Material.AIR)
                     .setSpeed(0.2, 0.2);
             stars.add(star);
         }
         return stars;
     }
 
-    private void input() {
+    protected void input() {
         Entity player = entities.get("player");
-        int step = (int) player.getAttribute("speedStep", 2);
+        boolean moving = false;
+        // player moves
+        double step = (double) player.getAttribute("speedStep", 2.0);
+        double rotStep = (double) player.getAttribute("speedRotStep", 0.01);
         if (ctrlKey)
-            step = step * 4;
+            step = step * 4.0;
         if (shiftKey)
-            step = step * 2;
+            step = step * 2.0;
 
-        if (keys[KeyEvent.VK_UP]) {
-            player.dy = -step;
+        // player rotation
+        if (altKey) {
+            if (keys[KeyEvent.VK_UP]) {
+                player.setRotationSpeed(-rotStep);
+            }
+            if (keys[KeyEvent.VK_DOWN]) {
+                player.setRotationSpeed(+rotStep);
+            }
+            if (keys[KeyEvent.VK_DELETE]) {
+                player.setRotationSpeed(0.0);
+                player.setRotation(0.0);
+            }
+        } else {
+            if (keys[KeyEvent.VK_UP]) {
+                player.setSpeed(player.dx, -step);
+                moving = true;
+            }
+            if (keys[KeyEvent.VK_DOWN]) {
+                player.setSpeed(player.dx, step);
+                moving = true;
+            }
         }
-        if (keys[KeyEvent.VK_DOWN]) {
-            player.dy = step;
 
-        }
         if (keys[KeyEvent.VK_LEFT]) {
-            player.dx = -step;
-
+            player.setSpeed(-step, player.dy);
+            moving = true;
         }
         if (keys[KeyEvent.VK_RIGHT]) {
-            player.dx = step;
+            player.setSpeed(step, player.dy);
+            moving = true;
         }
 
+        // camera rotation
         if (keys[KeyEvent.VK_PAGE_UP]) {
-            camera.drotation = 0.001;
+            camera.setRotationSpeed(0.001);
         }
         if (keys[KeyEvent.VK_PAGE_DOWN]) {
-            camera.drotation = -0.001;
+            camera.setRotationSpeed(-0.001);
         }
-        if (keys[KeyEvent.VK_CLEAR]) {
-            camera.drotation = 0.0;
-            camera.rotation = 0.0;
+        if (keys[KeyEvent.VK_DELETE]) {
+            camera.setRotationSpeed(0.0);
+            camera.setRotation(0.0);
         }
-        player.dx *= 0.98;
-        player.dy *= 0.98;
+        if (!moving) {
+            player.setSpeed(
+                    player.dx * player.material.roughness,
+                    player.dy * player.material.roughness);
+
+        }
+        // move all stars according to player reverse speed.
         entities.values().stream()
                 .filter(e -> e.name.startsWith("star_"))
                 .forEach(e -> {
                     e.setSpeed(-player.dx * (e.layer * 0.2), -player.dy * (e.layer * 0.2));
-                    e.color = new Color((e.layer * 0.2f), (e.layer * 0.2f), (e.layer * 0.2f));
+                    e.setColor(new Color((e.layer * 0.2f), (e.layer * 0.2f), (e.layer * 0.2f)));
                 });
     }
 
     private void update(long elapsed, Map<String, Object> datastats) {
         int time = (int) (elapsed * 0.0000001);
-        entities.values().stream().filter(e -> e.isActive()).forEach(
-                e -> {
-                    updateEntity(e, time);
-                    constrainToViewport(e);
-                });
+        entities.values().stream().filter(e -> e.isActive()).sorted((a, b) -> a.physicType < b.physicType ? 1 : -1)
+                .forEach(
+                        e -> {
+                            updateEntity(e, time);
+                            e.setContact(0);
+                            constrainPlayArea(e);
+                        });
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);
         }
         long renderedEntities = entities.values().stream()
                 .filter(e -> e.isActive())
-                .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
+                .filter(e -> inViewport(camera, e) || e.physicType == Entity.NONE)
                 .sorted((a, b) -> a.priority > b.priority ? 1 : -1).count();
         datastats.put("5_rend", renderedEntities);
     }
 
-    private void updateEntity(Entity e, int elapsed) {
-        constrainToPhysic(e);
-        double gravity = (e.stickToCamera ? 0.0 : world.gravity);
+    private void updateEntity(Entity<? extends Entity<?>> e, int elapsed) {
+
+        double gravity = (e.stickToCamera || e.physicType == Entity.NONE ? 0.0 : world.gravity);
 
         e.rotation += e.drotation * elapsed;
-        e.y += (e.dy + gravity) * elapsed;
+        if (e.contact > 0) {
+            e.dx *= e.material.roughness;
+            e.dy *= e.material.roughness;
+            e.drotation *= e.material.roughness;
+        } else {
+            e.dx *= world.material.roughness;
+            e.dy *= world.material.roughness;
+            e.drotation *= world.material.roughness;
+
+        }
+        e.y += (e.dy + gravity * (e.mass != 0.0 ? e.mass * e.material.density : 1.0)) * elapsed;
         e.x += e.dx * elapsed;
 
         e.update(elapsed);
+        constrainToPhysic(e);
     }
 
-    private void constrainToPhysic(Entity e) {
+    private void constrainToPhysic(Entity<? extends Entity<?>> e) {
         // maximize speed.
         if (Math.abs(e.dx) > maxEntitySpeed) {
             e.dx = Math.signum(e.dx) * maxEntitySpeed;
@@ -922,20 +1052,33 @@ public class Application extends JPanel implements KeyListener {
         }
     }
 
-    protected void constrainToViewport(Entity e) {
+    protected void constrainPlayArea(Entity<? extends Entity<?>> e) {
+
         if (!e.constrainedToPlayArea)
             return;
         if (e.x < 0) {
             e.x = 0;
+
+            e.dx *= -e.material.elasticity * e.mass;
+            e.contact += 1;
         }
         if (e.x + e.width > world.playArea.getWidth()) {
             e.x = world.playArea.getWidth() - e.width;
+
+            e.dx *= -e.material.elasticity * e.mass;
+            e.contact += 2;
         }
         if (e.y < 0) {
             e.y = 0;
+
+            e.dy *= -e.material.elasticity * e.mass;
+            e.contact += 4;
         }
         if (e.y + e.height > world.playArea.getHeight()) {
             e.y = world.playArea.getHeight() - e.height;
+
+            e.dy *= -e.material.elasticity * e.mass;
+            e.contact += 8;
         }
     }
 
@@ -959,27 +1102,20 @@ public class Application extends JPanel implements KeyListener {
         g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
         // draw playArea
-        moveFromCameraPoV(g, -1);
+        moveFromCameraPoV(g, camera, -1);
         drawGrid(g, world.playArea);
         g.setColor(Color.BLUE);
         g.draw(world.playArea);
-        moveFromCameraPoV(g, 1);
+        moveFromCameraPoV(g, camera, 1);
 
         // draw entities
-        entities.values().stream()
-                .filter(e -> e.isActive())
-                .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
-                .sorted((a, b) -> a.priority > b.priority ? 1 : -1)
-                .forEach(
-                        e -> {
-                            if (e.physicType != Entity.STATIC) {
-                                moveFromCameraPoV(g, -1);
-                            }
-                            e.draw(g);
-                            if (e.physicType != Entity.STATIC) {
-                                moveFromCameraPoV(g, 1);
-                            }
-                        });
+        moveFromCameraPoV(g, camera, -1);
+        drawAllEntities(g, false);
+        moveFromCameraPoV(g, camera, 1);
+
+        // draw all entities that are stick to Camera viewport.
+        drawAllEntities(g, true);
+
         g.dispose();
 
         // copy to JFrame
@@ -999,10 +1135,33 @@ public class Application extends JPanel implements KeyListener {
         frame.getBufferStrategy().show();
     }
 
-    private void moveFromCameraPoV(Graphics2D g, double direction) {
+    private void drawAllEntities(Graphics2D g, boolean stickToCamera) {
+        entities.values().stream()
+                .filter(e -> e.isActive() && e.stickToCamera == stickToCamera)
+                .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
+                .sorted((a, b) -> a.priority > b.priority ? 1 : -1)
+                .forEach(
+                        e -> {
+                            g.rotate(-e.rotation,
+                                    e.x + e.width * 0.5,
+                                    e.y + e.height * 0.5);
+                            e.draw(g);
+
+                            g.rotate(e.rotation,
+                                    e.x + e.width * 0.5,
+                                    e.y + e.height * 0.5);
+                        });
+    }
+
+    private void moveFromCameraPoV(Graphics2D g, Camera camera, double direction) {
         if (camera != null) {
-            g.rotate(camera.rotation * direction, camera.x * direction * 0.5, camera.y * direction * 0.5);
-            g.translate(direction * camera.x, direction * camera.y);
+            AffineTransform af = AffineTransform.getRotateInstance(
+                    direction * camera.rotation,
+                    camera.width * 0.5,
+                    camera.height * 0.5);
+            af.translate(camera.x * direction, camera.y * direction);
+            // A Zoom factor can be : af.scale(1.0 / zoom, 1.0 / zoom);
+            g.transform(af);
         }
     }
 
@@ -1016,7 +1175,7 @@ public class Application extends JPanel implements KeyListener {
         }
     }
 
-    private boolean inViewport(Camera cam, Entity e) {
+    private boolean inViewport(Camera cam, Entity<? extends Entity<?>> e) {
         return cam.getBounds2D().contains(e.getBounds2D());
     }
 
@@ -1028,12 +1187,12 @@ public class Application extends JPanel implements KeyListener {
         System.out.printf(">> End of application %s%n", title);
     }
 
-    private Entity addEntity(Entity e) {
+    private Entity<? extends Entity<?>> addEntity(Entity<? extends Entity<?>> e) {
         return entities.put(e.name, e);
     }
 
-    private void addEntities(List<Entity> listEntities) {
-        for (Entity e : listEntities) {
+    private void addEntities(List<Entity<? extends Entity<?>>> listEntities) {
+        for (Entity<? extends Entity<?>> e : listEntities) {
             addEntity(e);
         }
     }
