@@ -181,7 +181,7 @@ public class Application extends JPanel implements KeyListener {
                 case TYPE_LINE -> {
                     if (color != null) {
                         g.setColor(color);
-                        g.drawLine((int) x, (int) y, width, height);
+                        g.drawLine((int) x, (int) y, (int) width, (int) height);
                     }
                 }
                 case TYPE_RECTANGLE -> {
@@ -975,7 +975,7 @@ public class Application extends JPanel implements KeyListener {
                     .setColor(Color.YELLOW)
                     .setMaterial(Material.AIR)
                     .setMass(110.0)
-                    .setSpeed(0.0, Math.random() * 0.4)
+                    .setSpeed(0.0, Math.random() * 30.1 * world.gravity)
                     .addBehavior(new Behavior<GameObject>() {
                         @Override
                         public void update(Entity<?> e, int elapsed) {
