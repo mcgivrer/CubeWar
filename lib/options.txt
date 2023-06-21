@@ -3,4 +3,4 @@
 -sourcepath src/main/java/;src/main/resources
 -source ${JAVA_VERSION}
 -target ${JAVA_VERSION}
--classpath tartget/classes
+-classpath target/classes

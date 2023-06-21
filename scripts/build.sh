@@ -25,7 +25,7 @@ export BUILD=${TARGET}/build
 export CLASSES=${TARGET}/classes
 export RESOURCES=${SRC}/main/resources
 export TESTRESOURCES=${SRC}/test/resources
-export COMPILATION_OPTS="--enable-preview -Xlint:preview -g:source,lines,vars"
+export COMPILATION_OPTS="--enable-preview -Xlint:preview -Xlint:unchecked -g:source,lines,vars"
 export JAR_NAME=${PROGRAM_NAME}-${PROGRAM_VERSION}.jar
 # -Xlint:unchecked -Xlint:preview"
 export JAR_OPTS=--enable-preview
