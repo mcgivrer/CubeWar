@@ -84,7 +84,9 @@ public class Application extends JPanel implements KeyListener {
         final static int TYPE_LINE = 2;
         final static int TYPE_RECTANGLE = 3;
         final static int TYPE_ELLIPSE = 4;
-        String name;
+        static int index = 0;
+        int id = ++index;
+        String name = "entity_" + id;
         double rotation;
         double dx;
         double dy;
@@ -108,6 +110,7 @@ public class Application extends JPanel implements KeyListener {
         public boolean constrainedToPlayArea;
         public boolean stickToCamera;
         public int contact;
+        public int debug = 5;
 
         /**
          * Constructeur de l'entité.
@@ -118,7 +121,7 @@ public class Application extends JPanel implements KeyListener {
          * @param w la largeur de l'entité
          * @param h la hauteur de l'entité
          */
-        public Entity(String n, double x, double y, int w, int h) {
+        public Entity(String n, double x, double y, double w, double h) {
             this.name = n;
             this.x = x;
             this.y = y;
@@ -164,6 +167,11 @@ public class Application extends JPanel implements KeyListener {
          */
         public boolean isActive() {
             return this.active;
+        }
+
+        public T setDebug(int d) {
+            this.debug = d;
+            return (T) this;
         }
 
         /**
@@ -322,6 +330,18 @@ public class Application extends JPanel implements KeyListener {
         public T setLayer(int l) {
             this.layer = l;
             return (T) this;
+        }
+
+        public List<String> getDebugInfo() {
+            List<String> infos = new ArrayList<>();
+            infos.add(String.format("1_#%d", id));
+            infos.add(String.format("1_name:%s", name));
+            infos.add(String.format("2_pos:(%.02f,%.02f)", x, y));
+            infos.add(String.format("2_size:(%.02f,%.02f)", width, height));
+            infos.add(String.format("3_vel:(%.02f,%.02f)", dx, dy));
+            infos.add(String.format("3_mass:%.02f kg", mass));
+            infos.add(String.format("4_mat:%s", material));
+            return infos;
         }
     }
 
@@ -498,7 +518,8 @@ public class Application extends JPanel implements KeyListener {
 
         @Override
         public void draw(Graphics2D g) {
-            // nothing to draw, perturbation is only a virtual element applying its effect to other entities.
+            // nothing to draw, perturbation is only a virtual element applying its effect
+            // to other entities.
         }
     }
 
@@ -568,12 +589,18 @@ public class Application extends JPanel implements KeyListener {
             this.density = d;
             this.roughness = r;
         }
+
+        public String toString() {
+            return "{n:" + name + "," + ",d:" + density + ",e:" + elasticity + ",r:" + roughness + "}";
+        }
     }
 
     /**
-     * Add a specific {@link Behavior#update(Entity, int)} to a {@link Application.GameObject} entity.
+     * Add a specific {@link Behavior#update(Entity, int)} to a
+     * {@link Application.GameObject} entity.
      * <p>
-     * The update phase for this {@link Application.GameObject} will be modified with the implementation of this behavior interface.
+     * The update phase for this {@link Application.GameObject} will be modified
+     * with the implementation of this behavior interface.
      *
      * @param <GameObject> the Entity to be modified.
      */
@@ -622,6 +649,8 @@ public class Application extends JPanel implements KeyListener {
     private boolean shiftKey;
     private boolean altKey;
     private boolean metaKey;
+    private String name;
+    private int debugLevel;
 
     /**
      * Create the {@link Application}.
@@ -636,6 +665,12 @@ public class Application extends JPanel implements KeyListener {
         init(args);
         frame = createWindow();
         create();
+        long staticEntities = entities.values().stream().filter(e -> e.physicType == Entity.STATIC).count();
+        long dynamicEntities = entities.values().stream().filter(e -> e.physicType == Entity.DYNAMIC).count();
+        long nonePhysicEntities = entities.values().stream().filter(e -> e.physicType == Entity.NONE).count();
+        System.out.printf(
+                ">> Scene created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
+                staticEntities, dynamicEntities, nonePhysicEntities, camera != null ? 1 : 0);
         loop();
         dispose();
     }
@@ -690,9 +725,11 @@ public class Application extends JPanel implements KeyListener {
 
         world = getWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
 
+        name = config.getProperty("app.name", "Default name Application");
+
         // --- Translated information ---
         // Application name.
-        title = Optional.of(messages.getString("app.name")).orElse("-Test002-");
+        title = Optional.of(messages.getString("app.window.name")).orElse("-Test002-");
         // Version of the application.
         version = Optional.of(messages.getString("app.version")).orElse("-1.0.0-");
 
@@ -709,6 +746,8 @@ public class Application extends JPanel implements KeyListener {
      * @return boolean value.
      */
     private static boolean getParsedBoolean(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
         return Boolean.parseBoolean(config.getProperty(key, defaultValue));
     }
 
@@ -723,6 +762,8 @@ public class Application extends JPanel implements KeyListener {
      * @return Integer value.
      */
     private static int getParsedInt(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
         return Integer.parseInt(config.getProperty(key, defaultValue));
     }
 
@@ -737,6 +778,9 @@ public class Application extends JPanel implements KeyListener {
      * @return Rectangle2D value.
      */
     private Rectangle2D getRectangle2D(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
+
         String[] paArgs = config.getProperty(key, defaultValue).split("x");
         return new Rectangle2D.Double(
                 0, 0,
@@ -755,6 +799,9 @@ public class Application extends JPanel implements KeyListener {
      * @return Dimension value.
      */
     private Dimension getDimension(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
+
         String[] winSizeArgs = config.getProperty(key, defaultValue).split("x");
         return new Dimension(
                 Integer.parseInt(winSizeArgs[0]),
@@ -773,6 +820,9 @@ public class Application extends JPanel implements KeyListener {
      * @return World value.
      */
     private World getWorld(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
+
         String value = config.getProperty(key, defaultValue);
         String[] wArgs = value.substring("world(".length(), value.length() - ")".length()).split(",");
         double g = Double.parseDouble(wArgs[1]);
@@ -792,6 +842,10 @@ public class Application extends JPanel implements KeyListener {
                 case "x", "exit" -> {
                     exit = Boolean.parseBoolean(arg[1]);
                     System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
+                }
+                case "d", "debug" -> {
+                    debugLevel = Integer.parseInt(arg[1]);
+                    System.out.printf(">> <!> argument 'debug' set to %s%n", arg[1]);
                 }
                 case "t", "title" -> {
                     title = arg[1];
@@ -907,7 +961,8 @@ public class Application extends JPanel implements KeyListener {
                 .setPriority(20)
                 .setTextAlign(TextEntity.ALIGN_RIGHT)
                 .setStickToCamera(true)
-                .setMaterial(Material.RUBBER);
+                .setMaterial(Material.RUBBER)
+                .setDebug(3);
 
         addEntity(score);
 
@@ -932,11 +987,12 @@ public class Application extends JPanel implements KeyListener {
                 .setFont(getFont().deriveFont(12.0f))
                 .setColor(Color.WHITE)
                 .setShadowWidth(3)
-                .setBorderWidth(2)
+                .setBorderWidth(1)
                 .setText("%d")
                 .setValue(3)
                 .setPriority(21)
-                .setStickToCamera(true);
+                .setStickToCamera(true)
+                .setDebug(2);
 
         addEntity(life);
 
@@ -949,7 +1005,8 @@ public class Application extends JPanel implements KeyListener {
                 .setMass(60.0)
                 .setMaterial(Material.RUBBER)
                 .setAttribute("speedStep", 3.0)
-                .setAttribute("speedRotStep", 0.01);
+                .setAttribute("speedRotStep", 0.01)
+                .setDebug(2);
         addEntity(player);
 
         addEntities(createDrops(world, "drop_%d", 2000));
@@ -1202,11 +1259,38 @@ public class Application extends JPanel implements KeyListener {
                                     e.x + e.width * 0.5,
                                     e.y + e.height * 0.5);
                             e.draw(g);
-
                             g.rotate(e.rotation,
                                     e.x + e.width * 0.5,
                                     e.y + e.height * 0.5);
+                            drawEntityDebugInfo(g, e);
                         });
+    }
+
+    private void drawEntityDebugInfo(Graphics2D g, Entity<? extends Entity<?>> e) {
+        if (debugLevel > 0 && debugLevel >= e.debug) {
+            List<String> infos = e.getDebugInfo();
+            int l = 0;
+            float fontSize = 9f;
+            g.setFont(g.getFont().deriveFont(fontSize));
+
+            int maxWidth = infos.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().getAsInt();
+            int offsetX = (int) (e.x + maxWidth > (camera.x + camera.width) ? -(maxWidth + 4.0) : 4.0);
+            int offsetY = (int) (e.y + (fontSize * infos.size()) > (camera.y + camera.height)
+                    ? -((fontSize * infos.size()) + 9.0)
+                    : -9.0);
+            g.setColor(Color.ORANGE);
+            for (String info : infos) {
+                String levelStr = info.substring(0, info.indexOf("_"));
+                int level = Integer.parseInt(levelStr);
+                if (level <= debugLevel) {
+                    g.drawString(info.substring(info.indexOf("_") + 1, info.length()),
+                            (int) (e.getX() + e.getWidth() + offsetX),
+                            (int) (e.getY() + offsetY + (l * fontSize)));
+                    l++;
+                }
+
+            }
+        }
     }
 
     private void moveFromCameraPoV(Graphics2D g, Camera camera, double direction) {
@@ -1259,7 +1343,9 @@ public class Application extends JPanel implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        if (debugLevel > 3) {
+            System.out.printf(">> <!> key typed: %s%n", e.getKeyChar());
+        }
     }
 
     @Override
@@ -1305,10 +1391,10 @@ public class Application extends JPanel implements KeyListener {
      * @param end        the character to end the string with.
      * @param delimiter  the character to seperate each entry.
      * @return a concatenated {@link String} based on the {@link Map}
-     * {@link java.util.Map.Entry}.
+     *         {@link java.util.Map.Entry}.
      */
     public static String prepareStatsString(Map<String, Object> attributes, String start, String delimiter,
-                                            String end) {
+            String end) {
         return start + attributes.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
             String value = "";
             switch (entry.getValue().getClass().getSimpleName()) {
