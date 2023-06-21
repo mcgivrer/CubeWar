@@ -2,8 +2,9 @@
 
 ## Context
 
-This is the readme file for Application (1.0.0) project
-The project can be built or executed through the provided `srcipts/build.sh` script.
+This is the readme file for Application (1.0.0) project.
+
+The java project can be built or executed through the provided `scripts/build.sh` script, see reference later in this README for more info on this build script.
 
 ## Build
 
