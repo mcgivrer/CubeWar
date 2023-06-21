@@ -2,7 +2,7 @@
 
 ## Context
 
-This is the readme file for Application (1.0.0) project.
+This is the readme file for JavaTestApp (1.0.0) project.
 
 The java project can be built or executed through the provided `scripts/build.sh` script, see reference later in this README for more info on this build script.
 
@@ -25,7 +25,7 @@ $> build.sh r
 or you can execute the command line :
 
 ```bash
-$> java -jar target/Application-1.0.0.jar
+$> java -jar target/JavaTestApp-1.0.0.jar
 ```
 
 ## Debug
@@ -43,7 +43,7 @@ jdb -sourcepath src/main/java/,src/main/resources \
 >
 > ```bash
 > $> scripts/build.sh
-> Build of program 'Application-1.0.0' ...
+> Build of program 'JavaTestApp-1.0.0' ...
 > -----------
 > build2 command line usage :
 > ---------------------------
