@@ -76,7 +76,7 @@ public class Application extends JPanel implements KeyListener {
      * durée de vie, des attributs et des propriétés graphiques.
      * </p>
      */
-    public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
+    public static class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         final static int NONE = 0;
         final static int STATIC = 1;
         final static int DYNAMIC = 2;
@@ -90,7 +90,7 @@ public class Application extends JPanel implements KeyListener {
         double dy;
         double drotation;
         double mass;
-        private boolean active = true;
+        private boolean active;
 
         int duration = -1;
         int life;
@@ -105,7 +105,7 @@ public class Application extends JPanel implements KeyListener {
         public Material material;
         public int type;
         public int layer;
-        public boolean constrainedToPlayArea = true;
+        public boolean constrainedToPlayArea;
         public boolean stickToCamera;
         public int contact;
 
@@ -127,6 +127,7 @@ public class Application extends JPanel implements KeyListener {
             this.active = true;
             this.type = TYPE_RECTANGLE;
             this.stickToCamera = false;
+            this.constrainedToPlayArea = true;
             this.material = Material.DEFAULT;
         }
 
@@ -181,7 +182,7 @@ public class Application extends JPanel implements KeyListener {
                 case TYPE_LINE -> {
                     if (color != null) {
                         g.setColor(color);
-                        g.drawLine((int) x, (int) y, width, height);
+                        g.drawLine((int) x, (int) y, (int) width, (int) height);
                     }
                 }
                 case TYPE_RECTANGLE -> {
@@ -975,7 +976,7 @@ public class Application extends JPanel implements KeyListener {
                     .setColor(Color.YELLOW)
                     .setMaterial(Material.AIR)
                     .setMass(110.0)
-                    .setSpeed(0.0, Math.random() * 0.4)
+                    .setSpeed(0.0, Math.random() * 30.1 * world.gravity)
                     .addBehavior(new Behavior<GameObject>() {
                         @Override
                         public void update(Entity<?> e, int elapsed) {
