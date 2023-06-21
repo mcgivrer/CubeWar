@@ -339,8 +339,8 @@ public class Application extends JPanel implements KeyListener {
             infos.add(String.format("2_pos:(%.02f,%.02f)", x, y));
             infos.add(String.format("2_size:(%.02f,%.02f)", width, height));
             infos.add(String.format("3_vel:(%.02f,%.02f)", dx, dy));
-            infos.add(String.format("3_mass:%.02f kg", mass));
-            infos.add(String.format("4_mat:%s", material));
+            if (mass != 0.0) infos.add(String.format("3_mass:%.02f kg", mass));
+            if (material != null) infos.add(String.format("4_mat:%s", material));
             return infos;
         }
     }
@@ -379,6 +379,8 @@ public class Application extends JPanel implements KeyListener {
 
         public Camera(String n, int vpWidth, int vpHeight) {
             super(n, 0, 0, vpWidth, vpHeight);
+            setMaterial(null);
+            setMass(0.0);
         }
 
         public void setTarget(Entity t) {
@@ -393,6 +395,14 @@ public class Application extends JPanel implements KeyListener {
             this.rotation += drotation;
             this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
             this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
+        }
+
+        @Override
+        public List<String> getDebugInfo() {
+            List<String> infos = super.getDebugInfo();
+            infos.add(String.format("3_target:%s", target.name));
+            infos.add(String.format("4_vp:%fx%f", width, height));
+            return infos;
         }
     }
 
@@ -439,7 +449,7 @@ public class Application extends JPanel implements KeyListener {
                 }
                 default -> {
                     offsetX = 0;
-                    System.err.printf(">> <?> unknown textAlignt %d value for %s%n", textAlign, name);
+                    System.err.printf(">> <?> unknown textAlign %d value for %s%n", textAlign, name);
                 }
             }
             if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
@@ -509,6 +519,13 @@ public class Application extends JPanel implements KeyListener {
             return this;
         }
 
+        @Override
+        public List<String> getDebugInfo() {
+            List<String> infos = super.getDebugInfo();
+            infos.add(String.format("3_text:%s", text));
+            infos.add(String.format("3_val:%s", value.toString()));
+            return infos;
+        }
     }
 
     public class Perturbation extends Entity<Perturbation> {
@@ -961,7 +978,7 @@ public class Application extends JPanel implements KeyListener {
                 .setPriority(20)
                 .setTextAlign(TextEntity.ALIGN_RIGHT)
                 .setStickToCamera(true)
-                .setMaterial(Material.RUBBER)
+                .setMaterial(null)
                 .setDebug(3);
 
         addEntity(score);
@@ -976,7 +993,8 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText("\u2764")
                 .setPriority(20)
-                .setStickToCamera(true);
+                .setStickToCamera(true)
+                .setMaterial(null);
 
         addEntity(heart);
 
@@ -992,7 +1010,8 @@ public class Application extends JPanel implements KeyListener {
                 .setValue(3)
                 .setPriority(21)
                 .setStickToCamera(true)
-                .setDebug(2);
+                .setDebug(2)
+                .setMaterial(null);
 
         addEntity(life);
 
@@ -1273,10 +1292,10 @@ public class Application extends JPanel implements KeyListener {
             float fontSize = 9f;
             g.setFont(g.getFont().deriveFont(fontSize));
 
-            int maxWidth = infos.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().getAsInt();
-            int offsetX = (int) (e.x + maxWidth > (camera.x + camera.width) ? -(maxWidth + 4.0) : 4.0);
-            int offsetY = (int) (e.y + (fontSize * infos.size()) > (camera.y + camera.height)
-                    ? -((fontSize * infos.size()) + 9.0)
+            int maxWidth = infos.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
+            int offsetX = (int) (e.x + maxWidth > ((e.stickToCamera ? 0 : camera.x) + camera.width) ? -(maxWidth + 4.0) : 4.0);
+            int offsetY = (int) (e.y + (fontSize * infos.size()) > ((e.stickToCamera ? 0 : camera.y) + camera.height)
+                    ? -(9.0 + (fontSize * infos.size()))
                     : -9.0);
             g.setColor(Color.ORANGE);
             for (String info : infos) {
@@ -1391,10 +1410,10 @@ public class Application extends JPanel implements KeyListener {
      * @param end        the character to end the string with.
      * @param delimiter  the character to seperate each entry.
      * @return a concatenated {@link String} based on the {@link Map}
-     *         {@link java.util.Map.Entry}.
+     * {@link java.util.Map.Entry}.
      */
     public static String prepareStatsString(Map<String, Object> attributes, String start, String delimiter,
-            String end) {
+                                            String end) {
         return start + attributes.entrySet().stream().sorted(Map.Entry.comparingByKey()).map(entry -> {
             String value = "";
             switch (entry.getValue().getClass().getSimpleName()) {
