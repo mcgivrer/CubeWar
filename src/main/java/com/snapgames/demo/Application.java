@@ -181,7 +181,7 @@ public class Application extends JPanel implements KeyListener {
                 case TYPE_LINE -> {
                     if (color != null) {
                         g.setColor(color);
-                        g.drawLine((int) x, (int) y, (int) width, (int) height);
+                        g.drawLine((int) x, (int) y, width, height);
                     }
                 }
                 case TYPE_RECTANGLE -> {
