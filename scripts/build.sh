@@ -9,7 +9,7 @@ export AUTHOR_NAME='Frédéric Delorme'
 export VENDOR_NAME=frederic.delorme@gmail.com
 export MAIN_CLASS=com.snapgames.demo.Application
 export JAVADOC_CLASSPATH="com.snapgames.demo"
-export SOURCE_VERSION=19
+export SOURCE_VERSION=20
 export SRC_ENCODING=UTF-8
 # the tools and sources versions
 export GIT_COMMIT_ID=$(git rev-parse HEAD)
