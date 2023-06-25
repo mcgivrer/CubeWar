@@ -2,9 +2,9 @@
 # more info at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
 # Copyright 2020 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
 # Your program build definition
-export PROGRAM_NAME=Application
+export PROGRAM_NAME=JavaTestApp
 export PROGRAM_VERSION=1.0.0
-export PROGRAM_TITLE=Application
+export PROGRAM_TITLE=JavaTestApp
 export AUTHOR_NAME='Frédéric Delorme'
 export VENDOR_NAME=frederic.delorme@gmail.com
 export MAIN_CLASS=com.snapgames.demo.Application
@@ -25,7 +25,7 @@ export BUILD=${TARGET}/build
 export CLASSES=${TARGET}/classes
 export RESOURCES=${SRC}/main/resources
 export TESTRESOURCES=${SRC}/test/resources
-export COMPILATION_OPTS="--enable-preview -Xlint:preview -g:source,lines,vars"
+export COMPILATION_OPTS="--enable-preview -Xlint:preview -Xlint:unchecked -g:source,lines,vars"
 export JAR_NAME=${PROGRAM_NAME}-${PROGRAM_VERSION}.jar
 # -Xlint:unchecked -Xlint:preview"
 export JAR_OPTS=--enable-preview
