@@ -84,8 +84,13 @@ public class Application extends JPanel implements KeyListener {
         final static int TYPE_LINE = 2;
         final static int TYPE_RECTANGLE = 3;
         final static int TYPE_ELLIPSE = 4;
-        String name;
+        static int index = 0;
+        int id = ++index;
+        String name = "entity_" + id;
         double rotation;
+
+        double oldX;
+        double oldY;
         double dx;
         double dy;
         double drotation;
@@ -108,6 +113,9 @@ public class Application extends JPanel implements KeyListener {
         public boolean constrainedToPlayArea;
         public boolean stickToCamera;
         public int contact;
+        public int debug = 5;
+        private Entity<?> parent;
+        private List<Entity<?>> child = new ArrayList<>();
 
         /**
          * Constructeur de l'entité.
@@ -118,7 +126,7 @@ public class Application extends JPanel implements KeyListener {
          * @param w la largeur de l'entité
          * @param h la hauteur de l'entité
          */
-        public Entity(String n, double x, double y, int w, int h) {
+        public Entity(String n, double x, double y, double w, double h) {
             this.name = n;
             this.x = x;
             this.y = y;
@@ -154,6 +162,7 @@ public class Application extends JPanel implements KeyListener {
             if (duration != -1) {
                 life = duration;
             }
+            child.forEach(c -> c.setActive(active));
             return (T) this;
         }
 
@@ -164,6 +173,11 @@ public class Application extends JPanel implements KeyListener {
          */
         public boolean isActive() {
             return this.active;
+        }
+
+        public T setDebug(int d) {
+            this.debug = d;
+            return (T) this;
         }
 
         /**
@@ -182,7 +196,7 @@ public class Application extends JPanel implements KeyListener {
                 case TYPE_LINE -> {
                     if (color != null) {
                         g.setColor(color);
-                        g.drawLine((int) x, (int) y, (int) width, (int) height);
+                        g.drawLine((int) x, (int) y, (int) oldX, (int) oldY);
                     }
                 }
                 case TYPE_RECTANGLE -> {
@@ -294,6 +308,11 @@ public class Application extends JPanel implements KeyListener {
             return (T) this;
         }
 
+        public T setType(int t) {
+            this.type = t;
+            return (T) this;
+        }
+
         public T setColor(Color c) {
             this.color = c;
             return (T) this;
@@ -321,6 +340,28 @@ public class Application extends JPanel implements KeyListener {
 
         public T setLayer(int l) {
             this.layer = l;
+            return (T) this;
+        }
+
+        public List<String> getDebugInfo() {
+            List<String> infos = new ArrayList<>();
+            infos.add(String.format("1_#%d", id));
+            infos.add(String.format("1_name:%s", name));
+            infos.add(String.format("2_pos:(%.02f,%.02f)", x, y));
+            infos.add(String.format("2_size:(%.02f,%.02f)", width, height));
+            infos.add(String.format("3_vel:(%.02f,%.02f)", dx, dy));
+            if (mass != 0.0) infos.add(String.format("3_mass:%.02f kg", mass));
+            if (material != null) infos.add(String.format("4_mat:%s", material));
+            return infos;
+        }
+
+        public T setParent(Entity<?> e) {
+            this.parent = e;
+            return (T) this;
+        }
+
+        public T addChild(Entity<?> c) {
+            this.child.add(c);
             return (T) this;
         }
     }
@@ -359,6 +400,8 @@ public class Application extends JPanel implements KeyListener {
 
         public Camera(String n, int vpWidth, int vpHeight) {
             super(n, 0, 0, vpWidth, vpHeight);
+            setMaterial(null);
+            setMass(0.0);
         }
 
         public void setTarget(Entity t) {
@@ -373,6 +416,14 @@ public class Application extends JPanel implements KeyListener {
             this.rotation += drotation;
             this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
             this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
+        }
+
+        @Override
+        public List<String> getDebugInfo() {
+            List<String> infos = super.getDebugInfo();
+            infos.add(String.format("3_target:%s", target.name));
+            infos.add(String.format("4_vp:%fx%f", width, height));
+            return infos;
         }
     }
 
@@ -419,7 +470,7 @@ public class Application extends JPanel implements KeyListener {
                 }
                 default -> {
                     offsetX = 0;
-                    System.err.printf(">> <?> unknown textAlignt %d value for %s%n", textAlign, name);
+                    System.err.printf(">> <?> unknown textAlign %d value for %s%n", textAlign, name);
                 }
             }
             if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
@@ -489,6 +540,13 @@ public class Application extends JPanel implements KeyListener {
             return this;
         }
 
+        @Override
+        public List<String> getDebugInfo() {
+            List<String> infos = super.getDebugInfo();
+            infos.add(String.format("3_text:%s", text));
+            infos.add(String.format("3_val:%s", value.toString()));
+            return infos;
+        }
     }
 
     public class Perturbation extends Entity<Perturbation> {
@@ -498,7 +556,8 @@ public class Application extends JPanel implements KeyListener {
 
         @Override
         public void draw(Graphics2D g) {
-            // nothing to draw, perturbation is only a virtual element applying its effect to other entities.
+            // nothing to draw, perturbation is only a virtual element applying its effect
+            // to other entities.
         }
     }
 
@@ -568,16 +627,28 @@ public class Application extends JPanel implements KeyListener {
             this.density = d;
             this.roughness = r;
         }
+
+        public String toString() {
+            return "{n:" + name + "," + ",d:" + density + ",e:" + elasticity + ",r:" + roughness + "}";
+        }
     }
 
     /**
-     * Add a specific {@link Behavior#update(Entity, int)} to a {@link Application.GameObject} entity.
+     * Add a specific {@link Behavior#update(Entity, int)} to a
+     * {@link Application.GameObject} entity.
      * <p>
-     * The update phase for this {@link Application.GameObject} will be modified with the implementation of this behavior interface.
+     * The update phase for this {@link Application.GameObject} will be modified
+     * with the implementation of this behavior interface.
      *
      * @param <GameObject> the Entity to be modified.
      */
     public interface Behavior<GameObject> {
+        void update(Entity<?> e, int elapsed);
+    }
+
+    public interface ParticleBehavior<GameObject> extends Behavior<GameObject> {
+        GameObject create(World w, String particleNamePRefix, Entity<?> e);
+
         void update(Entity<?> e, int elapsed);
     }
 
@@ -622,6 +693,8 @@ public class Application extends JPanel implements KeyListener {
     private boolean shiftKey;
     private boolean altKey;
     private boolean metaKey;
+    private String name;
+    private int debugLevel;
 
     /**
      * Create the {@link Application}.
@@ -636,6 +709,12 @@ public class Application extends JPanel implements KeyListener {
         init(args);
         frame = createWindow();
         create();
+        long staticEntities = entities.values().stream().filter(e -> e.physicType == Entity.STATIC).count();
+        long dynamicEntities = entities.values().stream().filter(e -> e.physicType == Entity.DYNAMIC).count();
+        long nonePhysicEntities = entities.values().stream().filter(e -> e.physicType == Entity.NONE).count();
+        System.out.printf(
+                ">> Scene created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
+                staticEntities, dynamicEntities, nonePhysicEntities, camera != null ? 1 : 0);
         loop();
         dispose();
     }
@@ -690,9 +769,11 @@ public class Application extends JPanel implements KeyListener {
 
         world = getWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
 
+        name = config.getProperty("app.name", "Default name Application");
+
         // --- Translated information ---
         // Application name.
-        title = Optional.of(messages.getString("app.name")).orElse("-Test002-");
+        title = Optional.of(messages.getString("app.window.name")).orElse("-Test002-");
         // Version of the application.
         version = Optional.of(messages.getString("app.version")).orElse("-1.0.0-");
 
@@ -709,6 +790,8 @@ public class Application extends JPanel implements KeyListener {
      * @return boolean value.
      */
     private static boolean getParsedBoolean(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
         return Boolean.parseBoolean(config.getProperty(key, defaultValue));
     }
 
@@ -723,6 +806,8 @@ public class Application extends JPanel implements KeyListener {
      * @return Integer value.
      */
     private static int getParsedInt(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
         return Integer.parseInt(config.getProperty(key, defaultValue));
     }
 
@@ -737,6 +822,9 @@ public class Application extends JPanel implements KeyListener {
      * @return Rectangle2D value.
      */
     private Rectangle2D getRectangle2D(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
+
         String[] paArgs = config.getProperty(key, defaultValue).split("x");
         return new Rectangle2D.Double(
                 0, 0,
@@ -755,6 +843,9 @@ public class Application extends JPanel implements KeyListener {
      * @return Dimension value.
      */
     private Dimension getDimension(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
+
         String[] winSizeArgs = config.getProperty(key, defaultValue).split("x");
         return new Dimension(
                 Integer.parseInt(winSizeArgs[0]),
@@ -773,6 +864,9 @@ public class Application extends JPanel implements KeyListener {
      * @return World value.
      */
     private World getWorld(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
+
         String value = config.getProperty(key, defaultValue);
         String[] wArgs = value.substring("world(".length(), value.length() - ")".length()).split(",");
         double g = Double.parseDouble(wArgs[1]);
@@ -792,6 +886,10 @@ public class Application extends JPanel implements KeyListener {
                 case "x", "exit" -> {
                     exit = Boolean.parseBoolean(arg[1]);
                     System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
+                }
+                case "d", "debug" -> {
+                    debugLevel = Integer.parseInt(arg[1]);
+                    System.out.printf(">> <!> argument 'debug' set to %s%n", arg[1]);
                 }
                 case "t", "title" -> {
                     title = arg[1];
@@ -894,8 +992,8 @@ public class Application extends JPanel implements KeyListener {
     }
 
     protected void create() {
-        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.98, 32);
-        score.setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.98, 32)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
                 .setBorderColor(Color.BLACK)
                 .setFont(getFont().deriveFont(20.0f))
@@ -907,7 +1005,8 @@ public class Application extends JPanel implements KeyListener {
                 .setPriority(20)
                 .setTextAlign(TextEntity.ALIGN_RIGHT)
                 .setStickToCamera(true)
-                .setMaterial(Material.RUBBER);
+                .setMaterial(null)
+                .setDebug(3);
 
         addEntity(score);
 
@@ -921,7 +1020,8 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText("\u2764")
                 .setPriority(20)
-                .setStickToCamera(true);
+                .setStickToCamera(true)
+                .setMaterial(null);
 
         addEntity(heart);
 
@@ -932,11 +1032,13 @@ public class Application extends JPanel implements KeyListener {
                 .setFont(getFont().deriveFont(12.0f))
                 .setColor(Color.WHITE)
                 .setShadowWidth(3)
-                .setBorderWidth(2)
+                .setBorderWidth(1)
                 .setText("%d")
                 .setValue(3)
                 .setPriority(21)
-                .setStickToCamera(true);
+                .setStickToCamera(true)
+                .setDebug(2)
+                .setMaterial(null);
 
         addEntity(life);
 
@@ -949,47 +1051,64 @@ public class Application extends JPanel implements KeyListener {
                 .setMass(60.0)
                 .setMaterial(Material.RUBBER)
                 .setAttribute("speedStep", 3.0)
-                .setAttribute("speedRotStep", 0.01);
+                .setAttribute("speedRotStep", 0.01)
+                .setDebug(2);
         addEntity(player);
 
-        addEntities(createDrops(world, "drop_%d", 2000));
+        addEntity(
+                createParticleSystem(world, "drop", 1000,
+                        new ParticleBehavior<GameObject>() {
+                            @Override
+                            public GameObject create(World parentWorld, String particleNamePrefix, Entity<?> e) {
+                                double x = (int) (Math.random() * parentWorld.playArea.getWidth());
+                                double y = (int) (Math.random() * parentWorld.playArea.getHeight() * 0.1);
+                                GameObject drop = new GameObject(
+                                        String.format(particleNamePrefix + "_%d", GameObject.index),
+                                        x,
+                                        y,
+                                        1, 1)
+                                        .setPriority(1)
+                                        .setType(Entity.TYPE_LINE)
+                                        .setConstrainedToPlayArea(false)
+                                        .setLayer((int) (Math.random() * 9) + 1)
+                                        .setPhysicType(Entity.DYNAMIC)
+                                        .setColor(Color.YELLOW)
+                                        .setMaterial(Material.AIR)
+                                        .setMass(110.0)
+                                        .setParent(e)
+                                        .setSpeed(0.0, Math.random() * 40.0 * parentWorld.gravity)
+                                        .addBehavior(this);
+                                return drop;
+                            }
+
+                            @Override
+                            public void update(Entity<?> e, int elapsed) {
+                                e.setColor(new Color((e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f)));
+                                if (!world.playArea.getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
+                                    e.setPosition(world.playArea.getWidth() * Math.random(),
+                                            Math.random() * world.playArea.getHeight() * 0.1);
+                                }
+                            }
+                        }));
 
         camera = new Camera("cam01", bufferResolution.width, bufferResolution.height);
         camera.setTarget(player);
-        camera.setTween(0.2);
+        camera.setTween(0.05);
     }
 
-    private List<GameObject> createDrops(World world, String namePrefix, int nbStars) {
+    private GameObject createParticleSystem(
+            World parentWorld,
+            String particleNamePrefix,
+            int nbParticles,
+            ParticleBehavior<GameObject> b) {
+
+        GameObject parentParticle = new GameObject(particleNamePrefix + "'s", 0, 0, 0, 0);
         List<GameObject> drops = new ArrayList<>();
-        for (int i = 0; i < nbStars; i++) {
-            double x = Math.random() * (world.playArea.getWidth());
-            double y = Math.random() * (world.playArea.getHeight());
-            GameObject drop = new GameObject(
-                    String.format(namePrefix, i),
-                    x,
-                    y,
-                    1, 1)
-                    .setPriority(1)
-                    .setConstrainedToPlayArea(false)
-                    .setLayer((int) (Math.random() * 9) + 1)
-                    .setPhysicType(Entity.DYNAMIC)
-                    .setColor(Color.YELLOW)
-                    .setMaterial(Material.AIR)
-                    .setMass(110.0)
-                    .setSpeed(0.0, Math.random() * 30.1 * world.gravity)
-                    .addBehavior(new Behavior<GameObject>() {
-                        @Override
-                        public void update(Entity<?> e, int elapsed) {
-                            e.setColor(new Color((e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f)));
-                            if (!world.playArea.getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
-                                e.setPosition(world.playArea.getWidth() * Math.random(),
-                                        Math.random() * world.playArea.getHeight() * 0.1);
-                            }
-                        }
-                    });
-            drops.add(drop);
+        for (int i = 0; i < nbParticles; i++) {
+            GameObject particle = b.create(world, particleNamePrefix, parentParticle);
+            parentParticle.addChild(particle);
         }
-        return drops;
+        return parentParticle;
     }
 
     protected void input() {
@@ -1074,7 +1193,8 @@ public class Application extends JPanel implements KeyListener {
     }
 
     private void updateEntity(Entity<?> e, int elapsed) {
-
+        e.oldX = e.x;
+        e.oldY = e.y;
         double gravity = (e.stickToCamera || e.physicType == Entity.NONE ? 0.0 : world.gravity);
 
         e.rotation += e.drotation * elapsed;
@@ -1202,11 +1322,38 @@ public class Application extends JPanel implements KeyListener {
                                     e.x + e.width * 0.5,
                                     e.y + e.height * 0.5);
                             e.draw(g);
-
                             g.rotate(e.rotation,
                                     e.x + e.width * 0.5,
                                     e.y + e.height * 0.5);
+                            drawEntityDebugInfo(g, e);
                         });
+    }
+
+    private void drawEntityDebugInfo(Graphics2D g, Entity<? extends Entity<?>> e) {
+        if (debugLevel > 0 && debugLevel >= e.debug) {
+            List<String> infos = e.getDebugInfo();
+            int l = 0;
+            float fontSize = 9f;
+            g.setFont(g.getFont().deriveFont(fontSize));
+
+            int maxWidth = infos.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
+            int offsetX = (int) (e.x + maxWidth > ((e.stickToCamera ? 0 : camera.x) + camera.width) ? -(maxWidth + 4.0) : 4.0);
+            int offsetY = (int) (e.y + (fontSize * infos.size()) > ((e.stickToCamera ? 0 : camera.y) + camera.height)
+                    ? -(9.0 + (fontSize * infos.size()))
+                    : -9.0);
+            g.setColor(Color.ORANGE);
+            for (String info : infos) {
+                String levelStr = info.substring(0, info.indexOf("_"));
+                int level = Integer.parseInt(levelStr);
+                if (level <= debugLevel) {
+                    g.drawString(info.substring(info.indexOf("_") + 1, info.length()),
+                            (int) (e.getX() + e.getWidth() + offsetX),
+                            (int) (e.getY() + offsetY + (l * fontSize)));
+                    l++;
+                }
+
+            }
+        }
     }
 
     private void moveFromCameraPoV(Graphics2D g, Camera camera, double direction) {
@@ -1244,6 +1391,7 @@ public class Application extends JPanel implements KeyListener {
     }
 
     private Entity<? extends Entity<?>> addEntity(Entity<? extends Entity<?>> e) {
+        e.child.forEach(c -> entities.put(c.name, c));
         return entities.put(e.name, e);
     }
 
@@ -1259,7 +1407,9 @@ public class Application extends JPanel implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        if (debugLevel > 3) {
+            System.out.printf(">> <!> key typed: %s%n", e.getKeyChar());
+        }
     }
 
     @Override
