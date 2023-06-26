@@ -1,5 +1,6 @@
 package com.snapgames.demo;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -11,13 +12,6 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
@@ -37,7 +31,7 @@ import javax.swing.WindowConstants;
  * Only added the JUnit library to execute unit tests.
  * <p>
  * This {@link Application} class will manage a bunch of {@link Entity} or
- * {@link TextEntity} and a {@link Camera} to display
+ * {@link TextObject} and a {@link Camera} to display
  * amazing things on the rendering buffer before displaying it on the
  * {@link JFrame} window.
  * <p>
@@ -84,7 +78,10 @@ public class Application extends JPanel implements KeyListener {
         final static int TYPE_LINE = 2;
         final static int TYPE_RECTANGLE = 3;
         final static int TYPE_ELLIPSE = 4;
+
+        final static int TYPE_IMAGE = 5;
         static int index = 0;
+        protected List<Point2D> forces = new ArrayList<>();
         int id = ++index;
         String name = "entity_" + id;
         double rotation;
@@ -93,7 +90,7 @@ public class Application extends JPanel implements KeyListener {
         double oldY;
         double dx;
         double dy;
-        double drotation;
+        double dRotation;
         double mass;
         private boolean active;
 
@@ -116,6 +113,7 @@ public class Application extends JPanel implements KeyListener {
         public int debug = 5;
         private Entity<?> parent;
         private List<Entity<?>> child = new ArrayList<>();
+        private BufferedImage image;
 
         /**
          * Constructeur de l'entité.
@@ -144,12 +142,13 @@ public class Application extends JPanel implements KeyListener {
          *
          * @param elapsed le temps écoulé depuis la dernière mise à jour
          */
-        public void update(int elapsed) {
-            if (life + elapsed > duration && duration != -1) {
+        public void update(double elapsed) {
+
+            life += elapsed;
+            if (life > duration && duration != -1) {
                 active = false;
-            } else {
-                life += elapsed;
             }
+
         }
 
         /**
@@ -219,6 +218,15 @@ public class Application extends JPanel implements KeyListener {
                         g.drawOval((int) x, (int) y, (int) width, (int) height);
                     }
                 }
+                case TYPE_IMAGE -> {
+                    if (Optional.ofNullable(image).isPresent()) {
+                        if (dx > 0) {
+                            g.drawImage(image, (int) x, (int) y, null);
+                        } else {
+                            g.drawImage(image, (int) (x - width), (int) y, (int) -width, (int) height, null);
+                        }
+                    }
+                }
                 default -> {
                     System.err.printf("Unknown Entity type %d%n", type);
                 }
@@ -231,10 +239,10 @@ public class Application extends JPanel implements KeyListener {
         }
 
         /**
-         * Ajoute un attribut à l'entité.
+         * Add an attribute to this Entity.
          *
-         * @param attrName  la clé de l'attribut
-         * @param attrValue la valeur de l'attribut
+         * @param attrName  Attribute's name
+         * @param attrValue Attribute's value
          */
         public T setAttribute(String attrName, Object attrValue) {
             attributes.put(attrName, attrValue);
@@ -242,10 +250,11 @@ public class Application extends JPanel implements KeyListener {
         }
 
         /**
-         * Récupère la valeur de l'attribut spécifié.
+         * Retrieve the specified attribute value.
          *
-         * @param attrName la clé de l'attribut
-         * @return la valeur de l'attribut, ou null si l'attribut n'existe pas
+         * @param attrName     Attribute's name
+         * @param defaultValue the default value if it does not exist.
+         * @return Attribute's value or the default value if it was not existing.
          */
         public <Y> Y getAttribute(String attrName, Y defaultValue) {
             return (Y) attributes.getOrDefault(attrName, defaultValue);
@@ -275,7 +284,7 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public T setRotationSpeed(double dr) {
-            this.drotation = dr;
+            this.dRotation = dr;
             return (T) this;
         }
 
@@ -364,8 +373,17 @@ public class Application extends JPanel implements KeyListener {
             this.child.add(c);
             return (T) this;
         }
+
+        public T setDuration(int d) {
+            this.duration = d;
+            return (T) this;
+        }
     }
 
+    /**
+     * The {@link GameObject} is the basic Object element to be displayed on screen.
+     * It can be a POINT, a LINE,a RECTANGLE, an ELLIPSE or an IMAGE.
+     */
     public class GameObject extends Entity<GameObject> {
 
         /**
@@ -413,7 +431,7 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public void update(int elapsed) {
-            this.rotation += drotation;
+            this.rotation += dRotation;
             this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
             this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
         }
@@ -427,7 +445,22 @@ public class Application extends JPanel implements KeyListener {
         }
     }
 
-    public class TextEntity extends Entity<TextEntity> {
+    /**
+     * The {@link TextObject} is an extended {@link Entity} to support Text drawing.
+     * <p>
+     * the <code>text</code> can be a simple string, or a formatted String with the provided <code>value</code>.
+     * The text will be then compatible with the {@link String#format(String, Object...)} formatting rules.
+     * <p>
+     * It also supports
+     * <ul>
+     *     <li>a graphical <code>textAlign</code> attribute than can be one of the {@link TextObject#ALIGN_LEFT},
+     *     {@link TextObject#ALIGN_CENTER} or {@link TextObject#ALIGN_RIGHT} values,</li>
+     *     <li> a <code>font</code> to define font family and size,</li>
+     *     <li>a <code>shadowColor</code> and <code>shadowWidth</code> to define a text shadow,</li>
+     *     <li>a <code>borderColor</code> and a <code>borderWidth</code> to define a outlined border on the text.</li>
+     * </ul>
+     */
+    public static class TextObject extends Entity<TextObject> {
         public static final int ALIGN_LEFT = 1;
         public static final int ALIGN_CENTER = 2;
         public static final int ALIGN_RIGHT = 4;
@@ -440,7 +473,7 @@ public class Application extends JPanel implements KeyListener {
         Color borderColor;
         int textAlign = ALIGN_LEFT;
 
-        public TextEntity(String n, double x, double y) {
+        public TextObject(String n, double x, double y) {
             super(n, x, y, 0, 0);
         }
 
@@ -499,42 +532,42 @@ public class Application extends JPanel implements KeyListener {
             }
         }
 
-        public TextEntity setShadowColor(Color sc) {
+        public TextObject setShadowColor(Color sc) {
             this.shadowColor = sc;
             return this;
         }
 
-        public TextEntity setShadowWidth(int sw) {
+        public TextObject setShadowWidth(int sw) {
             this.shadowWidth = sw;
             return this;
         }
 
-        public TextEntity setBorderColor(Color bc) {
+        public TextObject setBorderColor(Color bc) {
             this.borderColor = bc;
             return this;
         }
 
-        public TextEntity setBorderWidth(int bw) {
+        public TextObject setBorderWidth(int bw) {
             this.borderWidth = bw;
             return this;
         }
 
-        public TextEntity setFont(Font f) {
+        public TextObject setFont(Font f) {
             this.font = f;
             return this;
         }
 
-        public TextEntity setText(String t) {
+        public TextObject setText(String t) {
             this.text = t;
             return this;
         }
 
-        public TextEntity setValue(Object v) {
+        public TextObject setValue(Object v) {
             this.value = v;
             return this;
         }
 
-        public TextEntity setTextAlign(int ta) {
+        public TextObject setTextAlign(int ta) {
             assert (ta == ALIGN_LEFT || ta == ALIGN_CENTER || ta == ALIGN_RIGHT);
             this.textAlign = ta;
             return this;
@@ -544,12 +577,21 @@ public class Application extends JPanel implements KeyListener {
         public List<String> getDebugInfo() {
             List<String> infos = super.getDebugInfo();
             infos.add(String.format("3_text:%s", text));
-            infos.add(String.format("3_val:%s", value.toString()));
+            infos.add(String.format("3_val:%s", value != null ? value.toString() : "null"));
             return infos;
         }
     }
 
-    public class Perturbation extends Entity<Perturbation> {
+    /**
+     * A {@link Perturbation} is a rectangle area into the {@link World#playArea} where Entity will be influenced by
+     * some physic changes.
+     * <p>
+     * It can be an attraction factor applied to any entity in this perturbation area, or a new force added to the {@link Entity},
+     * this both thing are applied at computation time into the {@link Application#updateEntity(Entity, double)} processing method.
+     */
+    public static class Perturbation extends Entity<Perturbation> {
+        private double attraction;
+
         public Perturbation(String n, double x, double y, int w, int h) {
             super(n, x, y, w, h);
         }
@@ -559,8 +601,26 @@ public class Application extends JPanel implements KeyListener {
             // nothing to draw, perturbation is only a virtual element applying its effect
             // to other entities.
         }
+
+        public Perturbation setAttraction(double attraction) {
+            this.attraction = attraction;
+            return this;
+        }
+
+        public Perturbation setForce(Point2D f) {
+            this.forces.add(f);
+            return this;
+        }
+
     }
 
+    /**
+     * The {@link World} defines the context and environment where all {@link Application}'s {@link Entity} will evolve.
+     * <p>
+     * A <code>name</code>, a <code>playArea</code> and a <code>gravity</code> are the first mandatory things.
+     * the <code>perturbations</code> list will be implemented and used to influence
+     * {@link Entity} in certain places into the world play area.
+     */
     public static class World {
         String name = "defaultWorld";
         Rectangle2D playArea;
@@ -598,6 +658,22 @@ public class Application extends JPanel implements KeyListener {
         }
     }
 
+    /**
+     * The {@link Material} object contains all the physic attribute for a material.
+     * <p>
+     * It contains
+     * <ul>
+     *     <li>a <code>name</code> to just debug purpose and understand the attribute's values for this {@link Material},</li>
+     *     <li>a <code>density</code> value (double type),</li>
+     *     <li>an <code>elasticity</code> factor (0.0 to 1.0),</li>
+     *     <li>a <code>roughness</code> factor (0.0 to 1.0).</li>
+     * </ul>
+     * <p>It will be used :
+     * <ul>
+     *     <li>to be applied to any {@link Entity}</li>
+     * <li>used by the physic computation done at {@link Application#updateEntity(Entity, double)} processing.</li>
+     * </ul>
+     */
     public static class Material {
         public static final Material DEFAULT = new Material("defualt", 0.0, 1.0, 1.0);
         public static final Material RUBBER = new Material("rubber", 0.68, 0.7, 0.67);
@@ -634,7 +710,7 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * Add a specific {@link Behavior#update(Entity, int)} to a
+     * Add a specific {@link Behavior#update(Entity, double)} to a
      * {@link Application.GameObject} entity.
      * <p>
      * The update phase for this {@link Application.GameObject} will be modified
@@ -643,13 +719,38 @@ public class Application extends JPanel implements KeyListener {
      * @param <GameObject> the Entity to be modified.
      */
     public interface Behavior<GameObject> {
-        void update(Entity<?> e, int elapsed);
+        /**
+         * Implement the <code>update</code> the e Entity according to the elapsed time.
+         *
+         * @param e       the Entity to be updated.
+         * @param elapsed the elapsed time since previous call.
+         */
+        void update(Entity<?> e, double elapsed);
     }
 
+    /**
+     * Add a specific {@link ParticleBehavior#create(World, String, Entity)} extending the existing {@link Behavior}
+     * and will be applied to  {@link Application.GameObject} entity.
+     * <p>
+     * The new <code>create</code> phase for this {@link Application.GameObject} will be modified
+     * with the implementation of this behavior interface, and allow to create a new particle by the
+     * {@link Application#createParticleSystem(World, String, int, ParticleBehavior)}, while the already defined
+     * {@link Behavior#update(Entity, double)} will be used to update the created particles like any other
+     * {@link Application.GameObject}.
+     *
+     * @param <GameObject> the Entity to be modified.
+     */
     public interface ParticleBehavior<GameObject> extends Behavior<GameObject> {
-        GameObject create(World w, String particleNamePRefix, Entity<?> e);
-
-        void update(Entity<?> e, int elapsed);
+        /**
+         * Implement the <code>create</code> phase for the particle using a prefix name, the {@link World} object as
+         * context and the parent {@link Entity}
+         *
+         * @param w                  the world context object defining the environment where this new particle will evolve.
+         * @param particleNamePrefix the prefix name for this new particle. it will be completed by the internal {@link Entity#index} value.
+         * @param parent             the parent {@link Entity} hosting this particle.
+         * @return
+         */
+        GameObject create(World w, String particleNamePrefix, Entity<?> parent);
     }
 
     private static int FPS = 60;
@@ -992,7 +1093,7 @@ public class Application extends JPanel implements KeyListener {
     }
 
     protected void create() {
-        TextEntity score = new TextEntity("score", bufferResolution.getWidth() * 0.98, 32)
+        TextObject score = new TextObject("score", bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
                 .setBorderColor(Color.BLACK)
@@ -1003,14 +1104,14 @@ public class Application extends JPanel implements KeyListener {
                 .setText("%05d")
                 .setValue(0)
                 .setPriority(20)
-                .setTextAlign(TextEntity.ALIGN_RIGHT)
+                .setTextAlign(TextObject.ALIGN_RIGHT)
                 .setStickToCamera(true)
                 .setMaterial(null)
                 .setDebug(3);
 
         addEntity(score);
 
-        TextEntity heart = new TextEntity("heart", 10, bufferResolution.getHeight() * 0.90)
+        TextObject heart = new TextObject("heart", 10, bufferResolution.getHeight() * 0.90)
                 .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -1025,7 +1126,26 @@ public class Application extends JPanel implements KeyListener {
 
         addEntity(heart);
 
-        TextEntity life = new TextEntity("life", 20, bufferResolution.getHeight() * 0.90)
+        TextObject welcomeMessage = new TextObject("message",
+                bufferResolution.getWidth() * 0.50,
+                bufferResolution.getHeight() * 0.70)
+                .setPhysicType(Entity.STATIC)
+                .setTextAlign(TextObject.ALIGN_CENTER)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setBorderColor(Color.BLACK)
+                .setFont(getFont().deriveFont(12.0f))
+                .setColor(Color.WHITE)
+                .setShadowWidth(3)
+                .setBorderWidth(2)
+                .setText(messages.getString("app.title.welcome"))
+                .setPriority(20)
+                .setStickToCamera(true)
+                .setDuration(5000)
+                .setMaterial(null);
+
+        addEntity(welcomeMessage);
+
+        TextObject life = new TextObject("life", 20, bufferResolution.getHeight() * 0.90)
                 .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -1082,7 +1202,7 @@ public class Application extends JPanel implements KeyListener {
                             }
 
                             @Override
-                            public void update(Entity<?> e, int elapsed) {
+                            public void update(Entity<?> e, double elapsed) {
                                 e.setColor(new Color((e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f)));
                                 if (!world.playArea.getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
                                     e.setPosition(world.playArea.getWidth() * Math.random(),
@@ -1192,20 +1312,20 @@ public class Application extends JPanel implements KeyListener {
         datastats.put("5_rend", renderedEntities);
     }
 
-    private void updateEntity(Entity<?> e, int elapsed) {
+    private void updateEntity(Entity<?> e, double elapsed) {
         e.oldX = e.x;
         e.oldY = e.y;
         double gravity = (e.stickToCamera || e.physicType == Entity.NONE ? 0.0 : world.gravity);
 
-        e.rotation += e.drotation * elapsed;
+        e.rotation += e.dRotation * elapsed;
         if (e.contact > 0) {
             e.dx *= e.material.roughness;
             e.dy *= e.material.roughness;
-            e.drotation *= e.material.roughness;
+            e.dRotation *= e.material.roughness;
         } else {
             e.dx *= world.material.roughness;
             e.dy *= world.material.roughness;
-            e.drotation *= world.material.roughness;
+            e.dRotation *= world.material.roughness;
 
         }
         e.y += (e.dy + gravity * (e.mass != 0.0 ? e.mass * e.material.density : 1.0)) * elapsed;
@@ -1429,8 +1549,17 @@ public class Application extends JPanel implements KeyListener {
     public void keyReleased(KeyEvent e) {
         keys[e.getKeyCode()] = false;
         switch (e.getKeyCode()) {
+            // Request exiting game.
             case KeyEvent.VK_ESCAPE -> {
                 requestExit();
+            }
+            // Change debug level
+            case KeyEvent.VK_D -> {
+                debugLevel = debugLevel + 1 <= 5 ? debugLevel + 1 : 0;
+            }
+            // Reverse gravity
+            case KeyEvent.VK_G -> {
+                world.gravity = -world.gravity;
             }
             default -> {
                 // nothing to do !
