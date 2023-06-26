@@ -83,7 +83,7 @@ public class Application extends JPanel implements KeyListener {
         static int index = 0;
         protected List<Point2D> forces = new ArrayList<>();
         int id = ++index;
-        String name = "entity_" + id;
+        String name;
         double rotation;
 
         double oldX;
@@ -116,13 +116,13 @@ public class Application extends JPanel implements KeyListener {
         private BufferedImage image;
 
         /**
-         * Constructeur de l'entité.
+         * Entity's constructor with a name, a position (x,y) and a size (w,h).
          *
-         * @param n le nom de l'entité
-         * @param x la position en x de l'entité
-         * @param y la position en y de l'entité
-         * @param w la largeur de l'entité
-         * @param h la hauteur de l'entité
+         * @param n Name for  this new {@link Entity}
+         * @param x X axis position
+         * @param y Y axis position
+         * @param w Entity's width
+         * @param h Entity's height.
          */
         public Entity(String n, double x, double y, double w, double h) {
             this.name = n;
@@ -138,9 +138,9 @@ public class Application extends JPanel implements KeyListener {
         }
 
         /**
-         * Met à jour l'entité.
+         * Update the internal Entity's attribute for time management.
          *
-         * @param elapsed le temps écoulé depuis la dernière mise à jour
+         * @param elapsed Elapsed time since previous call.
          */
         public void update(double elapsed) {
 
@@ -820,6 +820,13 @@ public class Application extends JPanel implements KeyListener {
         dispose();
     }
 
+    /**
+     * Initialize the {@link Application} by loading the configuration from
+     * the possible argument file path (see <code>-config</code> argument),
+     * or on the default configuration file <code>./config.properties</code>.
+     *
+     * @param args the list of arguments from the java CLI.
+     */
     private void init(String[] args) {
         List<String> lArgs = Arrays.asList(args);
         parseArgs(lArgs);
@@ -979,23 +986,34 @@ public class Application extends JPanel implements KeyListener {
         return new World(wArgs[0]).setGravity(g).setPlayArea(pa);
     }
 
+    /**
+     * Parse the argument's list to try and decode possible new parameters and configuration to be applied
+     * on the {@link Application} before initialization.
+     *
+     * @param lArgs the list of arguments coming from the Java Command line.
+     */
     private void parseArgs(List<String> lArgs) {
         lArgs.forEach(s -> {
             System.out.printf("- process arg: '%s'%n", s);
             String[] arg = s.split("=");
             switch (arg[0]) {
+                // do not execute loop, just perform one and exit (used for test purpose only).
                 case "x", "exit" -> {
                     exit = Boolean.parseBoolean(arg[1]);
                     System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
                 }
+                // define debug level for this application run.
                 case "d", "debug" -> {
                     debugLevel = Integer.parseInt(arg[1]);
                     System.out.printf(">> <!> argument 'debug' set to %s%n", arg[1]);
                 }
+                // set a temporary window title (used for test execution purpose only)
                 case "t", "title" -> {
                     title = arg[1];
                     System.out.printf(">> <!> argument 'title' set to %s%n", arg[1]);
                 }
+                // define an alternate file configuration path to feed the Application.
+                // used mainly for automated test requirement.
                 case "cp", "configPath" -> {
                     pathToConfigFile = arg[1];
                     System.out.printf(">> <!> argument 'configuration file path' set to %s%n", arg[1]);
@@ -1007,6 +1025,11 @@ public class Application extends JPanel implements KeyListener {
         });
     }
 
+    /**
+     * Create tthe {@link Application}'s window, according to the defined configuration attributes.
+     *
+     * @return a new created JFrame, window of the {@link Application}.
+     */
     private JFrame createWindow() {
         JFrame frame = new JFrame(title);
         setPreferredSize(winSize);
@@ -1039,6 +1062,9 @@ public class Application extends JPanel implements KeyListener {
         frame.getGraphics().fillRect(0, 0, frame.getWidth(), frame.getHeight());
     }
 
+    /**
+     * The main {@link Application} Loop where every thing is processed and/or displayed from.
+     */
     private void loop() {
         long start = System.nanoTime();
         long previous = start;
@@ -1092,6 +1118,9 @@ public class Application extends JPanel implements KeyListener {
         } while (!exit);
     }
 
+    /**
+     * Create the scene with all the required {@link Entity}'s to be displayed and managed by this {@link Application} scene.
+     */
     protected void create() {
         TextObject score = new TextObject("score", bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
@@ -1216,6 +1245,21 @@ public class Application extends JPanel implements KeyListener {
         camera.setTween(0.05);
     }
 
+    /**
+     * Create a new Particle System with a parent GameObject and a certain number of child according to the nbParticles parameter.
+     * <p>
+     * These particles are {@link GameObject} with a specific {@link ParticleBehavior} applied on to have a
+     * common processing for all those particles belonging to the same parent {@link GameObject}.
+     * <p>
+     * the  {@link GameObject#parent} will have all those particles declared as its own {@link GameObject#child}.
+     *
+     * @param parentWorld        the world where all those particles will evolve.
+     * @param particleNamePrefix the prefix name for all those particles.
+     * @param nbParticles        the number of particle to be created.
+     * @param b                  the common {@link ParticleBehavior} to be applied to all those particles.
+     * @return a new parent {@link GameObject} containing a bunch of {@link GameObject} particle child with
+     * the same {@link ParticleBehavior}.
+     */
     private GameObject createParticleSystem(
             World parentWorld,
             String particleNamePrefix,
@@ -1381,10 +1425,10 @@ public class Application extends JPanel implements KeyListener {
     /**
      * Draw all {@link Application} the Entityies on window.
      *
-     * @param datastats a set of metadata to be displayed on screen as debug
-     *                  purpose. (only if Application#debug >0)
+     * @param stats a set of metadata to be displayed on screen as debug
+     *              purpose. (only if Application#debug >0)
      */
-    private void draw(Map<String, Object> datastats) {
+    private void draw(Map<String, Object> stats) {
 
         // prepare rendering buffer
         Graphics2D g = buffer.createGraphics();
@@ -1423,7 +1467,7 @@ public class Application extends JPanel implements KeyListener {
         if (debug > 0) {
             gScreen.setColor(Color.ORANGE);
             gScreen.drawString(
-                    prepareStatsString(datastats, "[ ", " | ", " ]"),
+                    prepareStatsString(stats, "[ ", " | ", " ]"),
                     20, frame.getHeight() - 20);
         }
         gScreen.dispose();
@@ -1607,6 +1651,11 @@ public class Application extends JPanel implements KeyListener {
         }).collect(Collectors.joining(delimiter)) + end;
     }
 
+    /**
+     * The entrypoint for our Application to be initialized and executed.
+     *
+     * @param argc the list of arguments from the Java command line.
+     */
     public static void main(String[] argc) {
         Application app = new Application();
         app.run(argc);
