@@ -911,8 +911,10 @@ public class Application extends JPanel implements KeyListener {
 
         // --- Configuration information ---
 
-        // debug level (0-5 where 0=off and 5 max debug info)
+        // debug mode (true = on)
         debug = getParsedBoolean(config, "app.debug", "false");
+        // debug level (0-5 where 0=off and 5 max debug info)
+        debugLevel = getParsedInt(config, "app.debug.level", "0");
         // exit flag to let test only ONE loop execution.
         exit = getParsedBoolean(config, "app.exit", "false");
         // Window size
