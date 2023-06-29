@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
@@ -80,15 +81,16 @@ public class Application extends JPanel implements KeyListener {
 
         final static int TYPE_IMAGE = 5;
         static int index = 0;
-        protected List<Point2D> forces = new ArrayList<>();
         int id = ++index;
         String name;
         double rotation;
 
-        double oldX;
-        double oldY;
-        double dx;
-        double dy;
+        Vector2D oldPos = Vector2D.ZERO();
+        Vector2D pos = Vector2D.ZERO();
+        Vector2D vel = Vector2D.ZERO();
+        Vector2D acceleration = Vector2D.ZERO();
+
+        protected List<Vector2D> forces = new ArrayList<>();
         double dRotation;
         double mass;
         private boolean active;
@@ -111,7 +113,7 @@ public class Application extends JPanel implements KeyListener {
         public int contact;
         public int debug = 5;
         private Entity<?> parent;
-        private List<Entity<?>> child = new ArrayList<>();
+        private List<Entity<?>> child = new CopyOnWriteArrayList<>();
         private BufferedImage image;
 
         /**
@@ -188,13 +190,13 @@ public class Application extends JPanel implements KeyListener {
                 case TYPE_POINT -> {
                     if (color != null) {
                         g.setColor(color);
-                        g.drawRect((int) x, (int) y, 1, 1);
+                        g.drawRect((int) pos.x, (int) pos.y, 1, 1);
                     }
                 }
                 case TYPE_LINE -> {
                     if (color != null) {
                         g.setColor(color);
-                        g.drawLine((int) x, (int) y, (int) oldX, (int) oldY);
+                        g.drawLine((int) pos.x, (int) pos.y, (int) oldPos.x, (int) oldPos.y);
                     }
                 }
                 case TYPE_RECTANGLE -> {
@@ -210,19 +212,19 @@ public class Application extends JPanel implements KeyListener {
                 case TYPE_ELLIPSE -> {
                     if (fillColor != null) {
                         g.setColor(fillColor);
-                        g.fillOval((int) x, (int) y, (int) width, (int) height);
+                        g.fillOval((int) pos.x, (int) pos.y, (int) width, (int) height);
                     }
                     if (color != null) {
                         g.setColor(color);
-                        g.drawOval((int) x, (int) y, (int) width, (int) height);
+                        g.drawOval((int) pos.x, (int) pos.y, (int) width, (int) height);
                     }
                 }
                 case TYPE_IMAGE -> {
                     if (Optional.ofNullable(image).isPresent()) {
-                        if (dx > 0) {
-                            g.drawImage(image, (int) x, (int) y, null);
+                        if (vel.x > 0) {
+                            g.drawImage(image, (int) pos.x, (int) pos.y, null);
                         } else {
-                            g.drawImage(image, (int) (x - width), (int) y, (int) -width, (int) height, null);
+                            g.drawImage(image, (int) (pos.x - width), (int) pos.y, (int) -width, (int) height, null);
                         }
                     }
                 }
@@ -260,16 +262,37 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public T setSpeed(double dx, double dy) {
-            this.dx = dx;
-            this.dy = dy;
+            this.vel = new Vector2D(dx, dy);
+            return (T) this;
+        }
+
+        public T setSpeed(Vector2D d) {
+            this.vel = d;
             return (T) this;
         }
 
         public T setPosition(double x, double y) {
-            this.x = x;
-            this.y = y;
+            this.oldPos = pos;
+            this.pos = new Vector2D(x, y);
             return (T) this;
         }
+
+        public T setPosition(Vector2D p) {
+            this.oldPos = pos;
+            this.pos = p;
+            return (T) this;
+        }
+
+        public T setAcceleration(double ax, double ay) {
+            this.acceleration = new Vector2D(ax, ay);
+            return (T) this;
+        }
+
+        public T setAcceleration(Vector2D acc) {
+            this.acceleration = acc;
+            return (T) this;
+        }
+
 
         public T setSize(int w, int h) {
             this.width = w;
@@ -355,11 +378,12 @@ public class Application extends JPanel implements KeyListener {
             List<String> infos = new ArrayList<>();
             infos.add(String.format("1_#%d", id));
             infos.add(String.format("1_name:%s", name));
-            infos.add(String.format("2_pos:(%.02f,%.02f)", x, y));
+            infos.add(String.format("2_pos:(%.02f,%.02f)", pos.x, pos.y));
             infos.add(String.format("2_size:(%.02f,%.02f)", width, height));
-            infos.add(String.format("3_vel:(%.02f,%.02f)", dx, dy));
+            infos.add(String.format("3_vel:(%.02f,%.02f)", vel.x, vel.y));
+            infos.add(String.format("4_acc:(%.02f,%.02f)", acceleration.x, acceleration.y));
             if (mass != 0.0)
-                infos.add(String.format("3_mass:%.02f kg", mass));
+                infos.add(String.format("4_mass:%.02f kg", mass));
             if (material != null)
                 infos.add(String.format("4_mat:%s", material));
             return infos;
@@ -381,15 +405,146 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public T setOldPosition(double x, double y) {
-            this.oldX = x;
-            this.oldY = y;
+            this.oldPos = pos;
+            return (T) this;
+        }
+
+        public T setOldPosition(Vector2D p) {
+            this.oldPos = p;
             return (T) this;
         }
 
         public List<Entity<?>> getChild() {
             return child;
         }
+
+        public T addForce(Vector2D f) {
+            this.forces.add(f);
+            return (T) this;
+        }
+
+        public Material getMaterial() {
+            return this.material;
+        }
+
+        public List<Vector2D> getForces() {
+            return forces;
+        }
     }
+
+    /**
+     * Internal Class to manage simple Vector2D.
+     *
+     * @author Frédéric Delorme
+     * @since 1.0.0
+     */
+    public static class Vector2D {
+        public double x, y;
+
+        public Vector2D() {
+            x = 0.0f;
+            y = 0.0f;
+        }
+
+        /**
+         * @param x
+         * @param y
+         */
+        public Vector2D(double x, double y) {
+            super();
+            this.x = x;
+            this.y = y;
+        }
+
+        public Vector2D add(Vector2D v) {
+            return new Vector2D(x + v.x, y + v.y);
+        }
+
+        public Vector2D substract(Vector2D v1) {
+            return new Vector2D(x - v1.x, y - v1.y);
+        }
+
+        public Vector2D multiply(double f) {
+            return new Vector2D(x * f, y * f);
+        }
+
+        public double dot(Vector2D v1) {
+
+            return v1.x * y + v1.y * x;
+        }
+
+        public double length() {
+            return Math.sqrt(x * x + y * y);
+        }
+
+        public double distance(Vector2D v1) {
+            return substract(v1).length();
+        }
+
+        public Vector2D divide(double f) {
+            return new Vector2D(x / f, y / f);
+        }
+
+        public Vector2D normalize() {
+            return divide(length());
+        }
+
+        public Vector2D negate() {
+            return new Vector2D(-x, -y);
+        }
+
+        public double angle(Vector2D v1) {
+            double vDot = this.dot(v1) / (this.length() * v1.length());
+            if (vDot < -1.0)
+                vDot = -1.0;
+            if (vDot > 1.0)
+                vDot = 1.0;
+            return Math.acos(vDot);
+
+        }
+
+        public Vector2D addAll(List<Vector2D> forces) {
+            Vector2D sum = new Vector2D();
+            for (Vector2D f : forces) {
+                sum = sum.add(f);
+            }
+            return sum;
+        }
+
+        public String toString() {
+            return String.format("{x:%04.2f,y:%04.2f}", x, y);
+        }
+
+        public Vector2D maximize(double maxAccel) {
+            maximize(maxAccel, maxAccel);
+            return this;
+        }
+
+        public Vector2D maximize(double maxAccelX, double maxAccelY) {
+            if (Math.abs(x) > maxAccelX) {
+                x = Math.signum(x) * maxAccelX;
+            }
+            if (Math.abs(y) > maxAccelY) {
+                y = Math.signum(y) * maxAccelY;
+            }
+            return this;
+        }
+
+        public Vector2D thresholdToZero(double minValue) {
+            if (Math.abs(x) < minValue) {
+                x = 0.0;
+            }
+            if (Math.abs(y) < minValue) {
+                y = 0.0;
+            }
+            return this;
+        }
+
+        public static Vector2D ZERO() {
+            return new Vector2D();
+        }
+    }
+
 
     /**
      * The {@link GameObject} is the basic Object element to be displayed on screen.
@@ -524,19 +679,19 @@ public class Application extends JPanel implements KeyListener {
                 }
             }
             if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
-                drawShadowText(g, textValue, x + offsetX, y);
+                drawShadowText(g, textValue, pos.x + offsetX, pos.y);
             }
             if (borderWidth > 0 && Optional.ofNullable(borderColor).isPresent()) {
-                drawBorderText(g, textValue, x + offsetX, y);
+                drawBorderText(g, textValue, pos.x + offsetX, pos.y);
             }
             g.setColor(color);
-            g.drawString(textValue, (int) (x + offsetX), (int) y);
+            g.drawString(textValue, (int) (pos.x + offsetX), (int) pos.y);
         }
 
         private void drawShadowText(Graphics2D g, String textValue, double x, double y) {
             g.setColor(shadowColor);
             for (int i = 0; i < shadowWidth; i++) {
-                g.drawString(textValue, (int) x + i, (int) y + i);
+                g.drawString(textValue, (int) pos.x + i, (int) pos.y + i);
             }
         }
 
@@ -544,7 +699,7 @@ public class Application extends JPanel implements KeyListener {
             g.setColor(borderColor);
             for (int i = -borderWidth; i < borderWidth; i++) {
                 for (int j = -borderWidth; j < borderWidth; j++) {
-                    g.drawString(textValue, (int) x + i, (int) y + j);
+                    g.drawString(textValue, (int) pos.x + i, (int) pos.y + j);
                 }
             }
         }
@@ -627,7 +782,7 @@ public class Application extends JPanel implements KeyListener {
             return this;
         }
 
-        public Perturbation setForce(Point2D f) {
+        public Perturbation setForce(Vector2D f) {
             this.forces.add(f);
             return this;
         }
@@ -646,7 +801,7 @@ public class Application extends JPanel implements KeyListener {
     public static class World {
         String name = "defaultWorld";
         Rectangle2D playArea;
-        double gravity;
+        Vector2D gravity;
         Material material = Material.AIR;
 
         List<Perturbation> perturbations = new ArrayList<>();
@@ -655,7 +810,7 @@ public class Application extends JPanel implements KeyListener {
             this.name = name;
         }
 
-        public World setGravity(double g) {
+        public World setGravity(Vector2D g) {
             this.gravity = g;
             return this;
         }
@@ -677,6 +832,14 @@ public class Application extends JPanel implements KeyListener {
                     ", playArea=(" + playArea.getWidth() + "x" + playArea.getHeight() + ")" +
                     ", gravity=" + gravity +
                     '}';
+        }
+
+        public Vector2D getGravity() {
+            return gravity;
+        }
+
+        public Material getMaterial() {
+            return this.material;
         }
     }
 
@@ -730,7 +893,7 @@ public class Application extends JPanel implements KeyListener {
         }
 
         public String toString() {
-            return "{n:" + name + "," + ",d:" + density + ",e:" + elasticity + ",r:" + roughness + "}";
+            return "{n:'" + name + "',d:" + density + ",e:" + elasticity + ",r:" + roughness + "}";
         }
     }
 
@@ -809,6 +972,7 @@ public class Application extends JPanel implements KeyListener {
     protected Dimension winSize;
     protected Dimension bufferResolution;
     protected double maxEntitySpeed;
+    protected double maxEntityAcc;
 
     private String title = "no-title";
     private String version = "0.0.0";
@@ -924,6 +1088,8 @@ public class Application extends JPanel implements KeyListener {
         // Maximum speed for Entity.
         maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.speed.max", "16.0"));
 
+        // Maximum Acceleration for Entity.
+        maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.acceleration.max", "4.0"));
         world = getWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
 
         name = config.getProperty("app.name", "Default name Application");
@@ -1032,7 +1198,7 @@ public class Application extends JPanel implements KeyListener {
                 0, 0,
                 Integer.parseInt(paArgs[0]),
                 Integer.parseInt(paArgs[0]));
-        return new World(wArgs[0]).setGravity(g).setPlayArea(pa);
+        return new World(wArgs[0]).setGravity(new Vector2D(0, g)).setPlayArea(pa);
     }
 
     /**
@@ -1405,21 +1571,21 @@ public class Application extends JPanel implements KeyListener {
             }
         } else {
             if (keys[KeyEvent.VK_UP]) {
-                player.setSpeed(player.dx, -step * jumpFactor);
+                player.addForce(new Vector2D(0.0, -step * jumpFactor));
                 moving = true;
             }
             if (keys[KeyEvent.VK_DOWN]) {
-                player.setSpeed(player.dx, step);
+                player.addForce(new Vector2D(0.0, step));
                 moving = true;
             }
         }
 
         if (keys[KeyEvent.VK_LEFT]) {
-            player.setSpeed(-step, player.dy);
+            player.addForce(new Vector2D(-step, 0.0));
             moving = true;
         }
         if (keys[KeyEvent.VK_RIGHT]) {
-            player.setSpeed(step, player.dy);
+            player.addForce(new Vector2D(step, 0.0));
             moving = true;
         }
 
@@ -1435,10 +1601,7 @@ public class Application extends JPanel implements KeyListener {
             camera.setRotation(0.0);
         }
         if (!moving) {
-            player.setSpeed(
-                    player.dx * player.material.roughness,
-                    player.dy * player.material.roughness);
-
+            player.vel = player.vel.multiply(player.getMaterial().roughness);
         }
     }
 
@@ -1450,7 +1613,7 @@ public class Application extends JPanel implements KeyListener {
                 .forEach(
                         e -> {
                             updateEntity(e, time);
-                            e.setContact(0);
+
                             constrainPlayArea(e);
                         });
         if (Optional.ofNullable(camera).isPresent()) {
@@ -1463,70 +1626,77 @@ public class Application extends JPanel implements KeyListener {
         stats.put("5_time", time);
     }
 
-    private void updateEntity(Entity<?> e, double elapsed) {
-        e.oldX = e.x;
-        e.oldY = e.y;
-        double gravity = (e.stickToCamera || e.physicType == Entity.NONE ? 0.0 : world.gravity);
+    private void updateEntity(Entity<?> entity, double elapsed) {
+        Vector2D gravity = Vector2D.ZERO();
+        // apply gravity
+        if (entity.physicType != Entity.NONE || !entity.stickToCamera) {
+            gravity = world.gravity;
+        }
+        entity.forces.add(gravity);
+        // compute acceleration
+        entity.acceleration = entity.acceleration.addAll(entity.getForces());
+        entity.acceleration = entity.acceleration.multiply(entity.mass * (entity.getMaterial() != null ? entity.getMaterial().density : 1.0));
+        entity.acceleration.maximize(
+                        (double) entity.getAttribute("maxAccelX", maxEntityAcc),
+                        (double) entity.getAttribute("maxAccelY", maxEntityAcc))
+                .thresholdToZero(0.01);
 
-        e.rotation += e.dRotation * elapsed;
-        if (e.contact > 0) {
-            e.dx *= e.material.roughness;
-            e.dy *= e.material.roughness;
-            e.dRotation *= e.material.roughness;
+        // compute velocity
+        double roughness = 1.0;
+        if (entity.contact > 0) {
+            roughness = entity.getMaterial().roughness;
         } else {
-            e.dx *= world.material.roughness;
-            e.dy *= world.material.roughness;
-            e.dRotation *= world.material.roughness;
-
+            roughness = world.getMaterial().roughness;
         }
-        e.y += (e.dy + gravity * (e.mass != 0.0 ? e.mass * e.material.density : 1.0)) * elapsed;
-        e.x += e.dx * elapsed;
+        entity.vel = entity.vel.add(entity.acceleration.multiply(elapsed * elapsed * 0.5)).multiply(roughness);
+        entity.vel.maximize(
+                        (double) entity.getAttribute("maxVelX", maxEntitySpeed),
+                        (double) entity.getAttribute("maxVelY", maxEntitySpeed))
+                .thresholdToZero(0.8);
 
-        e.update(elapsed);
-        if (e.behaviors.size() > 0) {
-            e.behaviors.forEach(b -> b.update(e, elapsed));
+        // compute position
+        entity.pos = entity.pos.add(entity.vel.multiply(elapsed));
+        entity.getChild().forEach(c -> updateEntity(c, elapsed));
+        entity.forces.clear();
+
+        if (entity.behaviors.size() > 0) {
+            entity.behaviors.forEach(b -> b.update(entity, elapsed));
         }
-        constrainToPhysic(e);
+
+        entity.x = entity.pos.x;
+        entity.y = entity.pos.y;
+        entity.setContact(0);
     }
 
-    private void constrainToPhysic(Entity<? extends Entity<?>> e) {
-        // maximize speed.
-        if (Math.abs(e.dx) > maxEntitySpeed) {
-            e.dx = Math.signum(e.dx) * maxEntitySpeed;
-        }
-        if (Math.abs(e.dy) > maxEntitySpeed) {
-            e.dy = Math.signum(e.dy) * maxEntitySpeed;
-        }
-    }
+    protected void constrainPlayArea(Entity<? extends Entity<?>> entity) {
 
-    protected void constrainPlayArea(Entity<? extends Entity<?>> e) {
-
-        if (!e.constrainedToPlayArea)
+        if (!entity.constrainedToPlayArea)
             return;
-        if (e.x < 0) {
-            e.x = 0;
+        if (entity.x < 0) {
+            entity.setPosition(0, entity.pos.y);
 
-            e.dx *= -e.material.elasticity;
-            e.contact += 1;
+            entity.setSpeed(entity.vel.x * -entity.getMaterial().elasticity, entity.vel.y);
+            entity.contact += 1;
         }
-        if (e.x + e.width > world.playArea.getWidth()) {
-            e.x = world.playArea.getWidth() - e.width;
+        if (entity.x + entity.width > world.playArea.getWidth()) {
+            entity.setPosition(world.playArea.getWidth() - entity.width, entity.pos.y);
+            entity.setSpeed(entity.vel.x * -entity.getMaterial().elasticity, entity.vel.y);
+            entity.contact += 2;
+        }
+        if (entity.y < 0) {
+            entity.setPosition(entity.pos.x, 0);
 
-            e.dx *= -e.material.elasticity;
-            e.contact += 2;
+            entity.setSpeed(entity.vel.x, entity.vel.y * -entity.getMaterial().elasticity);
+            entity.contact += 4;
         }
-        if (e.y < 0) {
-            e.y = 0;
+        if (entity.y + entity.height > world.playArea.getHeight()) {
+            entity.setPosition(entity.pos.x, world.playArea.getHeight() - entity.height);
 
-            e.dy *= -e.material.elasticity;
-            e.contact += 4;
+            entity.setSpeed(entity.vel.x, entity.vel.y * -entity.getMaterial().elasticity);
+            entity.contact += 8;
         }
-        if (e.y + e.height > world.playArea.getHeight()) {
-            e.y = world.playArea.getHeight() - e.height;
-
-            e.dy *= -e.material.elasticity;
-            e.contact += 8;
-        }
+        entity.x = entity.pos.x;
+        entity.y = entity.pos.y;
     }
 
     /**
@@ -1590,12 +1760,12 @@ public class Application extends JPanel implements KeyListener {
                 .forEach(
                         e -> {
                             g.rotate(-e.rotation,
-                                    e.x + e.width * 0.5,
-                                    e.y + e.height * 0.5);
+                                    e.pos.x + e.width * 0.5,
+                                    e.pos.y + e.height * 0.5);
                             e.draw(g);
                             g.rotate(e.rotation,
-                                    e.x + e.width * 0.5,
-                                    e.y + e.height * 0.5);
+                                    e.pos.x + e.width * 0.5,
+                                    e.pos.y + e.height * 0.5);
                             drawEntityDebugInfo(g, e);
                         });
     }
@@ -1608,9 +1778,9 @@ public class Application extends JPanel implements KeyListener {
             g.setFont(g.getFont().deriveFont(fontSize));
 
             int maxWidth = infos.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
-            int offsetX = (int) (e.x + maxWidth > ((e.stickToCamera ? 0 : camera.x) + camera.width) ? -(maxWidth + 4.0)
+            int offsetX = (int) (e.pos.x + maxWidth > ((e.stickToCamera ? 0 : camera.x) + camera.width) ? -(maxWidth + 4.0)
                     : 4.0);
-            int offsetY = (int) (e.y + (fontSize * infos.size()) > ((e.stickToCamera ? 0 : camera.y) + camera.height)
+            int offsetY = (int) (e.pos.y + (fontSize * infos.size()) > ((e.stickToCamera ? 0 : camera.y) + camera.height)
                     ? -(9.0 + (fontSize * infos.size()))
                     : -9.0);
             g.setColor(Color.ORANGE);
@@ -1619,8 +1789,8 @@ public class Application extends JPanel implements KeyListener {
                 int level = Integer.parseInt(levelStr);
                 if (level <= debugLevel) {
                     g.drawString(info.substring(info.indexOf("_") + 1, info.length()),
-                            (int) (e.getX() + e.getWidth() + offsetX),
-                            (int) (e.getY() + offsetY + (l * fontSize)));
+                            (int) (e.pos.x + e.getWidth() + offsetX),
+                            (int) (e.pos.y + offsetY + (l * fontSize)));
                     l++;
                 }
 
@@ -1711,7 +1881,7 @@ public class Application extends JPanel implements KeyListener {
             }
             // Reverse gravity
             case KeyEvent.VK_G -> {
-                world.gravity = -world.gravity;
+                world.setGravity(world.getGravity().negate());
             }
             case KeyEvent.VK_Z -> {
                 if (ctrlKey) {
