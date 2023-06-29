@@ -15,14 +15,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
@@ -448,7 +441,7 @@ public class Application extends JPanel implements KeyListener {
             this.tween = t;
         }
 
-        public void update(int elapsed) {
+        public void update(double elapsed) {
             this.rotation += dRotation;
             this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
             this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
@@ -806,9 +799,13 @@ public class Application extends JPanel implements KeyListener {
      * Configuration variables
      */
     protected String pathToConfigFile = "/config.properties";
+
+    protected boolean debug;
+    protected int debugLevel;
+
     protected boolean exit = false;
-    protected int debug = 0;
     protected boolean pause = false;
+
     protected Dimension winSize;
     protected Dimension bufferResolution;
     protected double maxEntitySpeed;
@@ -817,7 +814,6 @@ public class Application extends JPanel implements KeyListener {
     private String version = "0.0.0";
     private String name;
 
-    private int debugLevel;
 
     /**
      * Graphics components
@@ -916,7 +912,7 @@ public class Application extends JPanel implements KeyListener {
         // --- Configuration information ---
 
         // debug level (0-5 where 0=off and 5 max debug info)
-        debug = getParsedInt(config, "app.debug", "0");
+        debug = getParsedBoolean(config, "app.debug", "false");
         // exit flag to let test only ONE loop execution.
         exit = getParsedBoolean(config, "app.exit", "false");
         // Window size
@@ -1055,9 +1051,10 @@ public class Application extends JPanel implements KeyListener {
                     System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
                 }
                 // define debug level for this application run.
-                case "d", "debug" -> {
+                case "dl", "debugLevel" -> {
                     debugLevel = Integer.parseInt(arg[1]);
-                    System.out.printf(">> <!> argument 'debug' set to %s%n", arg[1]);
+                    this.debug = true;
+                    System.out.printf(">> <!> argument 'debugLevel' set to %s: debug mode activated.%n", arg[1]);
                 }
                 // set a temporary window title (used for test execution purpose only)
                 case "t", "title" -> {
@@ -1152,7 +1149,10 @@ public class Application extends JPanel implements KeyListener {
             if (elapsedTime > 1000) {
                 realFPS = frames;
                 realUPS = updates;
-                datastats.put("0_debug", debug);
+                datastats.put("0_dbg", debug ? "ON" : "off");
+                if (debug) {
+                    datastats.put("0_dbgLvl", debugLevel);
+                }
                 datastats.put("1_FPS", realFPS);
                 datastats.put("2_UPS", realUPS);
                 datastats.put("3_nbObj", entities.size());
@@ -1383,6 +1383,7 @@ public class Application extends JPanel implements KeyListener {
         double step = (double) player.getAttribute("speedStep", 0.05);
         double jumpFactor = (double) player.getAttribute("jumpFactor", 10.0);
         double rotStep = (double) player.getAttribute("speedRotStep", 0.01);
+
         if (ctrlKey)
             step = step * 4.0;
         if (shiftKey)
@@ -1440,9 +1441,10 @@ public class Application extends JPanel implements KeyListener {
     }
 
     private void update(long elapsed, Map<String, Object> stats) {
-        int time = (int) (elapsed * 0.000001);
+        double time = (elapsed * 0.000001);
 
-        entities.values().stream().filter(e -> e.isActive()).sorted((a, b) -> a.physicType < b.physicType ? 1 : -1)
+        entities.values().stream().filter(Entity::isActive)
+                .sorted(Comparator.comparingInt(a -> a.physicType))
                 .forEach(
                         e -> {
                             updateEntity(e, time);
@@ -1453,9 +1455,8 @@ public class Application extends JPanel implements KeyListener {
             camera.update(time);
         }
         long renderedEntities = entities.values().stream()
-                .filter(e -> e.isActive())
-                .filter(e -> inViewport(camera, e) || e.physicType == Entity.NONE)
-                .sorted((a, b) -> a.priority > b.priority ? 1 : -1).count();
+                .filter(Entity::isActive)
+                .filter(e -> inViewport(camera, e) || e.physicType == Entity.NONE).count();
         stats.put("5_rend", renderedEntities);
         stats.put("5_time", time);
     }
@@ -1568,7 +1569,7 @@ public class Application extends JPanel implements KeyListener {
                 buffer, 0, 0, frame.getWidth(), frame.getHeight(),
                 0, 0, buffer.getWidth(), buffer.getHeight(),
                 null);
-        if (debug > 0 && debugLevel > 0) {
+        if (debug && debugLevel > 0) {
             gScreen.setColor(Color.ORANGE);
             gScreen.drawString(
                     prepareStatsString(stats, "[ ", " | ", " ]"),
@@ -1583,7 +1584,7 @@ public class Application extends JPanel implements KeyListener {
         entities.values().stream()
                 .filter(e -> e.isActive() && e.stickToCamera == stickToCamera)
                 .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
-                .sorted((a, b) -> a.priority > b.priority ? 1 : -1)
+                .sorted(Comparator.comparingInt(a -> a.priority))
                 .forEach(
                         e -> {
                             g.rotate(-e.rotation,
