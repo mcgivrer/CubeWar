@@ -312,7 +312,7 @@ public class Application extends JPanel implements KeyListener {
             return String.format("%s:pos[%.02f,%.02f]", name, x, y);
         }
 
-        public T setStickToCamera(boolean b) {
+        public T setStickToCameraView(boolean b) {
             this.stickToCamera = b;
             return (T) this;
         }
@@ -855,7 +855,8 @@ public class Application extends JPanel implements KeyListener {
     public void run(String[] args) {
         init(args);
         frame = createWindow();
-        create();
+        clearScene();
+        createScene();
         long staticEntities = entities.values().stream().filter(e -> e.physicType == Entity.STATIC).count();
         long dynamicEntities = entities.values().stream().filter(e -> e.physicType == Entity.DYNAMIC).count();
         long nonePhysicEntities = entities.values().stream().filter(e -> e.physicType == Entity.NONE).count();
@@ -864,6 +865,10 @@ public class Application extends JPanel implements KeyListener {
                 staticEntities, dynamicEntities, nonePhysicEntities, camera != null ? 1 : 0);
         loop();
         dispose();
+    }
+
+    private void clearScene() {
+        entities.clear();
     }
 
     /**
@@ -1171,7 +1176,7 @@ public class Application extends JPanel implements KeyListener {
      * Create the scene with all the required {@link Entity}'s to be displayed and
      * managed by this {@link Application} scene.
      */
-    protected void create() {
+    protected void createScene() {
         TextObject score = new TextObject("score", bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
@@ -1184,7 +1189,7 @@ public class Application extends JPanel implements KeyListener {
                 .setValue(0)
                 .setPriority(20)
                 .setTextAlign(TextObject.ALIGN_RIGHT)
-                .setStickToCamera(true)
+                .setStickToCameraView(true)
                 .setMaterial(null)
                 .setDebug(3);
 
@@ -1200,10 +1205,27 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText("\u2764")
                 .setPriority(20)
-                .setStickToCamera(true)
+                .setStickToCameraView(true)
                 .setMaterial(null);
 
         addEntity(heart);
+
+        TextObject life = new TextObject("life", 20, bufferResolution.getHeight() * 0.90)
+                .setPhysicType(Entity.STATIC)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setBorderColor(Color.BLACK)
+                .setFont(getFont().deriveFont(12.0f))
+                .setColor(Color.WHITE)
+                .setShadowWidth(3)
+                .setBorderWidth(1)
+                .setText("%d")
+                .setValue(3)
+                .setPriority(21)
+                .setStickToCameraView(true)
+                .setDebug(2)
+                .setMaterial(null);
+
+        addEntity(life);
 
         TextObject welcomeMessage = new TextObject("message",
                 bufferResolution.getWidth() * 0.50,
@@ -1218,28 +1240,35 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText(messages.getString("app.title.welcome"))
                 .setPriority(20)
-                .setStickToCamera(true)
+                .setStickToCameraView(true)
                 .setDuration(5000)
                 .setMaterial(null);
 
         addEntity(welcomeMessage);
 
-        TextObject life = new TextObject("life", 20, bufferResolution.getHeight() * 0.90)
+        TextObject pauseObj = new TextObject("pause",
+                bufferResolution.getWidth() * 0.50,
+                bufferResolution.getHeight() * 0.50)
                 .setPhysicType(Entity.STATIC)
+                .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(getFont().deriveFont(12.0f))
                 .setColor(Color.WHITE)
                 .setShadowWidth(3)
-                .setBorderWidth(1)
-                .setText("%d")
-                .setValue(3)
-                .setPriority(21)
-                .setStickToCamera(true)
-                .setDebug(2)
-                .setMaterial(null);
+                .setBorderWidth(2)
+                .setText(messages.getString("app.pause.message"))
+                .setPriority(20)
+                .setStickToCameraView(true)
+                .setMaterial(null)
+                .addBehavior(new Behavior<TextObject>() {
+                    @Override
+                    public void update(Entity<?> e, double elapsed) {
+                        e.setActive(isPause());
+                    }
+                });
 
-        addEntity(life);
+        addEntity(pauseObj);
 
         GameObject player = new GameObject("player",
                 (int) ((bufferResolution.getWidth() - 16) * 0.5),
@@ -1250,7 +1279,7 @@ public class Application extends JPanel implements KeyListener {
                 .setMass(60.0)
                 .setMaterial(Material.RUBBER)
                 .setAttribute("speedStep", 0.25)
-                .setAttribute("jumpFactor", 255.0 * world.gravity)
+                .setAttribute("jumpFactor", 24.601)
                 .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);
@@ -1281,7 +1310,7 @@ public class Application extends JPanel implements KeyListener {
 
                             @Override
                             public void update(Entity<?> e, double elapsed) {
-                                e.setColor(new Color((0.1f), (0.3f), (e.layer * 0.1f), 0.6f));
+                                e.setColor(new Color((0.1f), (0.3f), (e.layer * 0.1f), 0.8f));
                                 if (!world.playArea.getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
                                     e.setPosition(world.playArea.getWidth() * Math.random(),
                                             Math.random() * world.playArea.getHeight() * 0.1);
@@ -1681,10 +1710,27 @@ public class Application extends JPanel implements KeyListener {
             case KeyEvent.VK_G -> {
                 world.gravity = -world.gravity;
             }
+            case KeyEvent.VK_Z -> {
+                if (ctrlKey) {
+                    clearScene();
+                    createScene();
+                }
+            }
+            case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
+                setPause(!isPause());
+            }
             default -> {
                 // nothing to do !
             }
         }
+    }
+
+    private boolean isPause() {
+        return this.pause;
+    }
+
+    private void setPause(boolean p) {
+        this.pause = p;
     }
 
     /**
