@@ -1,23 +1,22 @@
 package com.snapgames.demo;
 
-import java.awt.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -83,7 +82,7 @@ public class Application extends JPanel implements KeyListener {
         static int index = 0;
         protected List<Point2D> forces = new ArrayList<>();
         int id = ++index;
-        String name = "entity_" + id;
+        String name;
         double rotation;
 
         double oldX;
@@ -116,13 +115,13 @@ public class Application extends JPanel implements KeyListener {
         private BufferedImage image;
 
         /**
-         * Constructeur de l'entité.
+         * Entity's constructor with a name, a position (x,y) and a size (w,h).
          *
-         * @param n le nom de l'entité
-         * @param x la position en x de l'entité
-         * @param y la position en y de l'entité
-         * @param w la largeur de l'entité
-         * @param h la hauteur de l'entité
+         * @param n Name for this new {@link Entity}
+         * @param x X axis position
+         * @param y Y axis position
+         * @param w Entity's width
+         * @param h Entity's height.
          */
         public Entity(String n, double x, double y, double w, double h) {
             this.name = n;
@@ -138,9 +137,9 @@ public class Application extends JPanel implements KeyListener {
         }
 
         /**
-         * Met à jour l'entité.
+         * Update the internal Entity's attribute for time management.
          *
-         * @param elapsed le temps écoulé depuis la dernière mise à jour
+         * @param elapsed Elapsed time since previous call.
          */
         public void update(double elapsed) {
 
@@ -306,7 +305,7 @@ public class Application extends JPanel implements KeyListener {
             return String.format("%s:pos[%.02f,%.02f]", name, x, y);
         }
 
-        public T setStickToCamera(boolean b) {
+        public T setStickToCameraView(boolean b) {
             this.stickToCamera = b;
             return (T) this;
         }
@@ -359,8 +358,10 @@ public class Application extends JPanel implements KeyListener {
             infos.add(String.format("2_pos:(%.02f,%.02f)", x, y));
             infos.add(String.format("2_size:(%.02f,%.02f)", width, height));
             infos.add(String.format("3_vel:(%.02f,%.02f)", dx, dy));
-            if (mass != 0.0) infos.add(String.format("3_mass:%.02f kg", mass));
-            if (material != null) infos.add(String.format("4_mat:%s", material));
+            if (mass != 0.0)
+                infos.add(String.format("3_mass:%.02f kg", mass));
+            if (material != null)
+                infos.add(String.format("4_mat:%s", material));
             return infos;
         }
 
@@ -378,13 +379,23 @@ public class Application extends JPanel implements KeyListener {
             this.duration = d;
             return (T) this;
         }
+
+        public T setOldPosition(double x, double y) {
+            this.oldX = x;
+            this.oldY = y;
+            return (T) this;
+        }
+
+        public List<Entity<?>> getChild() {
+            return child;
+        }
     }
 
     /**
      * The {@link GameObject} is the basic Object element to be displayed on screen.
      * It can be a POINT, a LINE,a RECTANGLE, an ELLIPSE or an IMAGE.
      */
-    public class GameObject extends Entity<GameObject> {
+    public static class GameObject extends Entity<GameObject> {
 
         /**
          * Create a new GameObject.
@@ -411,7 +422,7 @@ public class Application extends JPanel implements KeyListener {
      * a {@link Camera#tween} factor to set the {@link Camera} velocity onthe
      * tracking.
      */
-    public class Camera extends Entity<Camera> {
+    public static class Camera extends Entity<Camera> {
 
         private Entity target;
         private double tween;
@@ -430,7 +441,7 @@ public class Application extends JPanel implements KeyListener {
             this.tween = t;
         }
 
-        public void update(int elapsed) {
+        public void update(double elapsed) {
             this.rotation += dRotation;
             this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
             this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
@@ -448,16 +459,22 @@ public class Application extends JPanel implements KeyListener {
     /**
      * The {@link TextObject} is an extended {@link Entity} to support Text drawing.
      * <p>
-     * the <code>text</code> can be a simple string, or a formatted String with the provided <code>value</code>.
-     * The text will be then compatible with the {@link String#format(String, Object...)} formatting rules.
+     * the <code>text</code> can be a simple string, or a formatted String with the
+     * provided <code>value</code>.
+     * The text will be then compatible with the
+     * {@link String#format(String, Object...)} formatting rules.
      * <p>
      * It also supports
      * <ul>
-     *     <li>a graphical <code>textAlign</code> attribute than can be one of the {@link TextObject#ALIGN_LEFT},
-     *     {@link TextObject#ALIGN_CENTER} or {@link TextObject#ALIGN_RIGHT} values,</li>
-     *     <li> a <code>font</code> to define font family and size,</li>
-     *     <li>a <code>shadowColor</code> and <code>shadowWidth</code> to define a text shadow,</li>
-     *     <li>a <code>borderColor</code> and a <code>borderWidth</code> to define a outlined border on the text.</li>
+     * <li>a graphical <code>textAlign</code> attribute than can be one of the
+     * {@link TextObject#ALIGN_LEFT},
+     * {@link TextObject#ALIGN_CENTER} or {@link TextObject#ALIGN_RIGHT}
+     * values,</li>
+     * <li>a <code>font</code> to define font family and size,</li>
+     * <li>a <code>shadowColor</code> and <code>shadowWidth</code> to define a text
+     * shadow,</li>
+     * <li>a <code>borderColor</code> and a <code>borderWidth</code> to define a
+     * outlined border on the text.</li>
      * </ul>
      */
     public static class TextObject extends Entity<TextObject> {
@@ -583,11 +600,14 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * A {@link Perturbation} is a rectangle area into the {@link World#playArea} where Entity will be influenced by
+     * A {@link Perturbation} is a rectangle area into the {@link World#playArea}
+     * where Entity will be influenced by
      * some physic changes.
      * <p>
-     * It can be an attraction factor applied to any entity in this perturbation area, or a new force added to the {@link Entity},
-     * this both thing are applied at computation time into the {@link Application#updateEntity(Entity, double)} processing method.
+     * It can be an attraction factor applied to any entity in this perturbation
+     * area, or a new force added to the {@link Entity},
+     * this both thing are applied at computation time into the
+     * {@link Application#updateEntity(Entity, double)} processing method.
      */
     public static class Perturbation extends Entity<Perturbation> {
         private double attraction;
@@ -615,9 +635,11 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * The {@link World} defines the context and environment where all {@link Application}'s {@link Entity} will evolve.
+     * The {@link World} defines the context and environment where all
+     * {@link Application}'s {@link Entity} will evolve.
      * <p>
-     * A <code>name</code>, a <code>playArea</code> and a <code>gravity</code> are the first mandatory things.
+     * A <code>name</code>, a <code>playArea</code> and a <code>gravity</code> are
+     * the first mandatory things.
      * the <code>perturbations</code> list will be implemented and used to influence
      * {@link Entity} in certain places into the world play area.
      */
@@ -663,15 +685,18 @@ public class Application extends JPanel implements KeyListener {
      * <p>
      * It contains
      * <ul>
-     *     <li>a <code>name</code> to just debug purpose and understand the attribute's values for this {@link Material},</li>
-     *     <li>a <code>density</code> value (double type),</li>
-     *     <li>an <code>elasticity</code> factor (0.0 to 1.0),</li>
-     *     <li>a <code>roughness</code> factor (0.0 to 1.0).</li>
+     * <li>a <code>name</code> to just debug purpose and understand the attribute's
+     * values for this {@link Material},</li>
+     * <li>a <code>density</code> value (double type),</li>
+     * <li>an <code>elasticity</code> factor (0.0 to 1.0),</li>
+     * <li>a <code>roughness</code> factor (0.0 to 1.0).</li>
      * </ul>
-     * <p>It will be used :
+     * <p>
+     * It will be used :
      * <ul>
-     *     <li>to be applied to any {@link Entity}</li>
-     * <li>used by the physic computation done at {@link Application#updateEntity(Entity, double)} processing.</li>
+     * <li>to be applied to any {@link Entity}</li>
+     * <li>used by the physic computation done at
+     * {@link Application#updateEntity(Entity, double)} processing.</li>
      * </ul>
      */
     public static class Material {
@@ -729,32 +754,42 @@ public class Application extends JPanel implements KeyListener {
     }
 
     /**
-     * Add a specific {@link ParticleBehavior#create(World, String, Entity)} extending the existing {@link Behavior}
-     * and will be applied to  {@link Application.GameObject} entity.
+     * Add a specific {@link ParticleBehavior#create(World, double, String, Entity)}
+     * extending the existing {@link Behavior}
+     * and will be applied to {@link Application.GameObject} entity.
      * <p>
-     * The new <code>create</code> phase for this {@link Application.GameObject} will be modified
-     * with the implementation of this behavior interface, and allow to create a new particle by the
-     * {@link Application#createParticleSystem(World, String, int, ParticleBehavior)}, while the already defined
-     * {@link Behavior#update(Entity, double)} will be used to update the created particles like any other
+     * The new <code>create</code> phase for this {@link Application.GameObject}
+     * will be modified
+     * with the implementation of this behavior interface, and allow to create a new
+     * particle by the
+     * {@link Application#createParticleSystem(World, String, int, ParticleBehavior)},
+     * while the already defined
+     * {@link Behavior#update(Entity, double)} will be used to update the created
+     * particles like any other
      * {@link Application.GameObject}.
      *
      * @param <GameObject> the Entity to be modified.
      */
     public interface ParticleBehavior<GameObject> extends Behavior<GameObject> {
         /**
-         * Implement the <code>create</code> phase for the particle using a prefix name, the {@link World} object as
+         * Implement the <code>create</code> phase for the particle using a prefix name,
+         * the {@link World} object as
          * context and the parent {@link Entity}
          *
-         * @param w                  the world context object defining the environment where this new particle will evolve.
-         * @param particleNamePrefix the prefix name for this new particle. it will be completed by the internal {@link Entity#index} value.
+         * @param w                  the world context object defining the environment
+         *                           where this new particle will evolve.
+         * @param elapsed            The elapsed time (in millisecond) since previous call.
+         * @param particleNamePrefix the prefix name for this new particle. it will be
+         *                           completed by the internal {@link Entity#index}
+         *                           value.
          * @param parent             the parent {@link Entity} hosting this particle.
-         * @return
+         * @return the newly created {@link ParticleBehavior} implementation.
          */
-        GameObject create(World w, String particleNamePrefix, Entity<?> parent);
+        GameObject create(World w, double elapsed, String particleNamePrefix, Entity<?> parent);
     }
 
-    private static int FPS = 60;
-    private static int UPS = 120;
+    private static int FPS = 120;
+    private static int UPS = 60;
     private static double PIXEL_METER_RATIO = 12.0;
 
     private ResourceBundle messages;
@@ -764,15 +799,21 @@ public class Application extends JPanel implements KeyListener {
      * Configuration variables
      */
     protected String pathToConfigFile = "/config.properties";
+
+    protected boolean debug;
+    protected int debugLevel;
+
     protected boolean exit = false;
-    protected int debug = 0;
     protected boolean pause = false;
+
     protected Dimension winSize;
     protected Dimension bufferResolution;
     protected double maxEntitySpeed;
 
     private String title = "no-title";
     private String version = "0.0.0";
+    private String name;
+
 
     /**
      * Graphics components
@@ -782,20 +823,21 @@ public class Application extends JPanel implements KeyListener {
 
     private Camera camera;
 
-    public World world;
+    /**
+     * Physic computation components
+     */
+    public transient World world;
+
+    private Map<String, Entity<? extends Entity<?>>> entities = new HashMap<>();
 
     /**
      * Key listener components
      */
     private boolean keys[] = new boolean[1024];
-
-    private Map<String, Entity<? extends Entity<?>>> entities = new HashMap<>();
     private boolean ctrlKey;
     private boolean shiftKey;
     private boolean altKey;
     private boolean metaKey;
-    private String name;
-    private int debugLevel;
 
     /**
      * Create the {@link Application}.
@@ -809,7 +851,8 @@ public class Application extends JPanel implements KeyListener {
     public void run(String[] args) {
         init(args);
         frame = createWindow();
-        create();
+        clearScene();
+        createScene();
         long staticEntities = entities.values().stream().filter(e -> e.physicType == Entity.STATIC).count();
         long dynamicEntities = entities.values().stream().filter(e -> e.physicType == Entity.DYNAMIC).count();
         long nonePhysicEntities = entities.values().stream().filter(e -> e.physicType == Entity.NONE).count();
@@ -820,6 +863,17 @@ public class Application extends JPanel implements KeyListener {
         dispose();
     }
 
+    private void clearScene() {
+        entities.clear();
+    }
+
+    /**
+     * Initialize the {@link Application} by loading the configuration from
+     * the possible argument file path (see <code>-config</code> argument),
+     * or on the default configuration file <code>./config.properties</code>.
+     *
+     * @param args the list of arguments from the java CLI.
+     */
     private void init(String[] args) {
         List<String> lArgs = Arrays.asList(args);
         parseArgs(lArgs);
@@ -858,7 +912,7 @@ public class Application extends JPanel implements KeyListener {
         // --- Configuration information ---
 
         // debug level (0-5 where 0=off and 5 max debug info)
-        debug = getParsedInt(config, "app.debug", "0");
+        debug = getParsedBoolean(config, "app.debug", "false");
         // exit flag to let test only ONE loop execution.
         exit = getParsedBoolean(config, "app.exit", "false");
         // Window size
@@ -979,23 +1033,36 @@ public class Application extends JPanel implements KeyListener {
         return new World(wArgs[0]).setGravity(g).setPlayArea(pa);
     }
 
+    /**
+     * Parse the argument's list to try and decode possible new parameters and
+     * configuration to be applied
+     * on the {@link Application} before initialization.
+     *
+     * @param lArgs the list of arguments coming from the Java Command line.
+     */
     private void parseArgs(List<String> lArgs) {
         lArgs.forEach(s -> {
             System.out.printf("- process arg: '%s'%n", s);
             String[] arg = s.split("=");
             switch (arg[0]) {
+                // do not execute loop, just perform one and exit (used for test purpose only).
                 case "x", "exit" -> {
                     exit = Boolean.parseBoolean(arg[1]);
                     System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
                 }
-                case "d", "debug" -> {
+                // define debug level for this application run.
+                case "dl", "debugLevel" -> {
                     debugLevel = Integer.parseInt(arg[1]);
-                    System.out.printf(">> <!> argument 'debug' set to %s%n", arg[1]);
+                    this.debug = true;
+                    System.out.printf(">> <!> argument 'debugLevel' set to %s: debug mode activated.%n", arg[1]);
                 }
+                // set a temporary window title (used for test execution purpose only)
                 case "t", "title" -> {
                     title = arg[1];
                     System.out.printf(">> <!> argument 'title' set to %s%n", arg[1]);
                 }
+                // define an alternate file configuration path to feed the Application.
+                // used mainly for automated test requirement.
                 case "cp", "configPath" -> {
                     pathToConfigFile = arg[1];
                     System.out.printf(">> <!> argument 'configuration file path' set to %s%n", arg[1]);
@@ -1007,6 +1074,12 @@ public class Application extends JPanel implements KeyListener {
         });
     }
 
+    /**
+     * Create tthe {@link Application}'s window, according to the defined
+     * configuration attributes.
+     *
+     * @return a new created JFrame, window of the {@link Application}.
+     */
     private JFrame createWindow() {
         JFrame frame = new JFrame(title);
         setPreferredSize(winSize);
@@ -1039,6 +1112,10 @@ public class Application extends JPanel implements KeyListener {
         frame.getGraphics().fillRect(0, 0, frame.getWidth(), frame.getHeight());
     }
 
+    /**
+     * The main {@link Application} Loop where every thing is processed and/or
+     * displayed from.
+     */
     private void loop() {
         long start = System.nanoTime();
         long previous = start;
@@ -1060,7 +1137,7 @@ public class Application extends JPanel implements KeyListener {
             update(elapsed, datastats);
             updates++;
 
-            fps += (elapsed * 0.000001);
+            fps += (elapsed * 0.0000001);
             if (fps < (1000 / FPS) && !pause) {
                 draw(datastats);
                 frames++;
@@ -1072,7 +1149,10 @@ public class Application extends JPanel implements KeyListener {
             if (elapsedTime > 1000) {
                 realFPS = frames;
                 realUPS = updates;
-                datastats.put("0_debug", debug);
+                datastats.put("0_dbg", debug ? "ON" : "off");
+                if (debug) {
+                    datastats.put("0_dbgLvl", debugLevel);
+                }
                 datastats.put("1_FPS", realFPS);
                 datastats.put("2_UPS", realUPS);
                 datastats.put("3_nbObj", entities.size());
@@ -1081,7 +1161,7 @@ public class Application extends JPanel implements KeyListener {
                 frames = 0;
                 updates = 0;
             }
-            wait = (int) ((1000.0 / UPS) - elapsed * 0.0000001);
+            wait = (int) ((1000.0 / UPS) - elapsed * 0.000001);
             try {
                 Thread.sleep((wait > 1 ? wait : 1));
             } catch (InterruptedException e) {
@@ -1092,7 +1172,11 @@ public class Application extends JPanel implements KeyListener {
         } while (!exit);
     }
 
-    protected void create() {
+    /**
+     * Create the scene with all the required {@link Entity}'s to be displayed and
+     * managed by this {@link Application} scene.
+     */
+    protected void createScene() {
         TextObject score = new TextObject("score", bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
@@ -1105,7 +1189,7 @@ public class Application extends JPanel implements KeyListener {
                 .setValue(0)
                 .setPriority(20)
                 .setTextAlign(TextObject.ALIGN_RIGHT)
-                .setStickToCamera(true)
+                .setStickToCameraView(true)
                 .setMaterial(null)
                 .setDebug(3);
 
@@ -1121,10 +1205,27 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText("\u2764")
                 .setPriority(20)
-                .setStickToCamera(true)
+                .setStickToCameraView(true)
                 .setMaterial(null);
 
         addEntity(heart);
+
+        TextObject life = new TextObject("life", 20, bufferResolution.getHeight() * 0.90)
+                .setPhysicType(Entity.STATIC)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setBorderColor(Color.BLACK)
+                .setFont(getFont().deriveFont(12.0f))
+                .setColor(Color.WHITE)
+                .setShadowWidth(3)
+                .setBorderWidth(1)
+                .setText("%d")
+                .setValue(3)
+                .setPriority(21)
+                .setStickToCameraView(true)
+                .setDebug(2)
+                .setMaterial(null);
+
+        addEntity(life);
 
         TextObject welcomeMessage = new TextObject("message",
                 bufferResolution.getWidth() * 0.50,
@@ -1139,28 +1240,35 @@ public class Application extends JPanel implements KeyListener {
                 .setBorderWidth(2)
                 .setText(messages.getString("app.title.welcome"))
                 .setPriority(20)
-                .setStickToCamera(true)
+                .setStickToCameraView(true)
                 .setDuration(5000)
                 .setMaterial(null);
 
         addEntity(welcomeMessage);
 
-        TextObject life = new TextObject("life", 20, bufferResolution.getHeight() * 0.90)
+        TextObject pauseObj = new TextObject("pause",
+                bufferResolution.getWidth() * 0.50,
+                bufferResolution.getHeight() * 0.50)
                 .setPhysicType(Entity.STATIC)
+                .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(getFont().deriveFont(12.0f))
                 .setColor(Color.WHITE)
                 .setShadowWidth(3)
-                .setBorderWidth(1)
-                .setText("%d")
-                .setValue(3)
-                .setPriority(21)
-                .setStickToCamera(true)
-                .setDebug(2)
-                .setMaterial(null);
+                .setBorderWidth(2)
+                .setText(messages.getString("app.pause.message"))
+                .setPriority(20)
+                .setStickToCameraView(true)
+                .setMaterial(null)
+                .addBehavior(new Behavior<TextObject>() {
+                    @Override
+                    public void update(Entity<?> e, double elapsed) {
+                        e.setActive(isPause());
+                    }
+                });
 
-        addEntity(life);
+        addEntity(pauseObj);
 
         GameObject player = new GameObject("player",
                 (int) ((bufferResolution.getWidth() - 16) * 0.5),
@@ -1170,8 +1278,9 @@ public class Application extends JPanel implements KeyListener {
                 .setPriority(10)
                 .setMass(60.0)
                 .setMaterial(Material.RUBBER)
-                .setAttribute("speedStep", 3.0)
-                .setAttribute("speedRotStep", 0.01)
+                .setAttribute("speedStep", 0.25)
+                .setAttribute("jumpFactor", 24.601)
+                .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);
 
@@ -1179,13 +1288,11 @@ public class Application extends JPanel implements KeyListener {
                 createParticleSystem(world, "drop", 1000,
                         new ParticleBehavior<GameObject>() {
                             @Override
-                            public GameObject create(World parentWorld, String particleNamePrefix, Entity<?> e) {
-                                double x = (int) (Math.random() * parentWorld.playArea.getWidth());
-                                double y = (int) (Math.random() * parentWorld.playArea.getHeight() * 0.1);
+                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix, Entity<?> e) {
                                 GameObject drop = new GameObject(
                                         String.format(particleNamePrefix + "_%d", GameObject.index),
-                                        x,
-                                        y,
+                                        (int) (Math.random() * parentWorld.playArea.getWidth()),
+                                        (int) (Math.random() * parentWorld.playArea.getHeight() * 0.1),
                                         1, 1)
                                         .setPriority(1)
                                         .setType(Entity.TYPE_LINE)
@@ -1196,18 +1303,35 @@ public class Application extends JPanel implements KeyListener {
                                         .setMaterial(Material.AIR)
                                         .setMass(110.0)
                                         .setParent(e)
-                                        .setSpeed(0.0, Math.random() * 40.0 * parentWorld.gravity)
+                                        .setSpeed(0.0, Math.random() * 0.0003)
                                         .addBehavior(this);
                                 return drop;
                             }
 
                             @Override
                             public void update(Entity<?> e, double elapsed) {
-                                e.setColor(new Color((e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f)));
+                                e.setColor(new Color((0.1f), (0.3f), (e.layer * 0.1f), 0.8f));
                                 if (!world.playArea.getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
                                     e.setPosition(world.playArea.getWidth() * Math.random(),
                                             Math.random() * world.playArea.getHeight() * 0.1);
+                                    e.setOldPosition(e.x, e.y);
+
                                 }
+                                GameObject parent = (GameObject) e.parent;
+                                double time = parent.getAttribute("particleTime", 0.0);
+                                double particleTimeCycle = parent.getAttribute("particleTimeCycle", 9800.0);
+                                double particleFreq = parent.getAttribute("particleFreq", 0.005);
+                                time += elapsed;
+                                int nbP = (int) parent.getAttribute("nbParticles", 0);
+                                if (parent.getChild().size() < nbP && time > particleTimeCycle) {
+                                    for (int i = 0; i < nbP * particleFreq; i++) {
+                                        GameObject particle = this.create(world, 0, parent.name, parent);
+                                        parent.addChild(particle);
+                                        addEntity(particle);
+                                    }
+                                    time = 0;
+                                }
+                                parent.setAttribute("particleTime", time);
                             }
                         }));
 
@@ -1216,6 +1340,27 @@ public class Application extends JPanel implements KeyListener {
         camera.setTween(0.05);
     }
 
+    /**
+     * Create a new Particle System with a parent GameObject and a certain number of
+     * child according to the nbParticles parameter.
+     * <p>
+     * These particles are {@link GameObject} with a specific
+     * {@link ParticleBehavior} applied on to have a
+     * common processing for all those particles belonging to the same parent
+     * {@link GameObject}.
+     * <p>
+     * the {@link GameObject#parent} will have all those particles declared as its
+     * own {@link GameObject#child}.
+     *
+     * @param parentWorld        the world where all those particles will evolve.
+     * @param particleNamePrefix the prefix name for all those particles.
+     * @param nbParticles        the number of particle to be created.
+     * @param b                  the common {@link ParticleBehavior} to be applied
+     *                           to all those particles.
+     * @return a new parent {@link GameObject} containing a bunch of
+     * {@link GameObject} particle child with
+     * the same {@link ParticleBehavior}.
+     */
     private GameObject createParticleSystem(
             World parentWorld,
             String particleNamePrefix,
@@ -1223,9 +1368,9 @@ public class Application extends JPanel implements KeyListener {
             ParticleBehavior<GameObject> b) {
 
         GameObject parentParticle = new GameObject(particleNamePrefix + "'s", 0, 0, 0, 0);
-        List<GameObject> drops = new ArrayList<>();
-        for (int i = 0; i < nbParticles; i++) {
-            GameObject particle = b.create(world, particleNamePrefix, parentParticle);
+        parentParticle.setAttribute("nbParticles", nbParticles);
+        for (int i = 0; i < nbParticles / 100; i++) {
+            GameObject particle = b.create(world, 0, particleNamePrefix, parentParticle);
             parentParticle.addChild(particle);
         }
         return parentParticle;
@@ -1235,8 +1380,10 @@ public class Application extends JPanel implements KeyListener {
         Entity player = entities.get("player");
         boolean moving = false;
         // player moves
-        double step = (double) player.getAttribute("speedStep", 2.0);
+        double step = (double) player.getAttribute("speedStep", 0.05);
+        double jumpFactor = (double) player.getAttribute("jumpFactor", 10.0);
         double rotStep = (double) player.getAttribute("speedRotStep", 0.01);
+
         if (ctrlKey)
             step = step * 4.0;
         if (shiftKey)
@@ -1256,7 +1403,7 @@ public class Application extends JPanel implements KeyListener {
             }
         } else {
             if (keys[KeyEvent.VK_UP]) {
-                player.setSpeed(player.dx, -step);
+                player.setSpeed(player.dx, -step * jumpFactor);
                 moving = true;
             }
             if (keys[KeyEvent.VK_DOWN]) {
@@ -1293,9 +1440,11 @@ public class Application extends JPanel implements KeyListener {
         }
     }
 
-    private void update(long elapsed, Map<String, Object> datastats) {
-        int time = (int) (elapsed * 0.0000001);
-        entities.values().stream().filter(e -> e.isActive()).sorted((a, b) -> a.physicType < b.physicType ? 1 : -1)
+    private void update(long elapsed, Map<String, Object> stats) {
+        double time = (elapsed * 0.000001);
+
+        entities.values().stream().filter(Entity::isActive)
+                .sorted(Comparator.comparingInt(a -> a.physicType))
                 .forEach(
                         e -> {
                             updateEntity(e, time);
@@ -1306,10 +1455,10 @@ public class Application extends JPanel implements KeyListener {
             camera.update(time);
         }
         long renderedEntities = entities.values().stream()
-                .filter(e -> e.isActive())
-                .filter(e -> inViewport(camera, e) || e.physicType == Entity.NONE)
-                .sorted((a, b) -> a.priority > b.priority ? 1 : -1).count();
-        datastats.put("5_rend", renderedEntities);
+                .filter(Entity::isActive)
+                .filter(e -> inViewport(camera, e) || e.physicType == Entity.NONE).count();
+        stats.put("5_rend", renderedEntities);
+        stats.put("5_time", time);
     }
 
     private void updateEntity(Entity<?> e, double elapsed) {
@@ -1381,10 +1530,10 @@ public class Application extends JPanel implements KeyListener {
     /**
      * Draw all {@link Application} the Entityies on window.
      *
-     * @param datastats a set of metadata to be displayed on screen as debug
-     *                  purpose. (only if Application#debug >0)
+     * @param stats a set of metadata to be displayed on screen as debug
+     *              purpose. (only if Application#debug >0)
      */
-    private void draw(Map<String, Object> datastats) {
+    private void draw(Map<String, Object> stats) {
 
         // prepare rendering buffer
         Graphics2D g = buffer.createGraphics();
@@ -1420,10 +1569,10 @@ public class Application extends JPanel implements KeyListener {
                 buffer, 0, 0, frame.getWidth(), frame.getHeight(),
                 0, 0, buffer.getWidth(), buffer.getHeight(),
                 null);
-        if (debug > 0) {
+        if (debug && debugLevel > 0) {
             gScreen.setColor(Color.ORANGE);
             gScreen.drawString(
-                    prepareStatsString(datastats, "[ ", " | ", " ]"),
+                    prepareStatsString(stats, "[ ", " | ", " ]"),
                     20, frame.getHeight() - 20);
         }
         gScreen.dispose();
@@ -1435,7 +1584,7 @@ public class Application extends JPanel implements KeyListener {
         entities.values().stream()
                 .filter(e -> e.isActive() && e.stickToCamera == stickToCamera)
                 .filter(e -> inViewport(camera, e) || e.physicType == Entity.STATIC)
-                .sorted((a, b) -> a.priority > b.priority ? 1 : -1)
+                .sorted(Comparator.comparingInt(a -> a.priority))
                 .forEach(
                         e -> {
                             g.rotate(-e.rotation,
@@ -1457,7 +1606,8 @@ public class Application extends JPanel implements KeyListener {
             g.setFont(g.getFont().deriveFont(fontSize));
 
             int maxWidth = infos.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
-            int offsetX = (int) (e.x + maxWidth > ((e.stickToCamera ? 0 : camera.x) + camera.width) ? -(maxWidth + 4.0) : 4.0);
+            int offsetX = (int) (e.x + maxWidth > ((e.stickToCamera ? 0 : camera.x) + camera.width) ? -(maxWidth + 4.0)
+                    : 4.0);
             int offsetY = (int) (e.y + (fontSize * infos.size()) > ((e.stickToCamera ? 0 : camera.y) + camera.height)
                     ? -(9.0 + (fontSize * infos.size()))
                     : -9.0);
@@ -1561,10 +1711,27 @@ public class Application extends JPanel implements KeyListener {
             case KeyEvent.VK_G -> {
                 world.gravity = -world.gravity;
             }
+            case KeyEvent.VK_Z -> {
+                if (ctrlKey) {
+                    clearScene();
+                    createScene();
+                }
+            }
+            case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
+                setPause(!isPause());
+            }
             default -> {
                 // nothing to do !
             }
         }
+    }
+
+    private boolean isPause() {
+        return this.pause;
+    }
+
+    private void setPause(boolean p) {
+        this.pause = p;
     }
 
     /**
@@ -1607,6 +1774,11 @@ public class Application extends JPanel implements KeyListener {
         }).collect(Collectors.joining(delimiter)) + end;
     }
 
+    /**
+     * The entrypoint for our Application to be initialized and executed.
+     *
+     * @param argc the list of arguments from the Java command line.
+     */
     public static void main(String[] argc) {
         Application app = new Application();
         app.run(argc);
