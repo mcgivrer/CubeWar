@@ -1,13 +1,16 @@
 package com.snapgames.demo;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.snapgames.demo.math.physic.Vector2D;
+import com.snapgames.demo.math.physic.World;
+
+import org.junit.jupiter.api.*;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Optional;
 
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ApplicationConfigurationTest {
@@ -44,7 +47,13 @@ public class ApplicationConfigurationTest {
     @Test
     public void applicationHasDebugConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
-        assertEquals(0, application.debug, "Debug level has not ben set correctly.");
+        assertTrue(application.getConfiguration().debug, "Debug has not been activated.");
+    }
+
+    @Test
+    public void applicationHasDebugLevelConfiguration() {
+        application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
+        assertEquals(4, application.getConfiguration().debugLevel, "Debug level has not been set correctly.");
     }
 
     @Test
@@ -56,30 +65,30 @@ public class ApplicationConfigurationTest {
     @Test
     public void applicationHasWindowConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
-        assertEquals(new Dimension(800, 480), application.winSize,
+        assertEquals(new Dimension(800, 480), application.getConfiguration().winSize,
                 "Window size configuration has not ben set correctly.");
     }
 
     @Test
     public void applicationHasResolutionConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
-        assertEquals(new Dimension(400, 240), application.bufferResolution,
+        assertEquals(new Dimension(400, 240), application.getConfiguration().bufferResolution,
                 "Buffer resolution configuration has not ben set correctly.");
     }
 
     @Test
     public void applicationHasMaxSpeedConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
-        assertEquals(64.0, application.maxEntitySpeed, 0.0,
+        assertEquals(40.0, application.getConfiguration().maxEntitySpeed, 0.0,
                 "Physic maximum speed configuration has not ben set correctly.");
     }
 
     @Test
     public void applicationHasWorldConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
-        Application.World w = new Application.World("amazing").setGravity(new Application.Vector2D(0, 0.981))
+        World w = new World("amazing").setGravity(new Vector2D(0, 0.0981))
                 .setPlayArea(new Rectangle2D.Double(0, 0, 1024, 1024));
-        assertEquals(w.toString(), application.world.toString(),
+        assertEquals(w.toString(), application.getPhysicEngine().getWorld().toString(),
                 "Physic World configuration has not ben set correctly.");
     }
 
