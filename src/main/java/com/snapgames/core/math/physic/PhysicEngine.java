@@ -1,6 +1,7 @@
 package com.snapgames.core.math.physic;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.utils.StringUtils;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
@@ -21,27 +22,48 @@ public class PhysicEngine {
     private final Application application;
     private double maxEntityAcc;
     private double maxEntitySpeed;
+    private double timeScaleFactor = 1.0;
+    private static long cumulatedTime;
 
     public PhysicEngine(Application app) {
         this.application = app;
         setWorld(app.getConfiguration().world);
+        initialize(app.getConfiguration());
     }
 
     public void initialize(Configuration config) {
         this.maxEntityAcc = config.maxEntityAcc;
         this.maxEntitySpeed = config.maxEntitySpeed;
+        this.timeScaleFactor = config.timeScaleFactor;
     }
 
     public void update(Scene scene, double elapsed, Map<String, Object> stats) {
         Camera camera = scene.getActiveCamera();
         Collection<Entity<?>> entities = scene.getEntities();
-        double time = (elapsed * 0.000001);
-
-        entities.stream().filter(Entity::isActive)
+        double time = (elapsed * timeScaleFactor);
+        cumulatedTime += elapsed;
+        entities.stream()
+                .filter(Entity::isActive)
                 .sorted(Comparator.comparingInt(a -> a.physicType))
                 .forEach(
                         e -> {
-                            updateEntity(e, time);
+                            if (e.physicType != Entity.STATIC && !e.stickToCamera) {
+                                updateEntity(e, time);
+                            }
+                            e.update(time);
+                            if (application.isDebugAt(5) &&  e.getName().equals("player")) {
+                                /*System.out.printf(">%s: elapsed:%f e:%s = {pos:%s,spd:%s,acc:%s,mass:%.02f,mat:%s}%n",
+                                        StringUtils.formatDuration(cumulatedTime / 1000000),
+                                        time,
+                                        e.getName(),
+                                        e.getPosition(),
+                                        e.getVelocity(),
+                                        e.getAcceleration(),
+                                        e.mass,
+                                        e.getMaterial());
+                                 */
+                            }
+
                         });
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);
@@ -49,25 +71,28 @@ public class PhysicEngine {
         scene.update(application, elapsed);
         long renderedEntities = entities.stream()
                 .filter(Entity::isActive)
-                .filter(e -> camera.inViewport(e) || e.physicType == Entity.NONE).count();
+                .filter(e -> {
+                    assert camera != null;
+                    return camera.inViewport(e) || e.physicType == Entity.NONE;
+                }).count();
         stats.put("5_rend", renderedEntities);
         stats.put("5_time", time);
     }
 
     private void updateEntity(Entity<?> entity, double elapsed) {
-        Vector2D gravity = Vector2D.ZERO();
+        // save previous entity position.
+        entity.setOldPosition(entity.pos);
         // apply gravity
         if (entity.physicType != Entity.NONE || !entity.stickToCamera) {
-            gravity = world.getGravity();
+            entity.forces.add(world.getGravity());
         }
-        entity.forces.add(gravity);
         // compute acceleration
         entity.setAcceleration(entity.acceleration.addAll(entity.getForces()));
         entity.setAcceleration(entity.acceleration.multiply(
                 entity.mass * (entity.getMaterial() != null ? entity.getMaterial().getDensity() : 1.0)));
-        entity.acceleration.maximize((double) entity.getAttribute("maxAccelY", maxEntityAcc))
-                .thresholdToZero(0.01);
-
+        if (application.getConfiguration().physicConstrained) {
+            entity.acceleration = entity.acceleration.maximize(entity.getAttribute("maxAccelY", this.maxEntityAcc));
+        }
         // compute velocity
         double roughness = 1.0;
         if (entity.contact > 0) {
@@ -76,23 +101,29 @@ public class PhysicEngine {
             roughness = world.getMaterial().getRoughness();
         }
         entity.setSpeed(entity.vel.add(entity.acceleration.multiply(elapsed * elapsed * 0.5)).multiply(roughness));
-        entity.vel.maximize(
-                        (double) entity.getAttribute("maxVelX", maxEntitySpeed),
-                        (double) entity.getAttribute("maxVelY", maxEntitySpeed))
-                .thresholdToZero(0.8);
+        if (application.getConfiguration().physicConstrained) {
+            entity.vel = entity.vel.maximize(entity.getAttribute("maxVelX", this.maxEntitySpeed));
+        }
 
         // compute position
         entity.pos = entity.pos.add(entity.vel.multiply(elapsed));
-        entity.getChild().forEach(c -> updateEntity(c, elapsed));
-        entity.forces.clear();
 
+        // apply Behaviors
         if (entity.behaviors.size() > 0) {
             entity.behaviors.forEach(b -> b.update(entity, elapsed));
         }
 
+        // update child entities
+        entity.getChild().forEach(c -> updateEntity(c, elapsed));
+        entity.forces.clear();
+
+        // set natural BoundingBox coordinates
         entity.x = entity.pos.x;
         entity.y = entity.pos.y;
+
+        // reset contact value
         entity.setContact(0);
+        // test Entity against play area limits.
         constrainPlayArea(entity);
     }
 

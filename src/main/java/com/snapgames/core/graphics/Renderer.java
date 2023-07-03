@@ -40,10 +40,8 @@ public class Renderer extends JPanel {
     }
 
     /**
-     * Create tthe {@link Application}'s window, according to the defined
+     * Create the {@link Application}'s window, according to the defined
      * configuration attributes.
-     *
-     * @return a new created JFrame, window of the {@link Application}.
      */
     public void createWindow(InputHandler ih) {
         frame = new JFrame(application.title);
@@ -80,7 +78,7 @@ public class Renderer extends JPanel {
     }
 
     /**
-     * Draw all {@link Application} the Entityies on window.
+     * Draw all {@link Application} the Entities on window.
      *
      * @param stats a set of metadata to be displayed on screen as debug
      *              purpose. (only if Application#debug >0)
@@ -105,13 +103,13 @@ public class Renderer extends JPanel {
         g.draw(world.getPlayArea());
         moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
-        // draw entities
+        // draw entities not stick to Camera.
         moveFromCameraPoV(g, scene.getActiveCamera(), -1);
         drawAllEntities(g, scene, false);
         scene.draw(application, g, stats);
         moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
-        // draw all entities that are stick to Camera viewport.
+        // draw all stick-to-camera's Entity.
         drawAllEntities(g, scene, true);
 
         g.dispose();
@@ -129,7 +127,7 @@ public class Renderer extends JPanel {
                     20, frame.getHeight() - 20);
         }
         gScreen.dispose();
-        // switch to next availbale drawing buffer
+        // switch to next available drawing buffer
         frame.getBufferStrategy().show();
     }
 
@@ -137,7 +135,7 @@ public class Renderer extends JPanel {
         scene.getEntities().stream()
                 .filter(e -> e.isActive() && e.stickToCamera == stickToCamera)
                 .filter(e -> scene.getActiveCamera().inViewport(e) || e.physicType == Entity.STATIC)
-                .sorted(Comparator.comparingInt(a -> a.getPriority()))
+                .sorted(Comparator.comparingInt(Entity::getPriority))
                 .forEach(
                         e -> {
                             g.rotate(-e.rotation,
@@ -148,35 +146,40 @@ public class Renderer extends JPanel {
                                     e.pos.x + e.width * 0.5,
                                     e.pos.y + e.height * 0.5);
                             drawEntityDebugInfo(g, scene, e);
+
+                            if (application.isDebugAt(4)) {
+                                System.out.printf(">> <d> draw entity %s%n", e.getName());
+                            }
                         });
     }
 
     private void drawEntityDebugInfo(Graphics2D g, Scene scene, Entity<? extends Entity<?>> e) {
         if (application.getConfiguration().debugLevel > 0 && application.getConfiguration().debugLevel >= e.debug) {
-            List<String> infos = e.getDebugInfo();
+            List<String> info = e.getDebugInfo();
             int l = 0;
             float fontSize = 9f;
             g.setFont(g.getFont().deriveFont(fontSize));
 
-            int maxWidth = infos.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
+            int maxWidth = info.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
             int offsetX = (int) (e.pos.x + maxWidth > (
                     (e.stickToCamera ? 0 : scene.getActiveCamera().x) + scene.getActiveCamera().width) ? -(maxWidth + 4.0)
                     : 4.0);
-            int offsetY = (int) (e.pos.y + (fontSize * infos.size()) >
+            int offsetY = (int) (e.pos.y + (fontSize * info.size()) >
                     ((e.stickToCamera ? 0 : scene.getActiveCamera().y) + scene.getActiveCamera().height)
-                    ? -(9.0 + (fontSize * infos.size()))
+                    ? -(9.0 + (fontSize * info.size()))
                     : -9.0);
             g.setColor(Color.ORANGE);
-            for (String info : infos) {
-                String levelStr = info.substring(0, info.indexOf("_"));
-                int level = Integer.parseInt(levelStr);
-                if (level <= application.getConfiguration().debugLevel) {
-                    g.drawString(info.substring(info.indexOf("_") + 1, info.length()),
-                            (int) (e.pos.x + e.getWidth() + offsetX),
-                            (int) (e.pos.y + offsetY + (l * fontSize)));
-                    l++;
+            for (String item : info) {
+                if (!item.equals("")) {
+                    String levelStr = item.contains("_") ? item.substring(0, info.indexOf("_")) : "0";
+                    int level = Integer.parseInt(levelStr);
+                    if (level <= application.getConfiguration().debugLevel) {
+                        g.drawString(item.substring(info.indexOf("_") + 1),
+                                (int) (e.pos.x + e.getWidth() + offsetX),
+                                (int) (e.pos.y + offsetY + (l * fontSize)));
+                        l++;
+                    }
                 }
-
             }
         }
     }

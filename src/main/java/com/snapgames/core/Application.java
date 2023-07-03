@@ -165,10 +165,10 @@ public abstract class Application {
 
             input(inputHandler, scene);
 
-            physicEngine.update(scnMgr.getCurrent(), elapsed, datastats);
+            physicEngine.update(scnMgr.getCurrent(), elapsed * 0.0000001, datastats);
             updates++;
 
-            fps += (elapsed * 0.0000001);
+            fps += (elapsed * 0.000001);
             if (fps < (1000 / FPS) && !pause) {
                 renderer.draw(physicEngine.getWorld(), scnMgr.getCurrent(), datastats);
                 frames++;
@@ -189,6 +189,7 @@ public abstract class Application {
                 datastats.put("3_nbObj", scnMgr.getCurrent().getEntities().size());
                 datastats.put("4_elapsed", (elapsed * 0.000001));
                 datastats.put("4_wait", wait);
+                datastats.put("g_wait", getPhysicEngine().getWorld().getGravity().y);
                 elapsedTime = 0;
                 frames = 0;
                 updates = 0;
@@ -263,5 +264,9 @@ public abstract class Application {
 
     public SceneManager getSceneManager() {
         return this.scnMgr;
+    }
+
+    public boolean isDebugAt(int dl) {
+        return configuration.debugLevel >= dl;
     }
 }

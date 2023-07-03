@@ -27,7 +27,6 @@ public class SceneManager {
         if (!Optional.ofNullable(this.current).isPresent()) {
             setCurrentScene(s);
         }
-        current.create(application);
         return this;
     }
 

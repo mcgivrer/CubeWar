@@ -1,7 +1,6 @@
 package com.snapgames.demo.scenes;
 
 import com.snapgames.core.Application;
-import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.*;
 import com.snapgames.core.input.InputHandler;
@@ -18,6 +17,12 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.util.Map;
 
+/**
+ * A {@link Scene} implementing a demonstration of capabilities for this framework.
+ *
+ * @author Frédéric Delorme
+ * @since 1.0.0
+ */
 public class DemoScene extends AbstractScene implements Scene {
     @Override
     public String getName() {
@@ -27,10 +32,11 @@ public class DemoScene extends AbstractScene implements Scene {
     @Override
     public void create(Application app) {
         Configuration configuration = app.getConfiguration();
-        Graphics2D g2d = (Graphics2D) app.getRenderer().getBufferGraphics();
+        Graphics2D g2d = app.getRenderer().getBufferGraphics();
         World world = app.getPhysicEngine().getWorld();
 
-        TextObject score = new TextObject("score", configuration.bufferResolution.getWidth() * 0.98, 32)
+        TextObject score = new TextObject("score",
+                configuration.bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
                 .setBorderColor(Color.BLACK)
@@ -56,7 +62,7 @@ public class DemoScene extends AbstractScene implements Scene {
                 .setColor(Color.RED)
                 .setShadowWidth(3)
                 .setBorderWidth(2)
-                .setText("\u2764")
+                .setText("❤")
                 .setPriority(20)
                 .setStickToCameraView(true)
                 .setMaterial(null);
@@ -114,12 +120,7 @@ public class DemoScene extends AbstractScene implements Scene {
                 .setPriority(20)
                 .setStickToCameraView(true)
                 .setMaterial(null)
-                .addBehavior(new Behavior<TextObject>() {
-                    @Override
-                    public void update(Entity<?> e, double elapsed) {
-                        e.setActive(app.isPause());
-                    }
-                });
+                .addBehavior((e, elapsed) -> e.setActive(app.isPause()));
 
         addEntity(pauseObj);
 
@@ -130,19 +131,20 @@ public class DemoScene extends AbstractScene implements Scene {
                 .setPhysicType(Entity.DYNAMIC)
                 .setPriority(10)
                 .setMass(60.0)
-                .setMaterial(Material.RUBBER)
-                .setAttribute("speedStep", 0.25)
-                .setAttribute("jumpFactor", 24.601)
+                .setMaterial(Material.WOOD)
+                .setAttribute("speedStep", 0.01)
+                .setAttribute("jumpFactor", 20.601)
                 .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);
 
         addEntity(
                 ParticleSystemBuilder.createParticleSystem(world, "drop", 1000,
-                        new ParticleBehavior<GameObject>() {
+                        new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix, Entity<?> e) {
-                                GameObject drop = new GameObject(
+
+                                return new GameObject(
                                         String.format(particleNamePrefix + "_%d", GameObject.index),
                                         (int) (Math.random() * parentWorld.getPlayArea().getWidth()),
                                         (int) (Math.random() * parentWorld.getPlayArea().getHeight() * 0.1),
@@ -153,12 +155,11 @@ public class DemoScene extends AbstractScene implements Scene {
                                         .setLayer((int) (Math.random() * 9) + 1)
                                         .setPhysicType(Entity.DYNAMIC)
                                         .setColor(Color.YELLOW)
-                                        .setMaterial(Material.AIR)
+                                        .setMaterial(Material.WATER)
                                         .setMass(1.0)
                                         .setParent(e)
-                                        .setSpeed(0.0, Math.random() * 0.0003)
-                                        .addBehavior(this);
-                                return drop;
+                                        .addBehavior(this)
+                                        .addForce(new Vector2D(0.0, Math.random() * 0.0003));
                             }
 
                             @Override
@@ -175,7 +176,7 @@ public class DemoScene extends AbstractScene implements Scene {
                                 double particleTimeCycle = parent.getAttribute("particleTimeCycle", 9800.0);
                                 double particleFreq = parent.getAttribute("particleFreq", 0.005);
                                 time += elapsed;
-                                int nbP = (int) parent.getAttribute("nbParticles", 0);
+                                int nbP = parent.getAttribute("nbParticles", 0);
                                 if (parent.getChild().size() < nbP && time > particleTimeCycle) {
                                     for (int i = 0; i < nbP * particleFreq; i++) {
                                         GameObject particle = this.create(world, 0, parent.name, parent);
@@ -190,7 +191,7 @@ public class DemoScene extends AbstractScene implements Scene {
 
         Camera cam = new Camera("cam01", configuration.bufferResolution.width, configuration.bufferResolution.height);
         cam.setTarget(player);
-        cam.setTween(0.05);
+        cam.setTween(0.5);
         addCamera(cam);
 
     }
@@ -200,9 +201,9 @@ public class DemoScene extends AbstractScene implements Scene {
         Entity<?> player = getEntity("player");
         boolean moving = false;
         // player moves
-        double step = (double) player.getAttribute("speedStep", 0.05);
-        double jumpFactor = (double) player.getAttribute("jumpFactor", 10.0);
-        double rotStep = (double) player.getAttribute("speedRotStep", 0.01);
+        double step = player.getAttribute("speedStep", 0.0005);
+        double jumpFactor = player.getAttribute("jumpFactor", 10.0);
+        double rotStep = player.getAttribute("speedRotStep", 0.01);
 
         if (ih.ctrlKey)
             step = step * 4.0;

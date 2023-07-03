@@ -139,7 +139,7 @@ public class TextObject extends Entity<TextObject> {
     }
 
     @Override
-    public java.util.List<String> getDebugInfo() {
+    public List<String> getDebugInfo() {
         List<String> infos = super.getDebugInfo();
         infos.add(String.format("3_text:%s", text));
         infos.add(String.format("3_val:%s", value != null ? value.toString() : "null"));

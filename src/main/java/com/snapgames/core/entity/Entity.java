@@ -180,9 +180,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
                     }
                 }
             }
-            default -> {
-                System.err.printf("Unknown Entity type %d%n", type);
-            }
+            default -> System.err.printf("Unknown Entity type %d%n", type);
         }
     }
 
@@ -214,8 +212,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     }
 
     public T setSpeed(double dx, double dy) {
-        this.vel = new Vector2D(dx, dy);
-        return (T) this;
+        return (T) setSpeed(new Vector2D(dx, dy));
     }
 
     public T setSpeed(Vector2D d) {
@@ -224,20 +221,19 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     }
 
     public T setPosition(double x, double y) {
-        this.oldPos = pos;
-        this.pos = new Vector2D(x, y);
-        return (T) this;
+        return (T) setPosition(new Vector2D(x, y));
     }
 
     public T setPosition(Vector2D p) {
         this.oldPos = pos;
         this.pos = p;
+        this.x = pos.x;
+        this.y = pos.y;
         return (T) this;
     }
 
     public T setAcceleration(double ax, double ay) {
-        this.acceleration = new Vector2D(ax, ay);
-        return (T) this;
+        return (T) setAcceleration(new Vector2D(ax, ay));
     }
 
     public T setAcceleration(Vector2D acc) {
@@ -293,6 +289,11 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
     public T setType(int t) {
         this.type = t;
+        return (T) this;
+    }
+
+    public T setImage(BufferedImage img) {
+        this.image = img;
         return (T) this;
     }
 
@@ -357,7 +358,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     }
 
     public T setOldPosition(double x, double y) {
-        this.oldPos = pos;
+        this.oldPos = new Vector2D(x, y);
         return (T) this;
     }
 
@@ -385,5 +386,21 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
     public int getPriority() {
         return this.priority;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Vector2D getPosition() {
+        return pos;
+    }
+
+    public Vector2D getVelocity() {
+        return vel;
+    }
+
+    public Vector2D getAcceleration() {
+        return acceleration;
     }
 }
