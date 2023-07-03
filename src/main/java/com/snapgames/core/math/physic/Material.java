@@ -1,6 +1,5 @@
 package com.snapgames.core.math.physic;
 
-import com.snapgames.core.Application;
 import com.snapgames.core.entity.Entity;
 
 /**
@@ -19,7 +18,7 @@ import com.snapgames.core.entity.Entity;
  * <ul>
  * <li>to be applied to any {@link Entity}</li>
  * <li>used by the physic computation done at
- * {@link Application#updateEntity(Entity, double)} processing.</li>
+ * {@link PhysicEngine#updateEntity(Entity, double)} processing.</li>
  * </ul>
  */
 public class Material {
@@ -29,7 +28,7 @@ public class Material {
     public static final Material WOOD = new Material("wood", 0.20, 0.65, 0.50);
     public static final Material STEEL = new Material("steel", 0.10, 1.2, 0.12);
     public static final Material AIR = new Material("air", 0.0, 0.05, 0.9999);
-    public static final Material WATER = new Material("water", 0.0, 0.90, 0.80);
+    public static final Material WATER = new Material("water", 0.80, 0.997, 1.0);
 
     private String name;
     private double density;

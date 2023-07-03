@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Configuration extends ConcurrentHashMap<String, Object> {
 
     private final Application application;
+    public boolean physicConstrained;
+    public double timeScaleFactor;
     private String pathToConfigFile;
     private Properties props = new Properties();
 
@@ -74,15 +76,21 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         debugLevel = getParsedInt(config, "app.debug.level", "0");
         // exit flag to let test only ONE loop execution.
         application.exit = getParsedBoolean(config, "app.exit", "false");
+
         // Window size
         winSize = getDimension(config, "app.window.size", "640x400");
         // resolution
         bufferResolution = getDimension(config, "app.render.resolution", "320x200");
-        // Maximum speed for Entity.
-        maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.speed.max", "16.0"));
 
+        // Time scale factor adaptation for Physic computation.
+        timeScaleFactor = getParsedDouble(config, "app.physic.time.scale.factor", "1.0");
+        // apply constraints on Speed and Acceleration.
+        physicConstrained = getParsedBoolean(config, "app.physic.constrained", "false");
+        // Maximum speed for Entity.
+        maxEntitySpeed = getParsedDouble(config, "app.physic.speed.max", "16.0");
         // Maximum Acceleration for Entity.
-        maxEntitySpeed = Double.parseDouble(config.getProperty("app.physic.acceleration.max", "4.0"));
+        maxEntityAcc = Double.parseDouble(config.getProperty("app.physic.acceleration.max", "4.0"));
+        // set Default World for physic engine computation.
         world = getWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
 
         name = config.getProperty("app.name", "Default name Application");
@@ -119,6 +127,22 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
                 config.getProperty(key, defaultValue));
         return Integer.parseInt(config.getProperty(key, defaultValue));
+    }
+
+    /**
+     * Retrieve the key Double value from the config. if nof exists, return the
+     * default value.
+     *
+     * @param config       the Properties instance to be parsed in.
+     * @param key          the key for the required Double value.
+     * @param defaultValue the default Double value for the key entry if it not
+     *                     exists in.
+     * @return Integer value.
+     */
+    private static double getParsedDouble(Properties config, String key, String defaultValue) {
+        System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
+                config.getProperty(key, defaultValue));
+        return Double.parseDouble(config.getProperty(key, defaultValue));
     }
 
     /**
