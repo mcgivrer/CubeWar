@@ -77,17 +77,20 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
      * @param h Entity's height.
      */
     public Entity(String n, double x, double y, double w, double h) {
-        this.name = n;
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
-        this.active = true;
-        this.type = TYPE_RECTANGLE;
-        this.stickToCamera = false;
-        this.constrainedToPlayArea = true;
-        this.material = Material.DEFAULT;
-        this.mass = 1.0;
+        setName(n);
+        setPosition(x, y);
+        setSize((int) w, (int) h);
+        setActive(true);
+        setType(TYPE_RECTANGLE);
+        setStickToCameraView(false);
+        setConstrainedToPlayArea(true);
+        setMaterial(Material.DEFAULT);
+        setMass(1.0);
+    }
+
+    public T setName(String name) {
+        this.name = name;
+        return (T) this;
     }
 
     /**
@@ -240,7 +243,6 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         this.acceleration = acc;
         return (T) this;
     }
-
 
     public T setSize(int w, int h) {
         this.width = w;

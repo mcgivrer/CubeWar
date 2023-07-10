@@ -1,13 +1,15 @@
 package com.snapgames.core.math.physic;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+
 import com.snapgames.core.Application;
-import com.snapgames.core.utils.StringUtils;
-import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.scene.Scene;
-
-import java.util.*;
+import com.snapgames.core.utils.config.Configuration;
 
 /**
  * The {@link PhysicEngine} service will process mathematical moves to any Scene {@link Entity}.

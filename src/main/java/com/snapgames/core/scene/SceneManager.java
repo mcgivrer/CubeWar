@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The {@link SceneManager} intends to manage the scene and all its processing into the {@link com.snapgames.core.Application#loop} and game lifecycle.
+ * The {@link SceneManager} intends to manage the scene and all its processing
+ * into the {@link com.snapgames.core.Application#loop} and game lifecycle.
  *
  * @author Frédéric Delorme
  * @version 1.0
@@ -24,8 +25,10 @@ public class SceneManager {
 
     public SceneManager add(Scene s) {
         this.scenes.put(s.getName(), s);
+        System.out.printf(">> <!> Add Scene '%s'(%s)%n", s.getName(), s.getClass().getName());
         if (!Optional.ofNullable(this.current).isPresent()) {
             setCurrentScene(s);
+            System.out.printf(">> <!> Set '%s'(%s) as current one.%n", s.getName(), s.getClass().getName());
         }
         return this;
     }
@@ -40,6 +43,8 @@ public class SceneManager {
 
     public void activate(String name) {
         if (current != null) {
+            System.out.printf(">> <!> Disable current scene '%s'(%s) as current one.%n", current.getName(),
+                    current.getClass().getName());
             this.current.dispose();
         }
         this.current = scenes.get(name);
@@ -48,5 +53,6 @@ public class SceneManager {
 
     public void dispose() {
         scenes.clear();
+        System.out.printf(">> <!> Scenes managed list has been cleared.%n");
     }
 }
