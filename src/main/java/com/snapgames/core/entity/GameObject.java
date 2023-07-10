@@ -18,4 +18,14 @@ public class GameObject extends Entity<GameObject> {
     public GameObject(String n, double x, double y, int w, int h) {
         super(n, x, y, w, h);
     }
+
+    /**
+     * Create a new GameObject.
+     *
+     * @param n le nom de l'entité
+     */
+    public GameObject(String n) {
+        super(n);
+    }
+
 }
