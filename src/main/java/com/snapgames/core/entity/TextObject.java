@@ -38,8 +38,24 @@ public class TextObject extends Entity<TextObject> {
     Color borderColor;
     int textAlign = ALIGN_LEFT;
 
+    /**
+     * Create a new {@link TextObject} at (x,y) with name n.
+     * 
+     * @param n name of the new {@link TextObject}
+     * @param x horizontal position of the new {@link TextObject}
+     * @param y vertical position of the new {@link TextObject}
+     */
     public TextObject(String n, double x, double y) {
         super(n, x, y, 0, 0);
+    }
+
+    /**
+     * Create a new {@link TextObject} at (x,y) with name n.
+     * 
+     * @param n name of the new {@link TextObject}
+     */
+    public TextObject(String n) {
+        super(n);
     }
 
     @Override

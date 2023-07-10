@@ -34,10 +34,12 @@ public class Camera extends Entity<Camera> {
         this.tween = t;
     }
 
+    @Override
     public void update(double elapsed) {
         this.rotation += dRotation;
         this.x += (target.x - ((this.width - target.width) * 0.5) - this.x) * tween * elapsed;
         this.y += (target.y - ((this.height - target.height) * 0.5) - this.y) * tween * elapsed;
+        super.update(elapsed);
     }
 
     @Override

@@ -36,8 +36,9 @@ public class DemoScene extends AbstractScene {
         Graphics2D g2d = app.getRenderer().getBufferGraphics();
         World world = app.getPhysicEngine().getWorld();
 
-        TextObject score = new TextObject("score",
-                configuration.bufferResolution.getWidth() * 0.98, 32)
+        TextObject score = new TextObject("score")
+                .setPosition(
+                        configuration.bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setPhysicType(Entity.STATIC)
                 .setBorderColor(Color.BLACK)
@@ -55,7 +56,8 @@ public class DemoScene extends AbstractScene {
 
         addEntity(score);
 
-        TextObject heart = new TextObject("heart", 10, configuration.bufferResolution.getHeight() * 0.90)
+        TextObject heart = new TextObject("heart")
+                .setPosition(10, configuration.bufferResolution.getHeight() * 0.90)
                 .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -70,7 +72,8 @@ public class DemoScene extends AbstractScene {
 
         addEntity(heart);
 
-        TextObject life = new TextObject("life", 20, configuration.bufferResolution.getHeight() * 0.90)
+        TextObject life = new TextObject("life")
+                .setPosition(20, configuration.bufferResolution.getHeight() * 0.90)
                 .setPhysicType(Entity.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -87,9 +90,10 @@ public class DemoScene extends AbstractScene {
 
         addEntity(life);
 
-        TextObject welcomeMessage = new TextObject("message",
-                configuration.bufferResolution.getWidth() * 0.50,
-                configuration.bufferResolution.getHeight() * 0.70)
+        TextObject welcomeMessage = new TextObject("message")
+                .setPosition(
+                        configuration.bufferResolution.getWidth() * 0.50,
+                        configuration.bufferResolution.getHeight() * 0.70)
                 .setPhysicType(Entity.STATIC)
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
@@ -106,9 +110,10 @@ public class DemoScene extends AbstractScene {
 
         addEntity(welcomeMessage);
 
-        TextObject pauseObj = new TextObject("pause",
-                configuration.bufferResolution.getWidth() * 0.50,
-                configuration.bufferResolution.getHeight() * 0.50)
+        TextObject pauseObj = new TextObject("pause")
+                .setPosition(
+                        configuration.bufferResolution.getWidth() * 0.50,
+                        configuration.bufferResolution.getHeight() * 0.50)
                 .setPhysicType(Entity.STATIC)
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
@@ -121,16 +126,20 @@ public class DemoScene extends AbstractScene {
                 .setPriority(20)
                 .setStickToCameraView(true)
                 .setMaterial(null)
+                .setActive(false)
                 .addBehavior((e, elapsed) -> e.setActive(app.isPause()));
 
         addEntity(pauseObj);
 
-        GameObject player = new GameObject("player",
-                (int) configuration.world.getPlayArea().getWidth() * 0.50,
-                (int) configuration.world.getPlayArea().getHeight() * 0.50,
-                16, 16)
+        GameObject player = new GameObject("player")
+                .setPosition(
+                        configuration.world.getPlayArea().getWidth() * 0.50,
+                        configuration.world.getPlayArea().getHeight() * 0.50)
+                .setType(Entity.TYPE_RECTANGLE)
                 .setPhysicType(Entity.DYNAMIC)
                 .setPriority(10)
+                .setColor(Color.WHITE)
+                .setFillColor(Color.GREEN)
                 .setMass(60.0)
                 .setMaterial(Material.WOOD)
                 .setAttribute("speedStep", 0.01)
@@ -147,13 +156,15 @@ public class DemoScene extends AbstractScene {
                                     Entity<?> e) {
 
                                 return new GameObject(
-                                        String.format(particleNamePrefix + "_%d", GameObject.index),
-                                        (int) (Math.random() * parentWorld.getPlayArea().getWidth()),
-                                        (int) (Math.random() * parentWorld.getPlayArea().getHeight() * 0.1),
-                                        1, 1)
+                                        particleNamePrefix + "_" + GameObject.index)
+                                        .setPosition(
+                                                Math.random() * parentWorld.getPlayArea().getWidth(),
+                                                Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
+                                        .setSize(1, 1)
                                         .setPriority(1)
                                         .setType(Entity.TYPE_LINE)
                                         .setConstrainedToPlayArea(false)
+                                        // set depth to the rain drop.
                                         .setLayer((int) (Math.random() * 9) + 1)
                                         .setPhysicType(Entity.DYNAMIC)
                                         .setColor(Color.YELLOW)

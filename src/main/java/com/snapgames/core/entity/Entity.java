@@ -1,15 +1,19 @@
 package com.snapgames.core.entity;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.math.physic.Material;
 import com.snapgames.core.math.physic.Vector2D;
-
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Classe interne représentant une entité dans le jeu.
@@ -86,6 +90,15 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         setConstrainedToPlayArea(true);
         setMaterial(Material.DEFAULT);
         setMass(1.0);
+    }
+
+    /**
+     * Entity's constructor with a name, a position (x,y) and a size (w,h).
+     *
+     * @param n Name for this new {@link Entity}
+     */
+    public Entity(String n) {
+        this(n, 0, 0, 0, 0);
     }
 
     public T setName(String name) {
@@ -271,7 +284,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     }
 
     public Rectangle2D getBounds2D() {
-        return new Double(x, y, width, height);
+        return new Rectangle2D.Double(x, y, width, height);
     }
 
     public String toString() {
