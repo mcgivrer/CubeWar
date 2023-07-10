@@ -18,12 +18,13 @@ import java.awt.geom.Point2D;
 import java.util.Map;
 
 /**
- * A {@link Scene} implementing a demonstration of capabilities for this framework.
+ * A {@link Scene} implementing a demonstration of capabilities for this
+ * framework.
  *
  * @author Frédéric Delorme
  * @since 1.0.0
  */
-public class DemoScene extends AbstractScene implements Scene {
+public class DemoScene extends AbstractScene {
     @Override
     public String getName() {
         return "demo";
@@ -125,8 +126,8 @@ public class DemoScene extends AbstractScene implements Scene {
         addEntity(pauseObj);
 
         GameObject player = new GameObject("player",
-                (int) ((configuration.bufferResolution.getWidth() - 16) * 0.5),
-                (int) ((configuration.bufferResolution.getHeight() - 16) * 0.5),
+                (int) configuration.world.getPlayArea().getWidth() * 0.50,
+                (int) configuration.world.getPlayArea().getHeight() * 0.50,
                 16, 16)
                 .setPhysicType(Entity.DYNAMIC)
                 .setPriority(10)
@@ -142,7 +143,8 @@ public class DemoScene extends AbstractScene implements Scene {
                 ParticleSystemBuilder.createParticleSystem(world, "drop", 1000,
                         new ParticleBehavior<>() {
                             @Override
-                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix, Entity<?> e) {
+                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
+                                    Entity<?> e) {
 
                                 return new GameObject(
                                         String.format(particleNamePrefix + "_%d", GameObject.index),
@@ -277,6 +279,5 @@ public class DemoScene extends AbstractScene implements Scene {
                         (int) world.getPlayArea().getHeight())
                         .setSpeed(new Vector2D(0.5, 0.5)));
     }
-
 
 }

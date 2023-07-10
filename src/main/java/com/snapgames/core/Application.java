@@ -52,13 +52,11 @@ import java.util.*;
  */
 public abstract class Application {
 
-
     private static int FPS = 120;
     private static int UPS = 60;
     private static double PIXEL_METER_RATIO = 12.0;
 
     private ResourceBundle messages;
-
 
     public boolean exit = false;
     public boolean pause = false;
@@ -68,17 +66,14 @@ public abstract class Application {
      */
     protected String pathToConfigFile = "/config.properties";
 
-
     public String title = "no-title";
     public String version = "0.0.0";
-
 
     private Configuration configuration;
     private SceneManager scnMgr;
     private PhysicEngine physicEngine;
     private Renderer renderer;
     private InputHandler inputHandler;
-
 
     /**
      * Create the {@link Application}.
@@ -102,14 +97,10 @@ public abstract class Application {
         renderer.createWindow(inputHandler);
         createScenes();
         Scene scene = scnMgr.getCurrent();
-        long staticEntities = scene.getEntities().stream().filter(e -> e.physicType == Entity.STATIC).count();
-        long dynamicEntities = scene.getEntities().stream().filter(e -> e.physicType == Entity.DYNAMIC).count();
-        long nonePhysicEntities = scene.getEntities().stream().filter(e -> e.physicType == Entity.NONE).count();
-        System.out.printf(
-                ">> Scene created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
-                staticEntities, dynamicEntities, nonePhysicEntities, scene.getActiveCamera() != null ? 1 : 0);
         loop();
         dispose();
+        System.out.println(">> <!> Scene Ended.");
+        System.out.printf(">> <!> Application %s exiting.%n", title);
     }
 
     void dispose() {
@@ -117,7 +108,6 @@ public abstract class Application {
         renderer.dispose();
         scnMgr.dispose();
     }
-
 
     /**
      * Initialize the {@link Application} by loading the configuration from
@@ -146,7 +136,27 @@ public abstract class Application {
      * displayed from.
      */
     private void loop() {
+        System.out.printf(
+                ">> <!> Activate Scene '%s'(%s).%n",
+                scnMgr.getCurrent().getName(), scnMgr.getCurrent().getClass().getName());
+
         scnMgr.getCurrent().create(this);
+        long staticEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType == Entity.STATIC)
+                .count();
+        long dynamicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType == Entity.DYNAMIC)
+                .count();
+        long nonePhysicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType == Entity.NONE)
+                .count();
+        System.out.printf(
+                ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
+                scnMgr.getCurrent().getName(),
+                staticEntities,
+                dynamicEntities,
+                nonePhysicEntities,
+                scnMgr.getCurrent().getActiveCamera() != null ? 1 : 0);
+
+        System.out.printf(
+                ">> <!> Application now loops on Scene '%s'", scnMgr.getCurrent().getName());
         long start = System.nanoTime();
         long previous = start;
         long elapsedTime = 0;
@@ -210,7 +220,6 @@ public abstract class Application {
      * managed by this {@link Application} scene.
      */
     protected abstract void createScenes();
-
 
     protected void input(InputHandler ih, Scene scene) {
         scene.input(this, ih);
