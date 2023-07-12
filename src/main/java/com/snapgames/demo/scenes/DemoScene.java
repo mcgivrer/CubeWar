@@ -5,6 +5,7 @@ import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.*;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.Material;
+import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.Vector2D;
 import com.snapgames.core.math.physic.World;
 import com.snapgames.core.scene.AbstractScene;
@@ -40,7 +41,7 @@ public class DemoScene extends AbstractScene {
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setPhysicType(Entity.STATIC)
+                .setPhysicType(PhysicType.STATIC)
                 .setBorderColor(Color.BLACK)
                 .setFont(g2d.getFont().deriveFont(20.0f))
                 .setColor(Color.WHITE)
@@ -58,7 +59,7 @@ public class DemoScene extends AbstractScene {
 
         TextObject heart = new TextObject("heart")
                 .setPosition(10, configuration.bufferResolution.getHeight() * 0.90)
-                .setPhysicType(Entity.STATIC)
+                .setPhysicType(PhysicType.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(g2d.getFont().deriveFont(16.0f))
@@ -74,7 +75,7 @@ public class DemoScene extends AbstractScene {
 
         TextObject life = new TextObject("life")
                 .setPosition(20, configuration.bufferResolution.getHeight() * 0.90)
-                .setPhysicType(Entity.STATIC)
+                .setPhysicType(PhysicType.STATIC)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(g2d.getFont().deriveFont(12.0f))
@@ -94,7 +95,7 @@ public class DemoScene extends AbstractScene {
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.50,
                         configuration.bufferResolution.getHeight() * 0.70)
-                .setPhysicType(Entity.STATIC)
+                .setPhysicType(PhysicType.STATIC)
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -114,7 +115,7 @@ public class DemoScene extends AbstractScene {
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.50,
                         configuration.bufferResolution.getHeight() * 0.50)
-                .setPhysicType(Entity.STATIC)
+                .setPhysicType(PhysicType.STATIC)
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -135,15 +136,16 @@ public class DemoScene extends AbstractScene {
                 .setPosition(
                         configuration.world.getPlayArea().getWidth() * 0.50,
                         configuration.world.getPlayArea().getHeight() * 0.50)
-                .setType(Entity.TYPE_RECTANGLE)
-                .setPhysicType(Entity.DYNAMIC)
+                .setSize(16, 16)
+                .setType(GameObject.TYPE_RECTANGLE)
+                .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
                 .setMaterial(Material.WOOD)
                 .setAttribute("speedStep", 0.01)
-                .setAttribute("jumpFactor", 20.601)
+                .setAttribute("jumpFactor", 99.601)
                 .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);
@@ -153,7 +155,7 @@ public class DemoScene extends AbstractScene {
                         new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                    Entity<?> e) {
+                                                     Entity<?> e) {
 
                                 return new GameObject(
                                         particleNamePrefix + "_" + GameObject.index)
@@ -162,11 +164,11 @@ public class DemoScene extends AbstractScene {
                                                 Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
                                         .setSize(1, 1)
                                         .setPriority(1)
-                                        .setType(Entity.TYPE_LINE)
+                                        .setType(GameObject.TYPE_LINE)
                                         .setConstrainedToPlayArea(false)
                                         // set depth to the rain drop.
                                         .setLayer((int) (Math.random() * 9) + 1)
-                                        .setPhysicType(Entity.DYNAMIC)
+                                        .setPhysicType(PhysicType.DYNAMIC)
                                         .setColor(Color.YELLOW)
                                         .setMaterial(Material.WATER)
                                         .setMass(1.0)
@@ -175,6 +177,12 @@ public class DemoScene extends AbstractScene {
                                         .addForce(new Vector2D(0.0, Math.random() * 0.0003));
                             }
 
+                            /**
+                             * Update the Entity e according to the elapsed time since previous call.
+                             *
+                             * @param e       the Entity to be updated
+                             * @param elapsed the elapsed time since previous call.
+                             */
                             @Override
                             public void update(Entity<?> e, double elapsed) {
                                 e.setColor(new Color((0.1f), (0.3f), (e.layer * 0.1f), 0.8f));

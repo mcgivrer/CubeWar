@@ -4,6 +4,7 @@ import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.input.InputHandler;
+import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.World;
 import com.snapgames.core.scene.Scene;
 
@@ -131,10 +132,10 @@ public class Renderer extends JPanel {
         frame.getBufferStrategy().show();
     }
 
-    private void drawAllEntities(Graphics2D g, Scene scene, boolean stickToCamera) {
+    private void drawAllEntities(Graphics2D g, Scene scene, boolean isStickToCamera) {
         scene.getEntities().stream()
-                .filter(e -> e.isActive() && e.stickToCamera == stickToCamera)
-                .filter(e -> scene.getActiveCamera().inViewport(e) || e.physicType == Entity.STATIC)
+                .filter(e -> e.isActive())
+                .filter(e -> scene.getActiveCamera().inViewport(e) || e.stickToCamera == isStickToCamera)
                 .sorted(Comparator.comparingInt(Entity::getPriority))
                 .forEach(
                         e -> {
@@ -171,7 +172,7 @@ public class Renderer extends JPanel {
             g.setColor(Color.ORANGE);
             for (String item : info) {
                 if (!item.equals("")) {
-                    String levelStr = item.contains("_") ? item.substring(0, info.indexOf("_")) : "0";
+                    String levelStr = item.contains("_") ? item.substring(0,item.indexOf("_")) : "0";
                     int level = Integer.parseInt(levelStr);
                     if (level <= application.getConfiguration().debugLevel) {
                         g.drawString(item.substring(info.indexOf("_") + 1),
