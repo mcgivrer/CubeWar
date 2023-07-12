@@ -144,15 +144,60 @@ public class DemoScene extends AbstractScene {
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
-                .setMaterial(Material.SUPER_BALL)
-                .setAttribute("speedStep", 0.01)
-                .setAttribute("jumpFactor", 99.601)
+                .setMaterial(Material.RUBBER)
+                .setAttribute("speedStep", 0.05)
+                .setAttribute("jumpFactor", 500.601)
                 .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);
 
+        // create some red ball particle system
+
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "drop", 1000,
+                ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
+                        new ParticleBehavior<>() {
+                            @Override
+                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
+                                                     Entity<?> e) {
+
+                                return new GameObject(
+                                        particleNamePrefix + "_" + GameObject.index)
+                                        .setPosition(
+                                                Math.random() * parentWorld.getPlayArea().getWidth(),
+                                                Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
+                                        .setSize(Math.random() * 8.0 + 4.0, Math.random() * 8.0 + 4.0)
+                                        .setPriority(1)
+                                        .setType(GameObject.TYPE_ELLIPSE)
+                                        .setConstrainedToPlayArea(true)
+                                        .setLayer(2)
+                                        .setPhysicType(PhysicType.DYNAMIC)
+                                        .setColor(Color.RED.darker().darker())
+                                        .setFillColor(Color.RED)
+                                        .setMaterial(Material.SUPER_BALL)
+                                        .setMass(5.0 * Math.random() + 1.0)
+                                        .setParent(e)
+                                        .addBehavior(this)
+                                        .addForce(
+                                                new Vector2D(
+                                                        -0.00015 + Math.random() * 0.0003,
+                                                        -0.00015 + Math.random() * 0.0003));
+                            }
+
+                            /**
+                             * Update the Entity e according to the elapsed time since previous call.
+                             *
+                             * @param e       the Entity to be updated
+                             * @param elapsed the elapsed time since previous call.
+                             */
+                            @Override
+                            public void update(Entity<?> e, double elapsed) {
+                            }
+                        }));
+
+
+        // create rain particle system
+        addEntity(
+                ParticleSystemBuilder.createParticleSystem(world, "drop", 1000, 100,
                         new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
@@ -170,7 +215,7 @@ public class DemoScene extends AbstractScene {
                                         // set depth to the rain drop.
                                         .setLayer((int) (Math.random() * 9) + 1)
                                         .setPhysicType(PhysicType.DYNAMIC)
-                                        .setColor(Color.YELLOW)
+                                        .setColor(Color.WHITE)
                                         .setMaterial(Material.WATER)
                                         .setMass(1.0)
                                         .setParent(e)
@@ -186,7 +231,7 @@ public class DemoScene extends AbstractScene {
                              */
                             @Override
                             public void update(Entity<?> e, double elapsed) {
-                                e.setColor(new Color((0.1f), (0.3f), (e.layer * 0.1f), 0.8f));
+                                e.setColor(new Color((0.1f), (e.layer * 0.1f), (e.layer * 0.1f), 0.8f));
                                 if (!world.getPlayArea().getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
                                     e.setPosition(world.getPlayArea().getWidth() * Math.random(),
                                             Math.random() * world.getPlayArea().getHeight() * 0.1);
@@ -197,7 +242,7 @@ public class DemoScene extends AbstractScene {
                                 double time = parent.getAttribute("particleTime", 0.0);
                                 double particleTimeCycle = parent.getAttribute("particleTimeCycle", 9800.0);
                                 double particleFreq = parent.getAttribute("particleFreq", 0.005);
-                                time += elapsed;
+                                time += elapsed*100;
                                 int nbP = parent.getAttribute("nbParticles", 0);
                                 if (parent.getChild().size() < nbP && time > particleTimeCycle) {
                                     for (int i = 0; i < nbP * particleFreq; i++) {

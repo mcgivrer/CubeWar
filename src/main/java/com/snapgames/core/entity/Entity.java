@@ -202,7 +202,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
-    public T setSize(int w, int h) {
+    public T setSize(double w, double h) {
         this.width = w;
         this.height = h;
         return (T) this;

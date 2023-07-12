@@ -94,20 +94,23 @@ public class Renderer extends JPanel {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         // clear buffer
-        g.setColor(Color.BLUE);
+        g.setColor(Color.BLACK);
         g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
-        // draw playArea
+        // move to camera PoV
         moveFromCameraPoV(g, scene.getActiveCamera(), -1);
+
+        // draw playArea
         drawGrid(g, world.getPlayArea());
         g.setColor(Color.BLUE);
         g.draw(world.getPlayArea());
-        moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
         // draw entities not stick to Camera.
-        moveFromCameraPoV(g, scene.getActiveCamera(), -1);
         drawAllEntities(g, scene, false);
+        // draw scene specifics
         scene.draw(application, g, stats);
+
+        // move back from PoV
         moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
         // draw all stick-to-camera's Entity.
@@ -155,7 +158,9 @@ public class Renderer extends JPanel {
     }
 
     private void drawEntityDebugInfo(Graphics2D g, Scene scene, Entity<? extends Entity<?>> e) {
-        if (application.getConfiguration().debugLevel > 0 && application.getConfiguration().debugLevel >= e.debug) {
+        if (application.getConfiguration().debugLevel > 0
+                && application.getConfiguration().debugLevel >= e.debug
+                && application.getConfiguration().debugFilter.contains(e.getName())) {
             List<String> info = e.getDebugInfo();
             int l = 0;
             float fontSize = 9f;
@@ -172,7 +177,7 @@ public class Renderer extends JPanel {
             g.setColor(Color.ORANGE);
             for (String item : info) {
                 if (!item.equals("")) {
-                    String levelStr = item.contains("_") ? item.substring(0,item.indexOf("_")) : "0";
+                    String levelStr = item.contains("_") ? item.substring(0, item.indexOf("_")) : "0";
                     int level = Integer.parseInt(levelStr);
                     if (level <= application.getConfiguration().debugLevel) {
                         g.drawString(item.substring(info.indexOf("_") + 1),

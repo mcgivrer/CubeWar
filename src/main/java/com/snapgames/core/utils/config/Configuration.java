@@ -17,6 +17,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     private final Application application;
     public boolean physicConstrained;
     public double timeScaleFactor;
+    public String debugFilter = "";
     private String pathToConfigFile;
     private Properties props = new Properties();
 
@@ -74,6 +75,8 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         debug = getParsedBoolean(config, "app.debug", "false");
         // debug level (0-5 where 0=off and 5 max debug info)
         debugLevel = getParsedInt(config, "app.debug.level", "0");
+        // debug filter: filtering entity on its name
+        debugFilter = config.getProperty("app.debug.filter", "none");
         // exit flag to let test only ONE loop execution.
         application.exit = getParsedBoolean(config, "app.exit", "false");
 
@@ -82,7 +85,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         // resolution
         bufferResolution = getDimension(config, "app.render.resolution", "320x200");
 
-        // Time scale factor adaptation for Physic computation.
+        // Timescale factor adaptation for Physic computation.
         timeScaleFactor = getParsedDouble(config, "app.physic.time.scale.factor", "1.0");
         // apply constraints on Speed and Acceleration.
         physicConstrained = getParsedBoolean(config, "app.physic.constrained", "false");
