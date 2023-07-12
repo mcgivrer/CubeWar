@@ -46,15 +46,15 @@ public class PhysicEngine {
         cumulatedTime += elapsed;
         entities.stream()
                 .filter(Entity::isActive)
-                .sorted(Comparator.comparingInt(a -> a.physicType))
+                .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
                 .forEach(
                         e -> {
-                            if (e.physicType != Entity.STATIC && !e.stickToCamera) {
+                            if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
                                 updateEntity(e, time);
                             }
                             e.update(time);
-                            if (application.isDebugAt(5) &&  e.getName().equals("player")) {
-                                /*System.out.printf(">%s: elapsed:%f e:%s = {pos:%s,spd:%s,acc:%s,mass:%.02f,mat:%s}%n",
+                            /*if (application.isDebugAt(5) && e.getName().equals("player")) {
+                                System.out.printf(">%s: elapsed:%f e:%s = {pos:%s,spd:%s,acc:%s,mass:%.02f,mat:%s}%n",
                                         StringUtils.formatDuration(cumulatedTime / 1000000),
                                         time,
                                         e.getName(),
@@ -63,8 +63,8 @@ public class PhysicEngine {
                                         e.getAcceleration(),
                                         e.mass,
                                         e.getMaterial());
-                                 */
-                            }
+
+                            }*/
 
                         });
         if (Optional.ofNullable(camera).isPresent()) {
@@ -75,7 +75,7 @@ public class PhysicEngine {
                 .filter(Entity::isActive)
                 .filter(e -> {
                     assert camera != null;
-                    return camera.inViewport(e) || e.physicType == Entity.NONE;
+                    return camera.inViewport(e) || e.physicType.equals(PhysicType.NONE);
                 }).count();
         stats.put("5_rend", renderedEntities);
         stats.put("5_time", time);
@@ -85,7 +85,7 @@ public class PhysicEngine {
         // save previous entity position.
         entity.setOldPosition(entity.pos);
         // apply gravity
-        if (entity.physicType != Entity.NONE || !entity.stickToCamera) {
+        if (!entity.physicType.equals(PhysicType.NONE) || !entity.stickToCamera) {
             entity.forces.add(world.getGravity());
         }
         // compute acceleration

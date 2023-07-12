@@ -6,6 +6,7 @@ import com.snapgames.core.entity.TextObject;
 import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.PhysicEngine;
+import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.utils.config.Configuration;
@@ -28,10 +29,11 @@ import java.util.*;
  * It also maintains some basic physic math about moves for the
  * {@link Entity#active}.
  * <p>
- * {@link Entity} can be from 2 physic nature:
+ * {@link Entity} can be from 3 physic nature:
  * <ul>
- * <li><code>{@link Entity#STATIC}</code>, stick to the display screen,</li>
- * <li><code>{@link Entity#DYNAMIC}</code>, move according to the first Newton's
+ * <li><code>{@link PhysicType#NONE}</code>, will not be processed by {@link PhysicEngine},</li>
+ * <li><code>{@link PhysicType#STATIC}</code>, stick to the display screen,</li>
+ * <li><code>{@link PhysicType#DYNAMIC}</code>, move according to the first Newton's
  * law on movement.</li>
  * </ul>
  * <p>
@@ -141,11 +143,11 @@ public abstract class Application {
                 scnMgr.getCurrent().getName(), scnMgr.getCurrent().getClass().getName());
 
         scnMgr.getCurrent().create(this);
-        long staticEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType == Entity.STATIC)
+        long staticEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType.equals(PhysicType.STATIC))
                 .count();
-        long dynamicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType == Entity.DYNAMIC)
+        long dynamicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
                 .count();
-        long nonePhysicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType == Entity.NONE)
+        long nonePhysicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType.equals(PhysicType.NONE))
                 .count();
         System.out.printf(
                 ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
