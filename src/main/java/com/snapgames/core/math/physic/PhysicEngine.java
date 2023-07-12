@@ -24,7 +24,7 @@ public class PhysicEngine {
     private final Application application;
     private double maxEntityAcc;
     private double maxEntitySpeed;
-    private double timeScaleFactor = 1.0;
+    private double timeScaleFactor = 1.00;
     private static long cumulatedTime;
 
     public PhysicEngine(Application app) {
@@ -70,7 +70,7 @@ public class PhysicEngine {
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);
         }
-        scene.update(application, elapsed);
+        scene.update(application, time);
         long renderedEntities = entities.stream()
                 .filter(Entity::isActive)
                 .filter(e -> {

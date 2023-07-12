@@ -22,11 +22,11 @@ public class GameObject extends Entity<GameObject> {
     /**
      * Create a new GameObject.
      *
-     * @param n le nom de l'entité
-     * @param x la position en x de l'entité
-     * @param y la position en y de l'entité
-     * @param w la largeur de l'entité
-     * @param h la hauteur de l'entité
+     * @param n name of the {@link Entity}
+     * @param x horizontal position of the {@link Entity}
+     * @param y vertical position of the {@link Entity}
+     * @param w width of the {@link Entity}
+     * @param h height of the {@link Entity}
      */
     public GameObject(String n, double x, double y, int w, int h) {
         super(n, x, y, w, h);
@@ -35,7 +35,7 @@ public class GameObject extends Entity<GameObject> {
     /**
      * Create a new GameObject.
      *
-     * @param n le nom de l'entité
+     * @param n name of the {@link Entity}
      */
     public GameObject(String n) {
         super(n);
