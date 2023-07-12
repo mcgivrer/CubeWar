@@ -177,7 +177,7 @@ public abstract class Application {
 
             input(inputHandler, scene);
 
-            physicEngine.update(scnMgr.getCurrent(), elapsed * 0.0000001, datastats);
+            physicEngine.update(scnMgr.getCurrent(), elapsed * 0.00000002, datastats);
             updates++;
 
             fps += (elapsed * 0.000001);

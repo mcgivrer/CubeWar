@@ -106,7 +106,8 @@ public class DemoScene extends AbstractScene {
                 .setText(app.getMessages().getString("app.title.welcome"))
                 .setPriority(20)
                 .setStickToCameraView(true)
-                .setDuration(5000)
+                .setDuration(5)
+                .setDebug(2)
                 .setMaterial(null);
 
         addEntity(welcomeMessage);
@@ -143,7 +144,7 @@ public class DemoScene extends AbstractScene {
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
-                .setMaterial(Material.WOOD)
+                .setMaterial(Material.SUPER_BALL)
                 .setAttribute("speedStep", 0.01)
                 .setAttribute("jumpFactor", 99.601)
                 .setAttribute("speedRotStep", 0.001)

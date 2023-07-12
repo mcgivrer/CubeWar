@@ -100,7 +100,7 @@ public class TextObject extends Entity<TextObject> {
     private void drawShadowText(Graphics2D g, String textValue, double x, double y) {
         g.setColor(shadowColor);
         for (int i = 0; i < shadowWidth; i++) {
-            g.drawString(textValue, (int) pos.x + i, (int) pos.y + i);
+            g.drawString(textValue, (int) x + i, (int) y + i);
         }
     }
 
@@ -108,7 +108,7 @@ public class TextObject extends Entity<TextObject> {
         g.setColor(borderColor);
         for (int i = -borderWidth; i < borderWidth; i++) {
             for (int j = -borderWidth; j < borderWidth; j++) {
-                g.drawString(textValue, (int) pos.x + i, (int) pos.y + j);
+                g.drawString(textValue, (int) x + i, (int) y + j);
             }
         }
     }
