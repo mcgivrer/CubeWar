@@ -53,7 +53,6 @@ import java.util.*;
  * @since 1.0.0
  */
 public abstract class Application {
-
     private static int FPS = 120;
     private static int UPS = 60;
     private static double PIXEL_METER_RATIO = 12.0;
@@ -141,6 +140,11 @@ public abstract class Application {
         System.out.printf(
                 ">> <!> Activate Scene '%s'(%s).%n",
                 scnMgr.getCurrent().getName(), scnMgr.getCurrent().getClass().getName());
+
+        // retrieve Frame-Per-Second
+        FPS = configuration.fps;
+        // retrieve Update-Per-Second
+        UPS = configuration.ups;
 
         scnMgr.getCurrent().create(this);
         long staticEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType.equals(PhysicType.STATIC))
