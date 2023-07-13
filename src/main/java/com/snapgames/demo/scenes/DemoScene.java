@@ -178,8 +178,8 @@ public class DemoScene extends AbstractScene {
                                         .addBehavior(this)
                                         .addForce(
                                                 new Vector2D(
-                                                        -0.00015 + Math.random() * 0.0003,
-                                                        -0.00015 + Math.random() * 0.0003));
+                                                        -0.15 + Math.random() * 0.30,
+                                                        -0.15 + Math.random() * 0.30));
                             }
 
                             /**

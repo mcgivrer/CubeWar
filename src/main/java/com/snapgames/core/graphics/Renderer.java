@@ -105,7 +105,7 @@ public class Renderer extends JPanel {
         g.draw(world.getPlayArea());
 
         // draw entities not stick to Camera.
-        drawAllEntities(g, scene, false);
+        drawAllEntities(g, scene);
         // draw scene specifics
         scene.draw(application, g, stats);
 
@@ -113,7 +113,7 @@ public class Renderer extends JPanel {
         moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
         // draw all stick-to-camera's Entity.
-        drawAllEntities(g, scene, true);
+        drawStickEntities(g, scene);
 
         g.dispose();
 
@@ -134,10 +134,33 @@ public class Renderer extends JPanel {
         frame.getBufferStrategy().show();
     }
 
-    private void drawAllEntities(Graphics2D g, Scene scene, boolean isStickToCamera) {
+    private void drawStickEntities(Graphics2D g, Scene scene) {
         scene.getEntities().stream()
                 .filter(e -> e.isActive())
-                .filter(e -> scene.getActiveCamera().inViewport(e) || e.stickToCamera == isStickToCamera)
+                .filter(e -> e.stickToCamera == true)
+                .sorted(Comparator.comparingInt(Entity::getPriority))
+                .forEach(
+                        e -> {
+                            g.rotate(-e.rotation,
+                                    e.pos.x + e.width * 0.5,
+                                    e.pos.y + e.height * 0.5);
+                            e.draw(g);
+                            g.rotate(e.rotation,
+                                    e.pos.x + e.width * 0.5,
+                                    e.pos.y + e.height * 0.5);
+                            drawEntityDebugInfo(g, scene, e);
+
+                            if (application.isDebugAt(4)) {
+                                System.out.printf(">> <d> draw entity %s%n", e.getName());
+                            }
+                        });
+    }
+
+
+    private void drawAllEntities(Graphics2D g, Scene scene) {
+        scene.getEntities().stream()
+                .filter(e -> e.isActive() && !e.stickToCamera)
+                .filter(e -> scene.getActiveCamera().inViewport(e))
                 .sorted(Comparator.comparingInt(Entity::getPriority))
                 .forEach(
                         e -> {
