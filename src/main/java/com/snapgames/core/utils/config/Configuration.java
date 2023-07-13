@@ -31,6 +31,9 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     public double maxEntityAcc;
     public World world;
 
+    public int fps;
+    public int ups;
+
 
     public Configuration(Application app, String pathCfgFile, List<String> lArgs) {
         this.application = app;
@@ -97,6 +100,9 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         world = getWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
 
         name = config.getProperty("app.name", "Default name Application");
+
+        fps = getParsedInt(config, "app.render.fps", "60");
+        ups = getParsedInt(config, "app.physic.ups", "120");
 
     }
 

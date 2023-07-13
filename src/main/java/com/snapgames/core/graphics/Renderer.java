@@ -28,7 +28,6 @@ import static com.snapgames.core.utils.StringUtils.prepareStatsString;
  */
 public class Renderer extends JPanel {
 
-
     private final Application application;
     /**
      * Graphics components
