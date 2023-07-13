@@ -65,7 +65,7 @@ public abstract class Application {
     /**
      * Configuration variables
      */
-    protected String pathToConfigFile = "/config.properties";
+    public String pathToConfigFile = "/config.properties";
 
     public String title = "no-title";
     public String version = "0.0.0";
@@ -104,7 +104,7 @@ public abstract class Application {
         System.out.printf(">> <!> Application %s exiting.%n", title);
     }
 
-    void dispose() {
+    public void dispose() {
         physicEngine.dispose();
         renderer.dispose();
         scnMgr.dispose();

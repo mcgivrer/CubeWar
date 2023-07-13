@@ -152,7 +152,6 @@ public class DemoScene extends AbstractScene {
         addEntity(player);
 
         // create some red ball particle system
-
         addEntity(
                 ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
                         new ParticleBehavior<>() {
@@ -165,7 +164,7 @@ public class DemoScene extends AbstractScene {
                                         .setPosition(
                                                 Math.random() * parentWorld.getPlayArea().getWidth(),
                                                 Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
-                                        .setSize(Math.random() * 8.0 + 4.0, Math.random() * 8.0 + 4.0)
+                                        .setSize(8.0,8.0)
                                         .setPriority(1)
                                         .setType(GameObject.TYPE_ELLIPSE)
                                         .setConstrainedToPlayArea(true)
