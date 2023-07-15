@@ -174,7 +174,6 @@ public abstract class Application {
         int wait = 0;
         Map<String, Object> datastats = new HashMap<>();
         Scene scene = scnMgr.getCurrent();
-        datastats.put("9_cam", scene.getActiveCamera());
         do {
             start = System.nanoTime();
             long elapsed = start - previous;
@@ -203,9 +202,9 @@ public abstract class Application {
                 datastats.put("1_FPS", realFPS);
                 datastats.put("2_UPS", realUPS);
                 datastats.put("3_nbObj", scnMgr.getCurrent().getEntities().size());
-                datastats.put("4_elapsed", (elapsed * 0.000001));
-                datastats.put("4_wait", wait);
-                datastats.put("g_wait", getPhysicEngine().getWorld().getGravity().y);
+                //datastats.put("4_elapsed", (elapsed * 0.000001));
+                //datastats.put("4_wait", wait);
+                datastats.put("5_g", getPhysicEngine().getWorld().getGravity().y);
                 elapsedTime = 0;
                 frames = 0;
                 updates = 0;

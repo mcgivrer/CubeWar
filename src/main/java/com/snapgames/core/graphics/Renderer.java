@@ -134,6 +134,12 @@ public class Renderer extends JPanel {
         frame.getBufferStrategy().show();
     }
 
+    /**
+     * Draw all Stick on Screen {@link Entity}.
+     *
+     * @param g     the {@link Graphics2D} API instance to use
+     * @param scene the {@link Scene} to be drawn.
+     */
     private void drawStickEntities(Graphics2D g, Scene scene) {
         scene.getEntities().stream()
                 .filter(e -> e.isActive())
@@ -156,7 +162,12 @@ public class Renderer extends JPanel {
                         });
     }
 
-
+    /**
+     * Draw all not stick on screen {@link Entity}.
+     *
+     * @param g     the {@link Graphics2D} API instance to use
+     * @param scene the {@link Scene} to be drawn.
+     */
     private void drawAllEntities(Graphics2D g, Scene scene) {
         scene.getEntities().stream()
                 .filter(e -> e.isActive() && !e.stickToCamera)
@@ -179,6 +190,13 @@ public class Renderer extends JPanel {
                         });
     }
 
+    /**
+     * Draw all {@link Entity} debug information onto screen according to debug level.
+     *
+     * @param g     the {@link Graphics2D} API instance to use
+     * @param scene the {@link Scene} to be drawn.
+     * @param e     the {@link Entity} to draw debug information about.
+     */
     private void drawEntityDebugInfo(Graphics2D g, Scene scene, Entity<? extends Entity<?>> e) {
         if (application.getConfiguration().debugLevel > 0
                 && application.getConfiguration().debugLevel >= e.debug

@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.math.physic.Material;
 import com.snapgames.core.math.physic.PhysicType;
-import com.snapgames.core.math.physic.Vector2D;
+import com.snapgames.core.math.Vector2D;
 
 /**
  * {@link Entity} class representing an entity in the game.
