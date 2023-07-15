@@ -36,18 +36,6 @@ import java.util.*;
  * <li><code>{@link PhysicType#DYNAMIC}</code>, move according to the first Newton's
  * law on movement.</li>
  * </ul>
- * <p>
- * And this {@link Entity} can be :
- * <ul>
- * <li><code>{@link Entity#TYPE_POINT}</code> to be drawn as a simple 2D
- * point,</li>
- * <li><code>{@link Entity#TYPE_LINE}</code> to be drawn as a 2D line from (x,y)
- * to (width,height),</li>
- * <li><code>{@link Entity#TYPE_RECTANGLE}</code> to be drawn as a 2D rectangle
- * at (x,y) of size (width,height),</li>
- * <li><code>{@link Entity#TYPE_ELLIPSE}</code> to be drawn as a 2D ellipse at
- * (x,y) with (r1=width and r2=height).</li>
- * </ul>
  *
  * @author Frédéric
  * @since 1.0.0

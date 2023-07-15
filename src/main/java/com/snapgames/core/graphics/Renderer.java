@@ -4,7 +4,6 @@ import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.input.InputHandler;
-import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.World;
 import com.snapgames.core.scene.Scene;
 
@@ -142,8 +141,8 @@ public class Renderer extends JPanel {
      */
     private void drawStickEntities(Graphics2D g, Scene scene) {
         scene.getEntities().stream()
-                .filter(e -> e.isActive())
-                .filter(e -> e.stickToCamera == true)
+                .filter(Entity::isActive)
+                .filter(e -> e.stickToCamera)
                 .sorted(Comparator.comparingInt(Entity::getPriority))
                 .forEach(
                         e -> {

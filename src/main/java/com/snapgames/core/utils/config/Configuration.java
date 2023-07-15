@@ -256,9 +256,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
                     this.pathToConfigFile = arg[1];
                     System.out.printf(">> <!> argument 'configuration file path' set to %s%n", arg[1]);
                 }
-                default -> {
-                    System.err.printf(">> <?> unknown argument: %s in %s%n", arg[0], s);
-                }
+                default -> System.err.printf(">> <?> unknown argument: %s in %s%n", arg[0], s);
             }
         });
     }

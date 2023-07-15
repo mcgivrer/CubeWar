@@ -164,7 +164,7 @@ public class DemoScene extends AbstractScene {
                                         .setPosition(
                                                 Math.random() * parentWorld.getPlayArea().getWidth(),
                                                 Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
-                                        .setSize(8.0,8.0)
+                                        .setSize(8.0, 8.0)
                                         .setPriority(1)
                                         .setType(GameObject.TYPE_ELLIPSE)
                                         .setConstrainedToPlayArea(true)
@@ -219,7 +219,7 @@ public class DemoScene extends AbstractScene {
                                         .setMass(1.0)
                                         .setParent(e)
                                         .addBehavior(this)
-                                        .addForce(new Vector2D(0.0, Math.random() * 0.0003));
+                                        .addForce(new Vector2D(0.0, Math.random() * 0.03));
                             }
 
                             /**
@@ -241,7 +241,7 @@ public class DemoScene extends AbstractScene {
                                 double time = parent.getAttribute("particleTime", 0.0);
                                 double particleTimeCycle = parent.getAttribute("particleTimeCycle", 9800.0);
                                 double particleFreq = parent.getAttribute("particleFreq", 0.005);
-                                time += elapsed*100;
+                                time += elapsed * 100;
                                 int nbP = parent.getAttribute("nbParticles", 0);
                                 if (parent.getChild().size() < nbP && time > particleTimeCycle) {
                                     for (int i = 0; i < nbP * particleFreq; i++) {

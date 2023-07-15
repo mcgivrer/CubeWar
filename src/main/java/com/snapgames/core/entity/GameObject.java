@@ -7,6 +7,18 @@ import java.util.Optional;
 /**
  * The {@link GameObject} is the basic Object element to be displayed on screen.
  * It can be a POINT, a LINE,a RECTANGLE, an ELLIPSE or an IMAGE.
+ * <p>
+ * And this {@link GameObject} can be :
+ * <ul>
+ * <li><code>{@link GameObject#TYPE_POINT}</code> to be drawn as a simple 2D
+ * point,</li>
+ * <li><code>{@link GameObject#TYPE_LINE}</code> to be drawn as a 2D line from (x,y)
+ * to (width,height),</li>
+ * <li><code>{@link GameObject#TYPE_RECTANGLE}</code> to be drawn as a 2D rectangle
+ * at (x,y) of size (width,height),</li>
+ * <li><code>{@link GameObject#TYPE_ELLIPSE}</code> to be drawn as a 2D ellipse at
+ * (x,y) with (r1=width and r2=height).</li>
+ * </ul>
  */
 public class GameObject extends Entity<GameObject> {
 

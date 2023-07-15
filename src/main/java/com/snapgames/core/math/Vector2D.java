@@ -17,8 +17,10 @@ public class Vector2D {
     }
 
     /**
-     * @param x
-     * @param y
+     * Create a new Vector2D (x,y).
+     *
+     * @param x the horizontal position
+     * @param y the vertical position
      */
     public Vector2D(double x, double y) {
         super();
