@@ -26,12 +26,14 @@ public class Camera extends Entity<Camera> {
         setMass(0.0);
     }
 
-    public void setTarget(Entity t) {
+    public Camera setTarget(Entity t) {
         this.target = t;
+        return this;
     }
 
-    public void setTween(double t) {
+    public Camera setTween(double t) {
         this.tween = t;
+        return this;
     }
 
     @Override
