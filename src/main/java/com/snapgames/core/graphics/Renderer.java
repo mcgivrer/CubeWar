@@ -17,6 +17,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.snapgames.core.utils.StringUtils.prepareStatsString;
 
@@ -105,12 +107,14 @@ public class Renderer extends JPanel {
 
         // draw entities not stick to Camera.
         moveFromCameraPoV(g, scene.getActiveCamera(), -1);
-        drawAllEntities(g, scene, false);
+        drawEntities(g, scene, scene.getEntities().stream()
+                .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera).collect(Collectors.toList()));
         scene.draw(application, g, stats);
         moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
         // draw all stick-to-camera's Entity.
-        drawAllEntities(g, scene, true);
+        drawEntities(g, scene, scene.getEntities().stream()
+                .filter(e -> e.stickToCamera).collect(Collectors.toList()));
 
         g.dispose();
 
@@ -133,8 +137,28 @@ public class Renderer extends JPanel {
 
     private void drawAllEntities(Graphics2D g, Scene scene, boolean isStickToCamera) {
         scene.getEntities().stream()
+                .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
                 .filter(e -> e.isActive())
-                .filter(e -> scene.getActiveCamera().inViewport(e) || e.stickToCamera == isStickToCamera)
+                .sorted(Comparator.comparingInt(Entity::getPriority))
+                .forEach(
+                        e -> {
+                            g.rotate(-e.rotation,
+                                    e.pos.x + e.width * 0.5,
+                                    e.pos.y + e.height * 0.5);
+                            e.draw(g);
+                            g.rotate(e.rotation,
+                                    e.pos.x + e.width * 0.5,
+                                    e.pos.y + e.height * 0.5);
+                            drawEntityDebugInfo(g, scene, e);
+
+                            if (application.isDebugAt(4)) {
+                                System.out.printf(">> <d> draw entity %s%n", e.getName());
+                            }
+                        });
+    }
+
+    private void drawEntities(Graphics2D g, Scene scene, List<Entity> list) {
+        list.stream().filter(e -> e.isActive())
                 .sorted(Comparator.comparingInt(Entity::getPriority))
                 .forEach(
                         e -> {
@@ -171,7 +195,7 @@ public class Renderer extends JPanel {
             g.setColor(Color.ORANGE);
             for (String item : info) {
                 if (!item.equals("")) {
-                    String levelStr = item.contains("_") ? item.substring(0,item.indexOf("_")) : "0";
+                    String levelStr = item.contains("_") ? item.substring(0, item.indexOf("_")) : "0";
                     int level = Integer.parseInt(levelStr);
                     if (level <= application.getConfiguration().debugLevel) {
                         g.drawString(item.substring(info.indexOf("_") + 1),
