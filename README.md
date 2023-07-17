@@ -42,6 +42,8 @@ jdb -sourcepath src/main/java/,src/main/resources \
 
 ## Reference
 
+### Build script
+
 > **NOTE** _To get more information this script usga ejust execite:_
 >
 > ```bash
@@ -66,6 +68,21 @@ jdb -sourcepath src/main/java/,src/main/resources \
 > -----------
 > ... done.
 > ```
+
+### Keys from the demo
+
+| Key                             | description                                              |
+|:--------------------------------|:---------------------------------------------------------|
+| `UP`,`DOWN`,<br/>`LEFT`,`RIGHT` | Move player vertically <br/>or horizontally              |
+| `ALT+UP`, `ALT+DOWN`            | Player rotation left or right                            |                                                     |
+| `CTRL+D`,<br/> `D`              | Activate debug display, <br/>change debug level (0 to 5) |
+| `PAGE-UP`, `PAGE-DOWN`          | Camera roll                                              |
+| `ALT+BACKSPACE`                 | Reset camera roll to initial position                    |
+| `CTRL+Z`                        | Reset Scene                                              |
+| `ESCAPE`                        | Exit demonstration                                       |
+| `P`,`PAUSE`                     | set/unset Game update in pause mode                      |
+| `G`                             | Reverse World gravity                                    |
+| `F3`                            | take screen shot (not implemented yet)                   |
 
 Enjoy !
 
