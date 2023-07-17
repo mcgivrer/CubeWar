@@ -10,25 +10,20 @@ import java.util.Optional;
  * * <p>
  * * And this {@link com.snapgames.core.entity.GameObject} can be :
  * * <ul>
- * * <li><code>{@link GameObject#TYPE_POINT}</code> to be drawn as a simple 2D
+ * * <li><code>{@link GameObjectType#TYPE_POINT}</code> to be drawn as a simple 2D
  * * point,</li>
- * * <li><code>{@link GameObject#TYPE_LINE}</code> to be drawn as a 2D line from (x,y)
+ * * <li><code>{@link GameObjectType#TYPE_LINE}</code> to be drawn as a 2D line from (x,y)
  * * to (width,height),</li>
- * * <li><code>{@link GameObject#TYPE_RECTANGLE}</code> to be drawn as a 2D rectangle
+ * * <li><code>{@link GameObjectType#TYPE_RECTANGLE}</code> to be drawn as a 2D rectangle
  * * at (x,y) of size (width,height),</li>
- * * <li><code>{@link GameObject#TYPE_ELLIPSE}</code> to be drawn as a 2D ellipse at
+ * * <li><code>{@link GameObjectType#TYPE_ELLIPSE}</code> to be drawn as a 2D ellipse at
  * * (x,y) with (r1=width and r2=height).</li>
  * * </ul>
  */
 public class GameObject extends Entity<GameObject> {
 
-    public final static int TYPE_POINT = 1;
-    public final static int TYPE_LINE = 2;
-    public final static int TYPE_RECTANGLE = 3;
-    public final static int TYPE_ELLIPSE = 4;
-    public final static int TYPE_IMAGE = 5;
 
-    public int type = TYPE_RECTANGLE;
+    public GameObjectType type = GameObjectType.TYPE_RECTANGLE;
     private BufferedImage image;
 
     /**
@@ -102,7 +97,7 @@ public class GameObject extends Entity<GameObject> {
         }
     }
 
-    public GameObject setType(int t) {
+    public GameObject setType(GameObjectType t) {
         this.type = t;
         return this;
     }
