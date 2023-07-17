@@ -21,6 +21,10 @@ import java.util.Map;
 /**
  * A {@link Scene} implementing a demonstration of capabilities for this
  * framework.
+ * <p>
+ * The scene implements a main <code>player</code> {@link GameObject}, a particle systems thanks
+ * to the {@link ParticleSystemBuilder}, and a bunch of TextObject to display <code>score</code>, <code>life</code>
+ * and some <code>message</code> and <code>pause</code> texts.
  *
  * @author Frédéric Delorme
  * @since 1.0.0
@@ -138,21 +142,21 @@ public class DemoScene extends AbstractScene {
                         configuration.world.getPlayArea().getWidth() * 0.50,
                         configuration.world.getPlayArea().getHeight() * 0.50)
                 .setSize(16, 16)
-                .setType(GameObject.TYPE_RECTANGLE)
+                .setType(GameObjectType.TYPE_RECTANGLE)
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
-                .setMaterial(Material.SUPER_BALL)
-                .setAttribute("speedStep", 0.01)
+                .setMaterial(new Material("playerMat",0.80,1.0,0.99))
+                .setAttribute("speedStep", 0.1)
                 .setAttribute("jumpFactor", 99.601)
                 .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);
 
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "drop", 1000,
+                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000,
                         new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
@@ -165,7 +169,7 @@ public class DemoScene extends AbstractScene {
                                                 Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
                                         .setSize(1, 1)
                                         .setPriority(1)
-                                        .setType(GameObject.TYPE_LINE)
+                                        .setType(GameObjectType.TYPE_LINE)
                                         .setConstrainedToPlayArea(false)
                                         // set depth to the rain drop.
                                         .setLayer((int) (Math.random() * 9) + 1)
@@ -195,7 +199,7 @@ public class DemoScene extends AbstractScene {
                                 }
                                 GameObject parent = (GameObject) e.parent;
                                 double time = parent.getAttribute("particleTime", 0.0);
-                                double particleTimeCycle = parent.getAttribute("particleTimeCycle", 9800.0);
+                                double particleTimeCycle = parent.getAttribute("particleTimeCycle", 980.0);
                                 double particleFreq = parent.getAttribute("particleFreq", 0.005);
                                 time += elapsed;
                                 int nbP = parent.getAttribute("nbParticles", 0);

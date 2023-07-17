@@ -1,8 +1,10 @@
-package com.snapgames.core;
+package com.snapgames.core.test;
 
+import com.snapgames.core.Application;
 import com.snapgames.core.math.physic.Vector2D;
 import com.snapgames.core.math.physic.World;
 
+import com.snapgames.core.test.scenes.AppTest;
 import org.junit.jupiter.api.*;
 
 import java.awt.*;
@@ -14,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ApplicationConfigurationTest {
-    private Application application;
+    private AppTest application;
 
     @BeforeEach
     public void setup() {
-        application = new Application();
+        application = new AppTest();
     }
 
     @AfterEach
@@ -86,7 +88,7 @@ public class ApplicationConfigurationTest {
     @Test
     public void applicationHasWorldConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
-        World w = new World("amazing").setGravity(new Vector2D(0, 0.0981))
+        World w = new World("amazing").setGravity(new Vector2D(0, 0.10))
                 .setPlayArea(new Rectangle2D.Double(0, 0, 1024, 1024));
         assertEquals(w.toString(), application.getPhysicEngine().getWorld().toString(),
                 "Physic World configuration has not ben set correctly.");
