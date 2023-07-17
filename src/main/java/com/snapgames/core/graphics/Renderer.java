@@ -161,7 +161,9 @@ public class Renderer extends JPanel {
     }
 
     private void drawEntityDebugInfo(Graphics2D g, Scene scene, Entity<? extends Entity<?>> e) {
-        if (application.getConfiguration().debugLevel > 0 && application.getConfiguration().debugLevel >= e.debug) {
+        if (application.getConfiguration().debug
+                && application.getConfiguration().debugLevel > 0
+                && application.getConfiguration().debugLevel >= e.debug) {
             List<String> info = e.getDebugInfo();
             int l = 0;
             float fontSize = 9f;
@@ -171,10 +173,11 @@ public class Renderer extends JPanel {
             int offsetX = (int) (e.pos.x + maxWidth > (
                     (e.stickToCamera ? 0 : scene.getActiveCamera().x) + scene.getActiveCamera().width) ? -(maxWidth + 4.0)
                     : 4.0);
-            int offsetY = (int) (e.pos.y + (fontSize * info.size()) >
+            long nbLines = info.stream().filter(i->Integer.parseInt((i.contains("_") ? i.substring(0, i.indexOf("_")) : "0"))<= application.getConfiguration().debugLevel).count();
+            int offsetY = (int) (e.pos.y + (fontSize * nbLines) >
                     ((e.stickToCamera ? 0 : scene.getActiveCamera().y) + scene.getActiveCamera().height)
-                    ? -(9.0 + (fontSize * info.size()))
-                    : -9.0);
+                    ? -(9.0 + (fontSize * nbLines))
+                    : 0);
             g.setColor(Color.ORANGE);
             for (String item : info) {
                 if (!item.equals("")) {
