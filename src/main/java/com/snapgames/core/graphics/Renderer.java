@@ -240,4 +240,12 @@ public class Renderer extends JPanel {
         }
 
     }
+
+    public void takeScreenShot() {
+        this.drawing=false;
+        if(Optional.ofNullable(buffer).isPresent()){
+            ImageIO.wr
+        }
+        this.drawing=true;
+    }
 }

@@ -45,7 +45,7 @@ public class DemoScene extends AbstractScene {
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.98, 32)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setPhysicType(PhysicType.STATIC)
+                .setPhysicType(PhysicType.NONE)
                 .setBorderColor(Color.BLACK)
                 .setFont(g2d.getFont().deriveFont(20.0f))
                 .setColor(Color.WHITE)
@@ -63,7 +63,7 @@ public class DemoScene extends AbstractScene {
 
         TextObject heart = new TextObject("heart")
                 .setPosition(10, configuration.bufferResolution.getHeight() * 0.90)
-                .setPhysicType(PhysicType.STATIC)
+                .setPhysicType(PhysicType.NONE)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(g2d.getFont().deriveFont(16.0f))
@@ -79,7 +79,7 @@ public class DemoScene extends AbstractScene {
 
         TextObject life = new TextObject("life")
                 .setPosition(20, configuration.bufferResolution.getHeight() * 0.90)
-                .setPhysicType(PhysicType.STATIC)
+                .setPhysicType(PhysicType.NONE)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
                 .setFont(g2d.getFont().deriveFont(12.0f))
@@ -99,7 +99,7 @@ public class DemoScene extends AbstractScene {
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.50,
                         configuration.bufferResolution.getHeight() * 0.70)
-                .setPhysicType(PhysicType.STATIC)
+                .setPhysicType(PhysicType.NONE)
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -120,7 +120,7 @@ public class DemoScene extends AbstractScene {
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.50,
                         configuration.bufferResolution.getHeight() * 0.50)
-                .setPhysicType(PhysicType.STATIC)
+                .setPhysicType(PhysicType.NONE)
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
@@ -148,7 +148,7 @@ public class DemoScene extends AbstractScene {
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
-                .setMaterial(new Material("playerMat",0.80,1.0,0.99))
+                .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
                 .setAttribute("speedStep", 0.1)
                 .setAttribute("jumpFactor", 99.601)
                 .setAttribute("speedRotStep", 0.001)
@@ -179,7 +179,7 @@ public class DemoScene extends AbstractScene {
                                         .setMass(1.0)
                                         .setParent(e)
                                         .addBehavior(this)
-                                        .addForce(new Vector2D(0.0, Math.random() * 0.0003));
+                                        .addForce(new Vector2D(0.0, Math.random() * 0.0003 * world.getGravity().y));
                             }
 
                             /**
@@ -190,7 +190,7 @@ public class DemoScene extends AbstractScene {
                              */
                             @Override
                             public void update(Entity<?> e, double elapsed) {
-                                e.setColor(new Color((0.1f), (0.3f), (e.layer * 0.1f), 0.8f));
+                                e.setColor(new Color((e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f)));
                                 if (!world.getPlayArea().getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
                                     e.setPosition(world.getPlayArea().getWidth() * Math.random(),
                                             Math.random() * world.getPlayArea().getHeight() * 0.1);

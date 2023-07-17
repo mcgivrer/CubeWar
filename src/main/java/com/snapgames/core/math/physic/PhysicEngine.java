@@ -9,6 +9,7 @@ import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.scene.Scene;
+import com.snapgames.core.utils.StringUtils;
 import com.snapgames.core.utils.config.Configuration;
 
 /**
@@ -53,7 +54,7 @@ public class PhysicEngine {
                                 updateEntity(e, time);
                             }
                             e.update(time);
-                            /*if (application.isDebugAt(5) && e.getName().equals("player")) {
+                            if (application.isDebugAt(5) && e.getName().equals("player")) {
                                 System.out.printf(">%s: elapsed:%f e:%s = {pos:%s,spd:%s,acc:%s,mass:%.02f,mat:%s}%n",
                                         StringUtils.formatDuration(cumulatedTime / 1000000),
                                         time,
@@ -64,7 +65,7 @@ public class PhysicEngine {
                                         e.mass,
                                         e.getMaterial());
 
-                            }*/
+                            }
 
                         });
         if (Optional.ofNullable(camera).isPresent()) {
@@ -74,11 +75,10 @@ public class PhysicEngine {
         long renderedEntities = entities.stream()
                 .filter(Entity::isActive)
                 .filter(e -> {
-                    assert camera != null;
-                    return camera.inViewport(e) || e.physicType.equals(PhysicType.NONE);
-                }).count();
-        stats.put("5_rend", renderedEntities);
-        stats.put("5_time", time);
+                            return camera.inViewport(e) || e.stickToCamera;
+                        }
+                ).count();
+        stats.put("5_drawn", renderedEntities);
     }
 
     private void updateEntity(Entity<?> entity, double elapsed) {
