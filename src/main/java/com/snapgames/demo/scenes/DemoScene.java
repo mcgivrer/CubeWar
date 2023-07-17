@@ -156,11 +156,11 @@ public class DemoScene extends AbstractScene {
         addEntity(player);
 
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000,
+                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000,100,
                         new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                                     Entity<?> e) {
+                                                     Entity<?> parent) {
 
                                 return new GameObject(
                                         particleNamePrefix + "_" + GameObject.index)
@@ -177,7 +177,7 @@ public class DemoScene extends AbstractScene {
                                         .setColor(Color.YELLOW)
                                         .setMaterial(Material.WATER)
                                         .setMass(1.0)
-                                        .setParent(e)
+                                        .setParent(parent)
                                         .addBehavior(this)
                                         .addForce(new Vector2D(0.0, Math.random() * 0.0003 * world.getGravity().y));
                             }

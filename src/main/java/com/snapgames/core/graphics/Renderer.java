@@ -8,11 +8,13 @@ import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.World;
 import com.snapgames.core.scene.Scene;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,8 @@ public class Renderer extends JPanel {
      */
     private JFrame frame;
     private BufferedImage buffer;
+    private boolean drawing = true;
+    private static int sc_index;
 
     public Renderer(Application app) {
         this.application = app;
@@ -86,75 +90,54 @@ public class Renderer extends JPanel {
      *              purpose. (only if Application#debug >0)
      */
     public void draw(World world, Scene scene, Map<String, Object> stats) {
+        if (drawing) {
+            // prepare rendering buffer
+            Graphics2D g = buffer.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // prepare rendering buffer
-        Graphics2D g = buffer.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            // clear buffer
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
-        // clear buffer
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+            // draw playArea
+            moveFromCameraPoV(g, scene.getActiveCamera(), -1);
+            drawGrid(g, world.getPlayArea());
+            g.setColor(Color.BLUE);
+            g.draw(world.getPlayArea());
+            moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
-        // draw playArea
-        moveFromCameraPoV(g, scene.getActiveCamera(), -1);
-        drawGrid(g, world.getPlayArea());
-        g.setColor(Color.BLUE);
-        g.draw(world.getPlayArea());
-        moveFromCameraPoV(g, scene.getActiveCamera(), 1);
+            // draw entities not stick to Camera.
+            moveFromCameraPoV(g, scene.getActiveCamera(), -1);
+            drawEntities(g, scene, scene.getEntities().stream()
+                    .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera).collect(Collectors.toList()));
+            scene.draw(application, g, stats);
+            moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
-        // draw entities not stick to Camera.
-        moveFromCameraPoV(g, scene.getActiveCamera(), -1);
-        drawEntities(g, scene, scene.getEntities().stream()
-                .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera).collect(Collectors.toList()));
-        scene.draw(application, g, stats);
-        moveFromCameraPoV(g, scene.getActiveCamera(), 1);
+            // draw all stick-to-camera's Entity.
+            drawEntities(g, scene, scene.getEntities().stream()
+                    .filter(e -> e.stickToCamera).collect(Collectors.toList()));
 
-        // draw all stick-to-camera's Entity.
-        drawEntities(g, scene, scene.getEntities().stream()
-                .filter(e -> e.stickToCamera).collect(Collectors.toList()));
+            g.dispose();
 
-        g.dispose();
-
-        // copy to JFrame
-        Graphics2D gScreen = (Graphics2D) frame.getBufferStrategy().getDrawGraphics();
-        gScreen.drawImage(
-                buffer, 0, 0, frame.getWidth(), frame.getHeight(),
-                0, 0, buffer.getWidth(), buffer.getHeight(),
-                null);
-        if (application.getConfiguration().debug && application.getConfiguration().debugLevel > 0) {
-            gScreen.setColor(Color.ORANGE);
-            gScreen.drawString(
-                    prepareStatsString(stats, "[ ", " | ", " ]"),
-                    20, frame.getHeight() - 20);
+            // copy to JFrame
+            Graphics2D gScreen = (Graphics2D) frame.getBufferStrategy().getDrawGraphics();
+            gScreen.drawImage(
+                    buffer, 0, 0, frame.getWidth(), frame.getHeight(),
+                    0, 0, buffer.getWidth(), buffer.getHeight(),
+                    null);
+            if (application.getConfiguration().debug && application.getConfiguration().debugLevel > 0) {
+                gScreen.setColor(Color.ORANGE);
+                gScreen.drawString(
+                        prepareStatsString(stats, "[ ", " | ", " ]"),
+                        20, frame.getHeight() - 20);
+            }
+            gScreen.dispose();
+            // switch to next available drawing buffer
+            frame.getBufferStrategy().show();
         }
-        gScreen.dispose();
-        // switch to next available drawing buffer
-        frame.getBufferStrategy().show();
-    }
-
-    private void drawAllEntities(Graphics2D g, Scene scene, boolean isStickToCamera) {
-        scene.getEntities().stream()
-                .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
-                .filter(e -> e.isActive())
-                .sorted(Comparator.comparingInt(Entity::getPriority))
-                .forEach(
-                        e -> {
-                            g.rotate(-e.rotation,
-                                    e.pos.x + e.width * 0.5,
-                                    e.pos.y + e.height * 0.5);
-                            e.draw(g);
-                            g.rotate(e.rotation,
-                                    e.pos.x + e.width * 0.5,
-                                    e.pos.y + e.height * 0.5);
-                            drawEntityDebugInfo(g, scene, e);
-
-                            if (application.isDebugAt(4)) {
-                                System.out.printf(">> <d> draw entity %s%n", e.getName());
-                            }
-                        });
     }
 
     private void drawEntities(Graphics2D g, Scene scene, List<Entity> list) {
@@ -242,10 +225,10 @@ public class Renderer extends JPanel {
     }
 
     public void takeScreenShot() {
-        this.drawing=false;
-        if(Optional.ofNullable(buffer).isPresent()){
-            ImageIO.wr
+        this.drawing = false;
+        if (Optional.ofNullable(buffer).isPresent()) {
+            // TODO implement buffer image save to file.
         }
-        this.drawing=true;
+        this.drawing = true;
     }
 }

@@ -151,7 +151,7 @@ public abstract class Application {
                 scnMgr.getCurrent().getActiveCamera() != null ? 1 : 0);
 
         System.out.printf(
-                ">> <!> Application now loops on Scene '%s'", scnMgr.getCurrent().getName());
+                ">> <!> Application now loops on Scene '%s'%n", scnMgr.getCurrent().getName());
         long start = System.nanoTime();
         long previous = start;
         long elapsedTime = 0;
