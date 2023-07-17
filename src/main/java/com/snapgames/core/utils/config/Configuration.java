@@ -32,6 +32,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
 
     public int fps;
     public int ups;
+    public String debugFilter;
 
 
     public Configuration(Application app, String pathCfgFile, List<String> lArgs) {
@@ -77,6 +78,8 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         debug = getParsedBoolean(config, "app.debug", "false");
         // debug level (0-5 where 0=off and 5 max debug info)
         debugLevel = getParsedInt(config, "app.debug.level", "0");
+        // debug filter: filtering entity on its name
+        debugFilter = config.getProperty("app.debug.filter", "none");
         // exit flag to let test only ONE loop execution.
         application.exit = getParsedBoolean(config, "app.exit", "false");
 
@@ -236,10 +239,18 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
                     System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
                 }
                 // define debug level for this application run.
-                case "dl", "debugLevel" -> {
+                case "d", "debugLevel" -> {
                     debugLevel = Integer.parseInt(arg[1]);
                     this.debug = true;
-                    System.out.printf(">> <!> argument 'debugLevel' set to %s: debug mode activated.%n", arg[1]);
+                    System.out.printf(">> <!> argument 'Debug Level' set to %s: debug mode activated.%n", arg[1]);
+                }
+                case "f", "fps" -> {
+                    fps = Integer.parseInt(arg[1]);
+                    System.out.printf(">> <!> argument 'FPS' set to %s Frame-Per-Second.%n", arg[1]);
+                }
+                case "u", "ups" -> {
+                    ups = Integer.parseInt(arg[1]);
+                    System.out.printf(">> <!> argument 'UPS' set to %s Update-Per-Second.%n", arg[1]);
                 }
                 // set a temporary window title (used for test execution purpose only)
                 case "t", "title" -> {
@@ -248,7 +259,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
                 }
                 // define an alternate file configuration path to feed the Application.
                 // used mainly for automated test requirement.
-                case "cp", "configPath" -> {
+                case "c", "configPath" -> {
                     application.setPathToConfigFile(arg[1]);
                     this.pathToConfigFile = arg[1];
                     System.out.printf(">> <!> argument 'configuration file path' set to %s%n", arg[1]);
