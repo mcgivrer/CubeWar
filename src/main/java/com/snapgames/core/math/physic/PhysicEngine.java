@@ -46,6 +46,15 @@ public class PhysicEngine {
         double time = (elapsed * timeScaleFactor);
         cumulatedTime += elapsed;
         if (!application.isExiting()) {
+
+            // if world contains any Perturbation n, apply to all concerned entities.
+            world.getPerturbations().stream().forEach(p ->
+                    entities.stream().filter(e -> e.isActive() && p.isEntityContained(e))
+                            .forEach(e -> {
+                                e.addForces(p.getForces());
+                            })
+            );
+
             entities.stream()
                     .filter(Entity::isActive)
                     .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))

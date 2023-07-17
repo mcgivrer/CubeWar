@@ -353,4 +353,19 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public Vector2D getAcceleration() {
         return acceleration;
     }
+
+    /**
+     * Add a list of Force to the {@link Entity}.
+     *
+     * @param forces list of forces.
+     * @return the updated T Entity.
+     */
+    public T addForces(List<Vector2D> forces) {
+        forces.forEach(f -> this.addForce(f));
+        return (T) this;
+    }
+
+    public void drawDebug(Graphics2D g) {
+        // nothing to render.
+    }
 }
