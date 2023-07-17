@@ -59,6 +59,13 @@ public class ApplicationConfigurationTest {
     }
 
     @Test
+    public void applicationHasDebugFilterConfiguration() {
+        application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
+        assertEquals("testObj1", application.getDebugFilter(),
+                "Physic World configuration has not ben set correctly.");
+    }
+
+    @Test
     public void applicationHasExitConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
         assertTrue(application.exit, "Exit configuration has not ben set correctly.");
@@ -78,6 +85,19 @@ public class ApplicationConfigurationTest {
                 "Buffer resolution configuration has not ben set correctly.");
     }
 
+
+    @Test
+    public void applicationHasFpsConfiguration() {
+        application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
+        assertEquals(60, application.getConfiguration().fps, "Frame-Per-Second has not been set correctly.");
+    }
+
+    @Test
+    public void applicationHasUpsConfiguration() {
+        application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
+        assertEquals(120, application.getConfiguration().ups, "Update-Per-Second has not been set correctly.");
+    }
+
     @Test
     public void applicationHasMaxSpeedConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
@@ -93,5 +113,6 @@ public class ApplicationConfigurationTest {
         assertEquals(w.toString(), application.getPhysicEngine().getWorld().toString(),
                 "Physic World configuration has not ben set correctly.");
     }
+
 
 }

@@ -279,4 +279,8 @@ public abstract class Application {
     public boolean isExiting() {
         return exit;
     }
+
+    public String getDebugFilter() {
+        return configuration.debugFilter;
+    }
 }
