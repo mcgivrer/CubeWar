@@ -28,7 +28,6 @@ import static com.snapgames.core.utils.StringUtils.prepareStatsString;
  */
 public class Renderer extends JPanel {
 
-
     private final Application application;
     /**
      * Graphics components
@@ -94,7 +93,7 @@ public class Renderer extends JPanel {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         // clear buffer
-        g.setColor(Color.BLUE);
+        g.setColor(Color.BLACK);
         g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
         // draw playArea
