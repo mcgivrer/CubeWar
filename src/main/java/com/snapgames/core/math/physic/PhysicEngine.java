@@ -45,40 +45,27 @@ public class PhysicEngine {
         Collection<Entity<?>> entities = scene.getEntities();
         double time = (elapsed * timeScaleFactor);
         cumulatedTime += elapsed;
-        entities.stream()
-                .filter(Entity::isActive)
-                .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
-                .forEach(
-                        e -> {
-                            if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
-                                updateEntity(e, time);
-                            }
-                            e.update(time);
-                            if (application.isDebugAt(5) && e.getName().equals("player")) {
-                                System.out.printf(">%s: elapsed:%f e:%s = {pos:%s,spd:%s,acc:%s,mass:%.02f,mat:%s}%n",
-                                        StringUtils.formatDuration(cumulatedTime / 1000000),
-                                        time,
-                                        e.getName(),
-                                        e.getPosition(),
-                                        e.getVelocity(),
-                                        e.getAcceleration(),
-                                        e.mass,
-                                        e.getMaterial());
-
-                            }
-
-                        });
-        if (Optional.ofNullable(camera).isPresent()) {
-            camera.update(time);
+        if (!application.isExiting()) {
+            entities.stream()
+                    .filter(Entity::isActive)
+                    .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
+                    .forEach(
+                            e -> {
+                                if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
+                                    updateEntity(e, time);
+                                }
+                                e.update(time * 100);
+                            });
+            if (Optional.ofNullable(camera).isPresent()) {
+                camera.update(time);
+            }
+            scene.update(application, time);
+            long renderedEntities = entities.stream()
+                    .filter(Entity::isActive)
+                    .filter(e -> camera.inViewport(e) || e.stickToCamera).count();
+            stats.put("3_rendered", renderedEntities);
         }
-        scene.update(application, time);
-        long renderedEntities = entities.stream()
-                .filter(Entity::isActive)
-                .filter(e -> {
-                            return camera.inViewport(e) || e.stickToCamera;
-                        }
-                ).count();
-        stats.put("5_drawn", renderedEntities);
+
     }
 
     private void updateEntity(Entity<?> entity, double elapsed) {

@@ -41,8 +41,8 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public double mass;
     public boolean active;
 
-    int duration = -1;
-    int lifespan;
+    protected int duration = -1;
+    protected int lifespan;
 
     Color color = Color.WHITE;
     Color fillColor = Color.RED;
@@ -102,8 +102,8 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public void update(double elapsed) {
 
         lifespan += elapsed;
-        if (lifespan > duration && duration != -1) {
-            active = false;
+        if (duration != -1 && lifespan > duration) {
+            this.active = false;
         }
 
     }

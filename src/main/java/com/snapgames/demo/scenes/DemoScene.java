@@ -110,11 +110,33 @@ public class DemoScene extends AbstractScene {
                 .setText(app.getMessages().getString("app.title.welcome"))
                 .setPriority(20)
                 .setStickToCameraView(true)
-                .setDuration(5)
+                .setDuration(5000)
                 .setDebug(2)
                 .setMaterial(null);
 
         addEntity(welcomeMessage);
+
+        TextObject copyRMessage = new TextObject("copyright")
+                .setPosition(
+                        configuration.bufferResolution.getWidth() * 0.50,
+                        configuration.bufferResolution.getHeight() * 0.95)
+                .setPhysicType(PhysicType.NONE)
+                .setTextAlign(TextObject.ALIGN_CENTER)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setBorderColor(Color.BLACK)
+                .setFont(g2d.getFont().deriveFont(8.0f))
+                .setColor(Color.WHITE)
+                .setShadowWidth(3)
+                .setBorderWidth(2)
+                .setText(app.getMessages().getString("app.title.copyright"))
+                .setPriority(20)
+                .setStickToCameraView(true)
+                .setDuration(2000)
+                .setDebug(2)
+                .setMaterial(null);
+
+        addEntity(copyRMessage);
+
 
         TextObject pauseObj = new TextObject("pause")
                 .setPosition(
@@ -155,8 +177,54 @@ public class DemoScene extends AbstractScene {
                 .setDebug(2);
         addEntity(player);
 
+        // add som ball particle system
+
+        // create some red ball particle system
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000,100,
+                ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
+                        new ParticleBehavior<GameObject>() {
+                            @Override
+                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
+                                                     Entity<?> parent) {
+
+                                return new GameObject(
+                                        particleNamePrefix + "_" + GameObject.index)
+                                        .setPosition(
+                                                Math.random() * parentWorld.getPlayArea().getWidth(),
+                                                Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
+                                        .setSize(8, 8)
+                                        .setPriority(1)
+                                        .setType(GameObjectType.TYPE_ELLIPSE)
+                                        .setConstrainedToPlayArea(true)
+                                        .setLayer(2)
+                                        .setPhysicType(PhysicType.DYNAMIC)
+                                        .setColor(Color.RED.darker().darker())
+                                        .setFillColor(Color.RED)
+                                        .setMaterial(Material.SUPER_BALL)
+                                        .setMass(5.0 * Math.random() + 1.0)
+                                        .setParent(parent)
+                                        .addBehavior(this)
+                                        .addForce(
+                                                new Vector2D(
+                                                        -0.15 + Math.random() * 0.30,
+                                                        -0.15 + Math.random() * 0.30));
+                            }
+
+                            /**
+                             * Update the Entity e according to the elapsed time since previous call.
+                             *
+                             * @param e       the Entity to be updated
+                             * @param elapsed the elapsed time since previous call.
+                             */
+                            @Override
+                            public void update(Entity<?> e, double elapsed) {
+                            }
+                        }));
+
+
+        // add rain drops particle system.
+        addEntity(
+                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 100,
                         new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
