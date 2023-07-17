@@ -365,7 +365,12 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
+
+    /**
+     * a Specific draw method only for debug drawing purpose.
+     *
+     * @param g the Graphics2D API instance to be used.
+     */
     public void drawDebug(Graphics2D g) {
-        // nothing to render.
     }
 }

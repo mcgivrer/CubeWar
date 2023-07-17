@@ -9,7 +9,6 @@ import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.scene.Scene;
-import com.snapgames.core.utils.StringUtils;
 import com.snapgames.core.utils.config.Configuration;
 
 /**
@@ -49,7 +48,7 @@ public class PhysicEngine {
 
             // if world contains any Perturbation n, apply to all concerned entities.
             world.getPerturbations().stream().forEach(p ->
-                    entities.stream().filter(e -> e.isActive() && p.isEntityContained(e))
+                    entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
                             .forEach(e -> {
                                 e.addForces(p.getForces());
                             })

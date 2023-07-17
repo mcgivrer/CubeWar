@@ -1,6 +1,5 @@
 package com.snapgames.core.math.physic;
 
-import com.snapgames.core.Application;
 import com.snapgames.core.entity.Entity;
 
 import java.awt.*;
@@ -18,7 +17,7 @@ import java.awt.*;
 public class Perturbation extends Entity<Perturbation> {
     private double attraction;
 
-    public Perturbation(String n, double x, double y, int w, int h) {
+    public Perturbation(String n, double x, double y, double w, double h) {
         super(n, x, y, w, h);
     }
 
@@ -28,12 +27,10 @@ public class Perturbation extends Entity<Perturbation> {
         // to other entities.
     }
 
-    /**
-     * a Specific draw method only for debug drawing purpose.
-     *
-     * @param g the Graphics2D API instance to be used.
-     */
+    @Override
     public void drawDebug(Graphics2D g) {
+        g.setColor(new Color(0.1f, 0.5f, 1.0f, 0.4f));
+        g.fill(this);
     }
 
     /**
@@ -64,8 +61,8 @@ public class Perturbation extends Entity<Perturbation> {
      * @param e
      * @return true if {@link Perturbation} contains the e {@link Entity}.
      */
-    public boolean isEntityContained(Entity e) {
-        return this.contains(e);
+    public boolean isEntityConstrained(Entity e) {
+        return this.contains(e) || this.intersects(e);
     }
 
 }
