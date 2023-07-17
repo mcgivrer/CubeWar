@@ -9,6 +9,7 @@ import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
+import com.snapgames.core.utils.StringUtils;
 import com.snapgames.core.utils.config.Configuration;
 
 import javax.swing.*;
@@ -160,18 +161,19 @@ public abstract class Application {
         int frames = 0;
         int updates = 0;
         int wait = 0;
+        long cumulatedGameTime = 0;
         Map<String, Object> datastats = new HashMap<>();
         Scene scene = scnMgr.getCurrent();
-        datastats.put("9_cam", scene.getActiveCamera());
         do {
             start = System.nanoTime();
             long elapsed = start - previous;
 
             input(inputHandler, scene);
-
-            physicEngine.update(scnMgr.getCurrent(), elapsed * 0.00000002, datastats);
-            updates++;
-
+            if (!pause) {
+                physicEngine.update(scnMgr.getCurrent(), elapsed * 0.00000002, datastats);
+                updates++;
+                cumulatedGameTime += elapsed * 0.000001;
+            }
             fps += (elapsed * 0.000001);
             if (fps < (1000 / FPS) && !pause) {
                 renderer.draw(physicEngine.getWorld(), scnMgr.getCurrent(), datastats);
@@ -191,9 +193,8 @@ public abstract class Application {
                 datastats.put("1_FPS", realFPS);
                 datastats.put("2_UPS", realUPS);
                 datastats.put("3_nbObj", scnMgr.getCurrent().getEntities().size());
-                datastats.put("4_elapsed", (elapsed * 0.000001));
-                datastats.put("4_wait", wait);
-                datastats.put("g_wait", getPhysicEngine().getWorld().getGravity().y);
+                datastats.put("4_pause", this.pause ? "on" : "off");
+
                 elapsedTime = 0;
                 frames = 0;
                 updates = 0;
@@ -206,6 +207,8 @@ public abstract class Application {
                 System.err.printf("Error while waiting for next update/frame %s%n",
                         Arrays.toString(e.getStackTrace()));
             }
+
+            datastats.put("5_internal", StringUtils.formatDuration(cumulatedGameTime));
         } while (!exit);
     }
 
