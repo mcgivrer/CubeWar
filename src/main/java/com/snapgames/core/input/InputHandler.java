@@ -58,7 +58,11 @@ public class InputHandler implements KeyListener {
             }
             // Change debug level
             case KeyEvent.VK_D -> {
-                configuration.debugLevel = configuration.debugLevel + 1 <= 5 ? configuration.debugLevel + 1 : 0;
+                if (ctrlKey) {
+                    configuration.debug = !configuration.debug;
+                } else {
+                    configuration.debugLevel = configuration.debugLevel + 1 <= 5 ? configuration.debugLevel + 1 : 0;
+                }
             }
             // Reverse gravity
             case KeyEvent.VK_G -> {
@@ -74,7 +78,7 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
                 application.setPause(!application.isPause());
             }
-            case KeyEvent.VK_F3 ->{
+            case KeyEvent.VK_F3 -> {
                 application.getRenderer().takeScreenShot();
             }
             default -> {

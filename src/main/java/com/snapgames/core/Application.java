@@ -275,4 +275,8 @@ public abstract class Application {
     public boolean isDebugAt(int dl) {
         return configuration.debugLevel >= dl;
     }
+
+    public boolean isExiting() {
+        return exit;
+    }
 }
