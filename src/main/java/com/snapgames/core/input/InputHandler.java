@@ -76,7 +76,7 @@ public class InputHandler implements KeyListener {
                 }
             }
             case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
-                application.setPause(!application.isPause());
+                application.setPause(!application.isPaused());
             }
             case KeyEvent.VK_F3 -> {
                 application.getRenderer().takeScreenShot();

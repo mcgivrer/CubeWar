@@ -161,7 +161,7 @@ public class DemoScene extends AbstractScene {
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
                 .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(12.0f))
+                .setFont(g2d.getFont().deriveFont(24.0f))
                 .setColor(Color.WHITE)
                 .setShadowWidth(3)
                 .setBorderWidth(2)
@@ -170,7 +170,7 @@ public class DemoScene extends AbstractScene {
                 .setStickToCameraView(true)
                 .setMaterial(null)
                 .setActive(false)
-                .addBehavior((e, elapsed) -> e.setActive(app.isPause()));
+                .addBehavior((e, elapsed) -> e.setActive(app.isPaused()));
 
         addEntity(pauseObj);
 

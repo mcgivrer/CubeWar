@@ -232,7 +232,7 @@ public abstract class Application {
         exit = true;
     }
 
-    public boolean isPause() {
+    public boolean isPaused() {
         return this.pause;
     }
 
