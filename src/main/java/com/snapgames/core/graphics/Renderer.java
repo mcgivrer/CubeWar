@@ -4,11 +4,13 @@ import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.graphics.plugins.GameObjectRendererPlugin;
+import com.snapgames.core.graphics.plugins.PerturbationRendererPlugin;
 import com.snapgames.core.graphics.plugins.RendererPlugin;
 import com.snapgames.core.graphics.plugins.TextObjectRendererPlugin;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.World;
+import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.Scene;
 
 import javax.imageio.ImageIO;
@@ -42,12 +44,13 @@ public class Renderer extends JPanel {
     private boolean drawing = true;
     private static int sc_index;
 
-    private Map<Class<?>, RendererPlugin<?>> plugins = new HashMap<>();
+    private Map<Class<?>, RendererPlugin<? extends Entity>> plugins = new HashMap<>();
 
     public Renderer(Application app) {
         this.application = app;
         addPlugin(new GameObjectRendererPlugin());
         addPlugin(new TextObjectRendererPlugin());
+        addPlugin(new PerturbationRendererPlugin());
     }
 
     private void addPlugin(RendererPlugin<?> rendererPlugin) {
@@ -123,7 +126,10 @@ public class Renderer extends JPanel {
             drawEntities(g, scene, scene.getEntities().stream()
                     .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera).collect(Collectors.toList()));
             // draw all perturbations
-            world.getPerturbations().forEach(p -> p.drawDebug(g));
+            world.getPerturbations().forEach(p -> {
+                RendererPlugin rp = plugins.get(p.getClass());
+                rp.drawDebugInfo(application, scene, this, g, p);
+            });
             scene.draw(application, g, stats);
             moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
