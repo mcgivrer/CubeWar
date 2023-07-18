@@ -6,8 +6,13 @@ import com.snapgames.core.graphics.Renderer;
 import java.awt.*;
 import java.util.Optional;
 
-import static com.snapgames.core.entity.GameObjectType.*;
-
+/**
+ * The {@link GameObjectRendererPlugin} implements the draw operation for the {@link GameObject}.
+ *
+ * @author Frédéric Delorme
+ * @see RendererPlugin
+ * @since 1.0.0
+ */
 public class GameObjectRendererPlugin implements RendererPlugin<GameObject> {
     @Override
     public Class<?> getEntityClass() {

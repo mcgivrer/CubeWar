@@ -9,6 +9,13 @@ import java.util.Optional;
 
 import static com.snapgames.core.entity.TextObject.*;
 
+/**
+ * The {@link TextObjectRendererPlugin} is the {@link RendererPlugin} implementation to draw the {@link TextObject}.
+ *
+ * @author Frédéric Delorme
+ * @see RendererPlugin
+ * @since 1.0.0
+ */
 public class TextObjectRendererPlugin implements RendererPlugin<TextObject> {
     @Override
     public Class<?> getEntityClass() {

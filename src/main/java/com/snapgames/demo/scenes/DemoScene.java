@@ -44,15 +44,18 @@ public class DemoScene extends AbstractScene {
                 new Perturbation(
                         "wind",
                         0, 0,
-                        world.getPlayArea().getWidth(), world.getPlayArea().getHeight())
-                        .setForce(new Vector2D(0.03, 0.04)));
+                        world.getPlayArea().getWidth() * 0.15, world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(-0.09, 0.00))
+                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.5f)));
 
         world.add(
                 new Perturbation(
-                        "wind",
-                        0, 0,
-                        world.getPlayArea().getWidth() * 0.15, world.getPlayArea().getHeight())
-                        .setForce(new Vector2D(-0.09, 0.00)));
+                        "magnet",
+                        0, world.getPlayArea().getHeight() * 0.85,
+                        world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
+                        .setForce(new Vector2D(0.0, -1.0))
+                        .setFillColor(new Color(0.6f, 0.5f, 0.2f, 0.5f)));
+
         TextObject score = new TextObject("score")
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.98, 32)

@@ -144,15 +144,6 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
-    /**
-     * Draw everything about your {@link Entity} implementation.
-     *
-     * @param g the Graphics API instance to be used.
-     */
-    public void draw(Graphics2D g) {
-        // nothing to do for ths entity.
-    }
-
     public T addBehavior(Behavior<T> b) {
         behaviors.add(b);
         return (T) this;
@@ -375,15 +366,6 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public T addForces(List<Vector2D> forces) {
         forces.forEach(f -> this.addForce(f));
         return (T) this;
-    }
-
-
-    /**
-     * a Specific draw method only for debug drawing purpose.
-     *
-     * @param g the Graphics2D API instance to be used.
-     */
-    public void drawDebug(Graphics2D g) {
     }
 
     public Color getColor() {
