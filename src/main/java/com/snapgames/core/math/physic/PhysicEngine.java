@@ -100,6 +100,10 @@ public class PhysicEngine {
                                     updateEntity(e, time);
                                 }
                                 e.update(time * 100);
+                                // apply Behaviors
+                                if (e.behaviors.size() > 0) {
+                                    e.behaviors.forEach(b -> b.update(e, elapsed));
+                                }
                             });
             if (Optional.ofNullable(camera).isPresent()) {
                 camera.update(time);
@@ -147,11 +151,6 @@ public class PhysicEngine {
 
         // compute position
         entity.pos = entity.pos.add(entity.vel.multiply(elapsed));
-
-        // apply Behaviors
-        if (entity.behaviors.size() > 0) {
-            entity.behaviors.forEach(b -> b.update(entity, elapsed));
-        }
 
         // update child entities
         entity.getChild().forEach(c -> updateEntity(c, elapsed));
