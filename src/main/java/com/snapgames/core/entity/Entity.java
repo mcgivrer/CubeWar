@@ -12,7 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.math.physic.Material;
 import com.snapgames.core.math.physic.PhysicType;
-import com.snapgames.core.math.physic.Vector2D;
+import com.snapgames.core.math.Vector2D;
 
 /**
  * {@link Entity} class representing an entity in the game.
@@ -352,5 +352,25 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
     public Vector2D getAcceleration() {
         return acceleration;
+    }
+
+    /**
+     * Add a list of Force to the {@link Entity}.
+     *
+     * @param forces list of forces.
+     * @return the updated T Entity.
+     */
+    public T addForces(List<Vector2D> forces) {
+        forces.forEach(f -> this.addForce(f));
+        return (T) this;
+    }
+
+
+    /**
+     * a Specific draw method only for debug drawing purpose.
+     *
+     * @param g the Graphics2D API instance to be used.
+     */
+    public void drawDebug(Graphics2D g) {
     }
 }

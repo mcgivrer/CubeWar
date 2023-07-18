@@ -29,7 +29,7 @@ or you can execute the command line :
 $> java -jar target/JavaTestApp-1.0.0.jar
 ```
 
-![A screenshot from the current version](doc/images/screenshot-001.png "A screenshot from the current version")
+![A screenshot from the current version](doc/images/screenshot-002-with-perturbations.png "A screenshot from the current version")
 
 ## Debug
 

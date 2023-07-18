@@ -113,6 +113,8 @@ public class Renderer extends JPanel {
             moveFromCameraPoV(g, scene.getActiveCamera(), -1);
             drawEntities(g, scene, scene.getEntities().stream()
                     .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera).collect(Collectors.toList()));
+            // draw all perturbations
+            world.getPerturbations().forEach(p -> p.drawDebug(g));
             scene.draw(application, g, stats);
             moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 

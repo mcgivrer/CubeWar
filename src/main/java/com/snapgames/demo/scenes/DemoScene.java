@@ -4,10 +4,9 @@ import com.snapgames.core.Application;
 import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.*;
 import com.snapgames.core.input.InputHandler;
-import com.snapgames.core.math.physic.Material;
-import com.snapgames.core.math.physic.PhysicType;
-import com.snapgames.core.math.physic.Vector2D;
-import com.snapgames.core.math.physic.World;
+import com.snapgames.core.math.Vector2D;
+import com.snapgames.core.math.physic.*;
+import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.utils.config.Configuration;
@@ -41,6 +40,19 @@ public class DemoScene extends AbstractScene {
         Graphics2D g2d = app.getRenderer().getBufferGraphics();
         World world = app.getPhysicEngine().getWorld();
 
+        world.add(
+                new Perturbation(
+                        "wind",
+                        0, 0,
+                        world.getPlayArea().getWidth(), world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(0.03, 0.04)));
+
+        world.add(
+                new Perturbation(
+                        "wind",
+                        0, 0,
+                        world.getPlayArea().getWidth() * 0.15, world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(-0.09, 0.00)));
         TextObject score = new TextObject("score")
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.98, 32)
@@ -200,8 +212,8 @@ public class DemoScene extends AbstractScene {
                                         .setPhysicType(PhysicType.DYNAMIC)
                                         .setColor(Color.RED.darker().darker())
                                         .setFillColor(Color.RED)
-                                        .setMaterial(Material.SUPER_BALL)
-                                        .setMass(5.0 * Math.random() + 1.0)
+                                        .setMaterial(Material.RUBBER)
+                                        .setMass(15.0 * Math.random() + 1.0)
                                         .setParent(parent)
                                         .addBehavior(this)
                                         .addForce(
