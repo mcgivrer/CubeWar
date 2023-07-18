@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.snapgames.core.behavior.Behavior;
+import com.snapgames.core.graphics.plugins.RendererPlugin;
 import com.snapgames.core.math.physic.Material;
 import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.Vector2D;
@@ -36,6 +37,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public Vector2D vel = Vector2D.ZERO();
     public Vector2D acceleration = Vector2D.ZERO();
 
+
     public List<Vector2D> forces = new ArrayList<>();
     public double dRotation;
     public double mass;
@@ -44,21 +46,27 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     protected int duration = -1;
     protected int lifespan;
 
-    Color color = Color.WHITE;
-    Color fillColor = Color.RED;
-    int priority = 1;
+    protected Color color = Color.WHITE;
+    protected Color fillColor = Color.RED;
+    protected int layer;
+    protected int priority = 1;
+    private Class<? extends RendererPlugin> drawnBy;
 
     Map<String, Object> attributes = new HashMap<>();
     public List<Behavior<T>> behaviors = new ArrayList<>();
     public PhysicType physicType = PhysicType.DYNAMIC;
     public Material material;
-    public int layer;
+
+
     public boolean constrainedToPlayArea;
     public boolean stickToCamera;
     public int contact;
+
     public int debug = 5;
+
     public Entity<?> parent;
     public List<Entity<?>> child = new CopyOnWriteArrayList<>();
+
 
     /**
      * Entity's constructor with a name, a position (x,y) and a size (w,h).
@@ -334,6 +342,10 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return forces;
     }
 
+    public int getLayer() {
+        return this.layer;
+    }
+
     public int getPriority() {
         return this.priority;
     }
@@ -372,5 +384,17 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
      * @param g the Graphics2D API instance to be used.
      */
     public void drawDebug(Graphics2D g) {
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public Color getFillColor() {
+        return fillColor;
+    }
+
+    public void setDrawnBy(Class<? extends RendererPlugin> aClass) {
+        drawnBy = aClass;
     }
 }

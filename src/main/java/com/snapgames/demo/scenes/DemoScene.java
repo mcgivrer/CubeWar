@@ -270,7 +270,8 @@ public class DemoScene extends AbstractScene {
                              */
                             @Override
                             public void update(Entity<?> e, double elapsed) {
-                                e.setColor(new Color((e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f), (e.layer * 0.1f)));
+                                int layer = e.getLayer();
+                                e.setColor(new Color((layer * 0.1f), (layer * 0.1f), (layer * 0.1f), (layer * 0.1f)));
                                 if (!world.getPlayArea().getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
                                     e.setPosition(world.getPlayArea().getWidth() * Math.random(),
                                             Math.random() * world.getPlayArea().getHeight() * 0.1);
