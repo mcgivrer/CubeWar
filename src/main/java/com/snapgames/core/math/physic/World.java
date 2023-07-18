@@ -2,6 +2,8 @@ package com.snapgames.core.math.physic;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Entity;
+import com.snapgames.core.math.Vector2D;
+import com.snapgames.core.math.physic.entity.Perturbation;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;

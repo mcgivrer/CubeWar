@@ -1,6 +1,9 @@
-package com.snapgames.core.math.physic;
+package com.snapgames.core.math.physic.entity;
 
 import com.snapgames.core.entity.Entity;
+import com.snapgames.core.math.physic.PhysicEngine;
+import com.snapgames.core.math.Vector2D;
+import com.snapgames.core.math.physic.World;
 
 import java.awt.*;
 

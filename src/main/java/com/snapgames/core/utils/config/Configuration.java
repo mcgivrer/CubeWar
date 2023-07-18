@@ -1,7 +1,7 @@
 package com.snapgames.core.utils.config;
 
 import com.snapgames.core.Application;
-import com.snapgames.core.math.physic.Vector2D;
+import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.math.physic.World;
 
 import java.awt.*;

@@ -1,4 +1,4 @@
-package com.snapgames.core.math.physic;
+package com.snapgames.core.math;
 
 import java.util.List;
 

@@ -1,7 +1,6 @@
 package com.snapgames.core.test;
 
-import com.snapgames.core.Application;
-import com.snapgames.core.math.physic.Vector2D;
+import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.math.physic.World;
 
 import com.snapgames.core.test.scenes.AppTest;
