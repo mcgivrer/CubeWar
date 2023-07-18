@@ -40,7 +40,7 @@ public class TextObject extends Entity<TextObject> {
 
     /**
      * Create a new {@link TextObject} at (x,y) with name n.
-     * 
+     *
      * @param n name of the new {@link TextObject}
      * @param x horizontal position of the new {@link TextObject}
      * @param y vertical position of the new {@link TextObject}
@@ -51,66 +51,11 @@ public class TextObject extends Entity<TextObject> {
 
     /**
      * Create a new {@link TextObject} at (x,y) with name n.
-     * 
+     *
      * @param n name of the new {@link TextObject}
      */
     public TextObject(String n) {
         super(n);
-    }
-
-    @Override
-    public void draw(Graphics2D g) {
-        if (Optional.ofNullable(font).isPresent()) {
-            g.setFont(font);
-        }
-        FontMetrics fm = g.getFontMetrics();
-        String textValue = text;
-        if (text.contains("%") && Optional.ofNullable(value).isPresent()) {
-            textValue = String.format(text, value);
-        }
-        this.width = fm.stringWidth(textValue);
-        this.height = fm.getHeight();
-        double offsetX = 0;
-        switch (textAlign) {
-            case ALIGN_LEFT -> {
-                offsetX = 0;
-            }
-            case ALIGN_CENTER -> {
-                offsetX = (int) (-this.width * 0.5);
-
-            }
-            case ALIGN_RIGHT -> {
-                offsetX = -this.width;
-            }
-            default -> {
-                offsetX = 0;
-                System.err.printf(">> <?> unknown textAlign %d value for %s%n", textAlign, name);
-            }
-        }
-        if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
-            drawShadowText(g, textValue, pos.x + offsetX, pos.y);
-        }
-        if (borderWidth > 0 && Optional.ofNullable(borderColor).isPresent()) {
-            drawBorderText(g, textValue, pos.x + offsetX, pos.y);
-        }
-        g.setColor(color);
-        g.drawString(textValue, (int) (pos.x + offsetX), (int) pos.y);
-    }
-
-    private void drawShadowText(Graphics2D g, String textValue, double x, double y) {
-        g.setColor(shadowColor);
-        for (int i = 0; i < shadowWidth; i++) {
-            g.drawString(textValue, (int) x + i, (int) y + i);
-        }
-    }
-
-    private void drawBorderText(Graphics2D g, String textValue, double x, double y) {
-        g.setColor(borderColor);
-        for (int i = -borderWidth; i < borderWidth; i++) {
-            for (int j = -borderWidth; j < borderWidth; j++) {
-                g.drawString(textValue, (int) x + i, (int) y + j);
-            }
-        }
     }
 
     public TextObject setShadowColor(Color sc) {
@@ -160,5 +105,37 @@ public class TextObject extends Entity<TextObject> {
         infos.add(String.format("3_text:%s", text));
         infos.add(String.format("3_val:%s", value != null ? value.toString() : "null"));
         return infos;
+    }
+
+    public Font getFont() {
+        return font;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public int getTextAlign() {
+        return textAlign;
+    }
+
+    public int getShadowWidth() {
+        return shadowWidth;
+    }
+
+    public Color getShadowColor() {
+        return shadowColor;
+    }
+
+    public int getBorderWidth() {
+        return borderWidth;
+    }
+
+    public Color getBorderColor() {
+        return borderColor;
     }
 }
