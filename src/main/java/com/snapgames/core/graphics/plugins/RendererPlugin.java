@@ -8,6 +8,15 @@ import com.snapgames.core.scene.Scene;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * The {@link RendererPlugin} interface define the required methods to implement the draw operations
+ * for any {@link Entity} to be drawn on screen.
+ *
+ * @param <T> the {@link Entity} inherited class to be processed by the RendererPlugin implementation.
+ * @author Frédéric Delorme
+ * @see RendererPlugin
+ * @since 1.0.0
+ */
 public interface RendererPlugin<T extends Entity<?>> {
 
     /**

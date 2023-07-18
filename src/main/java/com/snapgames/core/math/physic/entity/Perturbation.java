@@ -24,18 +24,6 @@ public class Perturbation extends Entity<Perturbation> {
         super(n, x, y, w, h);
     }
 
-    @Override
-    public void draw(Graphics2D g) {
-        // nothing to draw, perturbation is only a virtual element applying its effect
-        // to other entities.
-    }
-
-    @Override
-    public void drawDebug(Graphics2D g) {
-        g.setColor(new Color(0.1f, 0.5f, 1.0f, 0.4f));
-        g.fill(this);
-    }
-
     /**
      * Define Attraction level for this {@link Perturbation}, relatively applied from its center.
      *
