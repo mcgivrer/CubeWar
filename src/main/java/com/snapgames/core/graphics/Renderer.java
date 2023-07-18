@@ -3,6 +3,9 @@ package com.snapgames.core.graphics;
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
+import com.snapgames.core.graphics.plugins.GameObjectRendererPlugin;
+import com.snapgames.core.graphics.plugins.RendererPlugin;
+import com.snapgames.core.graphics.plugins.TextObjectRendererPlugin;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.World;
@@ -15,10 +18,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,8 +42,16 @@ public class Renderer extends JPanel {
     private boolean drawing = true;
     private static int sc_index;
 
+    private Map<Class<?>, RendererPlugin<?>> plugins = new HashMap<>();
+
     public Renderer(Application app) {
         this.application = app;
+        addPlugin(new GameObjectRendererPlugin());
+        addPlugin(new TextObjectRendererPlugin());
+    }
+
+    private void addPlugin(RendererPlugin<?> rendererPlugin) {
+        this.plugins.put(rendererPlugin.getEntityClass(), rendererPlugin);
     }
 
     /**
@@ -147,54 +156,21 @@ public class Renderer extends JPanel {
                 .sorted(Comparator.comparingInt(Entity::getPriority))
                 .forEach(
                         e -> {
+                            RendererPlugin rp = plugins.get(e.getClass());
                             g.rotate(-e.rotation,
                                     e.pos.x + e.width * 0.5,
                                     e.pos.y + e.height * 0.5);
-                            e.draw(g);
+                            rp.draw(this, g, e);
+                            e.setDrawnBy(rp.getClass());
                             g.rotate(e.rotation,
                                     e.pos.x + e.width * 0.5,
                                     e.pos.y + e.height * 0.5);
-                            drawEntityDebugInfo(g, scene, e);
+                            rp.drawDebugInfo(application, scene, this, g, e);
 
                             if (application.isDebugAt(4)) {
                                 System.out.printf(">> <d> draw entity %s%n", e.getName());
                             }
                         });
-    }
-
-    private void drawEntityDebugInfo(Graphics2D g, Scene scene, Entity<? extends Entity<?>> e) {
-        if (application.getConfiguration().debug
-                && application.getConfiguration().debugLevel > 0
-                && application.getConfiguration().debugLevel >= e.debug
-                && application.getConfiguration().debugFilter.contains(e.getName())) {
-            List<String> info = e.getDebugInfo();
-            int l = 0;
-            float fontSize = 9f;
-            g.setFont(g.getFont().deriveFont(fontSize));
-
-            int maxWidth = info.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
-            int offsetX = (int) (e.pos.x + maxWidth > (
-                    (e.stickToCamera ? 0 : scene.getActiveCamera().x) + scene.getActiveCamera().width) ? -(maxWidth + 4.0)
-                    : 4.0);
-            long nbLines = info.stream().filter(i -> Integer.parseInt((i.contains("_") ? i.substring(0, i.indexOf("_")) : "0")) <= application.getConfiguration().debugLevel).count();
-            int offsetY = (int) (e.pos.y + (fontSize * nbLines) >
-                    ((e.stickToCamera ? 0 : scene.getActiveCamera().y) + scene.getActiveCamera().height)
-                    ? -(9.0 + (fontSize * nbLines))
-                    : 0);
-            g.setColor(Color.ORANGE);
-            for (String item : info) {
-                if (!item.equals("")) {
-                    String levelStr = item.contains("_") ? item.substring(0, item.indexOf("_")) : "0";
-                    int level = Integer.parseInt(levelStr);
-                    if (level <= application.getConfiguration().debugLevel) {
-                        g.drawString(item.substring(info.indexOf("_") + 1),
-                                (int) (e.pos.x + e.getWidth() + offsetX),
-                                (int) (e.pos.y + offsetY + (l * fontSize)));
-                        l++;
-                    }
-                }
-            }
-        }
     }
 
     private void moveFromCameraPoV(Graphics2D g, Camera camera, double direction) {
