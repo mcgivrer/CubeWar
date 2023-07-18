@@ -48,12 +48,6 @@ public class GameObject extends Entity<GameObject> {
         super(n);
     }
 
-
-    @Override
-    public void draw(Graphics2D g) {
-
-    }
-
     public GameObject setType(GameObjectType t) {
         this.type = t;
         return this;
