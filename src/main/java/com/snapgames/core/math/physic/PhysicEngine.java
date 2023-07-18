@@ -13,6 +13,31 @@ import com.snapgames.core.utils.config.Configuration;
 
 /**
  * The {@link PhysicEngine} service will process mathematical moves to any Scene {@link Entity}.
+ * <p>
+ * Mainly some adapted Newton's laws are used to compute motions.
+ * Any {@link Entity} is under the first and second Newton's laws.
+ * <p>
+ * Some local changes can be added to th {@link World} through a {@link com.snapgames.core.math.physic.entity.Perturbation}
+ * object, bringing some force or attraction factor to be applied on a specific.
+ * <p>
+ * Some computation constrains on speed, acceleration and time scla factor can be defined into the configuration file:
+ * <pre>
+ * app.physic.constrained=true
+ * app.physic.ups=120
+ * app.physic.speed.max=128.0
+ * app.physic.acceleration.max=48.0
+ * app.physic.world=world(amazing,0.981,(1024x1024))
+ * </pre>
+ * <p>
+ * where:
+ *
+ * <ul>
+ *     <li><code>app.physic.constrained</code> defines if {@link Entity} is constrained to World play area,</li>
+ *     <li><code>app.physic.ups</code> defines loop engine update frequency (updates-per-second),</li>
+ *     <li><code>app.physic.speed.max</code> set the maximum speed for any {@link Entity} processed by the {@link PhysicEngine},</li>
+ *     <li><code>app.physic.acceleration.max</code> set the maximum acceleration for any {@link Entity} processed by the {@link PhysicEngine},</li>
+ *     <li><code>app.physic.world</code> defines the World object with a name, the gravity(only vertical) and the rectangle play area.</li>
+ * </ul>
  *
  * @author Frédéric Delorme
  * @since 1.0.0
@@ -33,12 +58,24 @@ public class PhysicEngine {
         initialize(app.getConfiguration());
     }
 
+    /**
+     * Initialize the service according to the {@link Configuration} entries.
+     *
+     * @param config the {@link Configuration} object corresponding to the loaded properties file.
+     */
     public void initialize(Configuration config) {
         this.maxEntityAcc = config.maxEntityAcc;
         this.maxEntitySpeed = config.maxEntitySpeed;
         this.timeScaleFactor = config.timeScaleFactor;
     }
 
+    /**
+     * Process any {@link Entity} in the {@link Scene} with the elapsed time.
+     *
+     * @param scene   the Scene containing the list of {@link Entity} to be processed.
+     * @param elapsed the elapsed time since previous call
+     * @param stats   the statistics map to be enhanced or used into the service, or to expose new statistics to other services.
+     */
     public void update(Scene scene, double elapsed, Map<String, Object> stats) {
         Camera camera = scene.getActiveCamera();
         Collection<Entity<?>> entities = scene.getEntities();
@@ -76,6 +113,12 @@ public class PhysicEngine {
 
     }
 
+    /**
+     * Process the {@link Entity} with the basic 2 first Newton's laws.
+     *
+     * @param entity  the concerned {@link Entity}
+     * @param elapsed the elapsed time since previous call.
+     */
     private void updateEntity(Entity<?> entity, double elapsed) {
         // save previous entity position.
         entity.setOldPosition(entity.pos);
@@ -124,6 +167,11 @@ public class PhysicEngine {
         constrainPlayArea(entity);
     }
 
+    /**
+     * Apply play area constrains to the concerned {@link Entity}.
+     *
+     * @param entity the {@link Entity} to be keep inside the play area.
+     */
     private void constrainPlayArea(Entity<? extends Entity<?>> entity) {
 
         if (!entity.constrainedToPlayArea)
@@ -155,14 +203,27 @@ public class PhysicEngine {
         entity.y = entity.pos.y;
     }
 
+    /**
+     * Define {@link World} object to be used during {@link Entity} processing.
+     *
+     * @param world the new {@link World} object instance to be used.
+     */
     public void setWorld(World world) {
         this.world = world;
     }
 
+    /**
+     * retrieve the current World object instance used for {@link Entity} processing.
+     *
+     * @return the World instance used into {@link Entity} processing.
+     */
     public World getWorld() {
         return this.world;
     }
 
+    /**
+     * Release possible captured resource.
+     */
     public void dispose() {
 
     }
