@@ -81,6 +81,9 @@ public class InputHandler implements KeyListener {
             case KeyEvent.VK_F3 -> {
                 application.getRenderer().takeScreenShot();
             }
+            case KeyEvent.VK_L -> {
+                application.getI18n().roll();
+            }
             default -> {
                 // nothing to do !
             }
