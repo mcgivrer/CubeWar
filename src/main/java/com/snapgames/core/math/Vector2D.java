@@ -1,6 +1,7 @@
 package com.snapgames.core.math;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Internal Class to manage simple Vector2D.
@@ -11,14 +12,19 @@ import java.util.List;
 public class Vector2D {
     public double x, y;
 
+    /**
+     * Create a zero initialize new {@link Vector2D} instance.
+     */
     public Vector2D() {
         x = 0.0f;
         y = 0.0f;
     }
 
     /**
-     * @param x
-     * @param y
+     * Create a new {@link Vector2D} with x and y values.
+     *
+     * @param x horizontal axis coordinate
+     * @param y vertical axis coordinate
      */
     public Vector2D(double x, double y) {
         super();
@@ -82,7 +88,7 @@ public class Vector2D {
     }
 
     public String toString() {
-        return String.format("{x:%04.2f,y:%04.2f}", x, y);
+        return String.format("{x:%04.3f,y:%04.3f}", x, y);
     }
 
     public Vector2D maximize(double maxAccel) {
@@ -112,5 +118,18 @@ public class Vector2D {
 
     public static Vector2D ZERO() {
         return new Vector2D();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vector2D vector2D = (Vector2D) o;
+        return Double.compare(vector2D.x, x) == 0.0 && Double.compare(vector2D.y, y) == 0.0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }
