@@ -1,5 +1,7 @@
 package com.snapgames.core.entity;
 
+import com.snapgames.core.utils.i18n.I18n;
+
 import java.awt.*;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +39,7 @@ public class TextObject extends Entity<TextObject> {
     int borderWidth;
     Color borderColor;
     int textAlign = ALIGN_LEFT;
+    String i18nKeyCode;
 
     /**
      * Create a new {@link TextObject} at (x,y) with name n.
@@ -107,6 +110,14 @@ public class TextObject extends Entity<TextObject> {
         return infos;
     }
 
+    @Override
+    public void update(double elapsed) {
+        super.update(elapsed);
+        if (i18nKeyCode != null) {
+            this.setText(I18n.getMessage(i18nKeyCode));
+        }
+    }
+
     public Font getFont() {
         return font;
     }
@@ -137,5 +148,10 @@ public class TextObject extends Entity<TextObject> {
 
     public Color getBorderColor() {
         return borderColor;
+    }
+
+    public TextObject setI18nKeyCode(String i18nKeyCode) {
+        this.i18nKeyCode = i18nKeyCode;
+        return this;
     }
 }
