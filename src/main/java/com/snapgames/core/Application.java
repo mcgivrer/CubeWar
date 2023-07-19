@@ -44,7 +44,6 @@ import java.util.*;
 public abstract class Application {
     private static int FPS = 120;
     private static int UPS = 60;
-    private static double PIXEL_METER_RATIO = 12.0;
 
     private ResourceBundle messages;
 
@@ -59,11 +58,11 @@ public abstract class Application {
     public String title = "no-title";
     public String version = "0.0.0";
 
-    private Configuration configuration;
-    private SceneManager scnMgr;
-    private PhysicEngine physicEngine;
-    private Renderer renderer;
-    private InputHandler inputHandler;
+    protected Configuration configuration;
+    protected SceneManager scnMgr;
+    protected PhysicEngine physicEngine;
+    protected Renderer renderer;
+    protected InputHandler inputHandler;
 
     /**
      * Create the {@link Application}.

@@ -3,7 +3,6 @@ package com.snapgames.core.test;
 import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.math.physic.World;
 
-import com.snapgames.core.test.scenes.AppTest;
 import org.junit.jupiter.api.*;
 
 import java.awt.*;

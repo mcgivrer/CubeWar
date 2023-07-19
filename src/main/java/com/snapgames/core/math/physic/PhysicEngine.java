@@ -81,39 +81,37 @@ public class PhysicEngine {
         Collection<Entity<?>> entities = scene.getEntities();
         double time = (elapsed * timeScaleFactor);
         cumulatedTime += elapsed;
-        if (!application.isExiting()) {
 
-            // if world contains any Perturbation n, apply to all concerned entities.
-            world.getPerturbations().stream().forEach(p ->
-                    entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
-                            .forEach(e -> {
-                                e.addForces(p.getForces());
-                            })
-            );
+        // if world contains any Perturbation n, apply to all concerned entities.
+        world.getPerturbations().stream().forEach(p ->
+                entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
+                        .forEach(e -> {
+                            e.addForces(p.getForces());
+                        })
+        );
 
-            entities.stream()
-                    .filter(Entity::isActive)
-                    .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
-                    .forEach(
-                            e -> {
-                                if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
-                                    updateEntity(e, time);
-                                }
-                                e.update(time * 100);
-                                // apply Behaviors
-                                if (e.behaviors.size() > 0) {
-                                    e.behaviors.forEach(b -> b.update(e, elapsed));
-                                }
-                            });
-            if (Optional.ofNullable(camera).isPresent()) {
-                camera.update(time);
-            }
-            scene.update(application, time);
-            long renderedEntities = entities.stream()
-                    .filter(Entity::isActive)
-                    .filter(e -> camera.inViewport(e) || e.stickToCamera).count();
-            stats.put("3_rendered", renderedEntities);
+        entities.stream()
+                .filter(Entity::isActive)
+                .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
+                .forEach(
+                        e -> {
+                            if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
+                                updateEntity(e, time);
+                            }
+                            e.update(time * 100);
+                            // apply Behaviors
+                            if (e.behaviors.size() > 0) {
+                                e.behaviors.forEach(b -> b.update(e, elapsed));
+                            }
+                        });
+        if (Optional.ofNullable(camera).isPresent()) {
+            camera.update(time);
         }
+        scene.update(application, time);
+        long renderedEntities = entities.stream()
+                .filter(Entity::isActive)
+                .filter(e -> (camera != null && camera.inViewport(e)) || e.stickToCamera).count();
+        stats.put("3_rendered", renderedEntities);
 
     }
 
