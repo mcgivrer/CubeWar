@@ -1,6 +1,7 @@
 package com.snapgames.core.input;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.World;
@@ -73,6 +74,18 @@ public class InputHandler implements KeyListener {
                 if (ctrlKey) {
                     scnMgr.getCurrent().clearScene();
                     scnMgr.getCurrent().create(application);
+                }
+            }
+            case KeyEvent.VK_R -> {
+                if (ctrlKey) {
+                    application.getSceneManager().getCurrent()
+                            .getEntity("ball's")
+                            .getChild().stream()
+                            .forEach(c -> {
+                                c.addForce(new Vector2D(
+                                        10.0 * (-0.5 + Math.random()),
+                                        10.0 * (-0.5 + Math.random())));
+                            });
                 }
             }
             case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {

@@ -173,7 +173,7 @@ public class Renderer extends JPanel {
                                     e.pos.y + e.height * 0.5);
                             rp.drawDebugInfo(application, scene, this, g, e);
 
-                            if (application.isDebugAt(4)) {
+                            if (application.isDebugAt(5)) {
                                 System.out.printf(">> <d> draw entity %s%n", e.getName());
                             }
                         });

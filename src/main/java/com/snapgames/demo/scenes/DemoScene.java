@@ -10,6 +10,7 @@ import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.utils.config.Configuration;
+import com.snapgames.core.utils.i18n.I18n;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 
 import java.awt.*;
@@ -42,11 +43,18 @@ public class DemoScene extends AbstractScene {
 
         world.add(
                 new Perturbation(
-                        "wind",
+                        "wind1",
                         0, 0,
                         world.getPlayArea().getWidth() * 0.15, world.getPlayArea().getHeight())
                         .setForce(new Vector2D(-0.09, 0.00))
                         .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.5f)));
+        world.add(
+                new Perturbation(
+                        "wind2",
+                        world.getPlayArea().getWidth() * 0.85, 0,
+                        world.getPlayArea().getWidth() * 0.15, world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(0.09, 0.00))
+                        .setFillColor(new Color(0.1f, 0.3f, 0.6f, 0.5f)));
 
         world.add(
                 new Perturbation(
@@ -55,6 +63,7 @@ public class DemoScene extends AbstractScene {
                         world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
                         .setForce(new Vector2D(0.0, -1.0))
                         .setFillColor(new Color(0.6f, 0.5f, 0.2f, 0.5f)));
+
 
         TextObject score = new TextObject("score")
                 .setPosition(
@@ -143,7 +152,7 @@ public class DemoScene extends AbstractScene {
                 .setColor(Color.WHITE)
                 .setShadowWidth(3)
                 .setBorderWidth(2)
-                .setText(app.getMessages().getString("app.title.copyright"))
+                .setI18nKeyCode("app.title.copyright")
                 .setPriority(20)
                 .setStickToCameraView(true)
                 .setDuration(2000)
@@ -170,7 +179,9 @@ public class DemoScene extends AbstractScene {
                 .setStickToCameraView(true)
                 .setMaterial(null)
                 .setActive(false)
-                .addBehavior((e, elapsed) -> e.setActive(app.isPaused()));
+                .addBehavior((e, elapsed) -> {
+                    e.setActive(app.isPaused());
+                });
 
         addEntity(pauseObj);
 
@@ -187,7 +198,7 @@ public class DemoScene extends AbstractScene {
                 .setMass(60.0)
                 .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
                 .setAttribute("speedStep", 0.1)
-                .setAttribute("jumpFactor", 99.601)
+                .setAttribute("jumpFactor", 10.601)
                 .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);

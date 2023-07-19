@@ -46,8 +46,6 @@ public abstract class Application {
     private static int FPS = 120;
     private static int UPS = 60;
 
-    private ResourceBundle messages;
-
     public boolean exit = false;
     public boolean pause = false;
 
@@ -72,7 +70,6 @@ public abstract class Application {
      * The default message file (from i18n/messages.properties) is loaded.
      */
     public Application() {
-        messages = ResourceBundle.getBundle("i18n/messages");
     }
 
     public void run(String[] args) {
@@ -81,9 +78,9 @@ public abstract class Application {
 
         // --- Translated information ---
         // Application name.
-        title = Optional.of(messages.getString("app.window.name")).orElse("-Test002-");
+        title = Optional.of(I18n.getMessage("app.window.name")).orElse("-Test002-");
         // Version of the application.
-        version = Optional.of(messages.getString("app.version")).orElse("-1.0.0-");
+        version = Optional.of(I18n.getMessage("app.version")).orElse("-1.0.0-");
 
         renderer.createWindow(inputHandler);
         createScenes();
@@ -163,7 +160,7 @@ public abstract class Application {
         int frames = 0;
         int updates = 0;
         int wait = 0;
-        long cumulatedGameTime = 0;
+        long internalGameTime = 0;
         Map<String, Object> datastats = new HashMap<>();
         Scene scene = scnMgr.getCurrent();
         do {
@@ -174,7 +171,7 @@ public abstract class Application {
             if (!pause) {
                 physicEngine.update(scnMgr.getCurrent(), elapsed * 0.00000002, datastats);
                 updates++;
-                cumulatedGameTime += elapsed * 0.000001;
+                internalGameTime += elapsed * 0.000001;
             }
             fps += (elapsed * 0.000001);
             if (fps < (1000 / FPS) && !pause) {
@@ -210,7 +207,7 @@ public abstract class Application {
                         Arrays.toString(e.getStackTrace()));
             }
 
-            datastats.put("5_internal", StringUtils.formatDuration(cumulatedGameTime));
+            datastats.put("5_internal", StringUtils.formatDuration(internalGameTime));
         } while (!exit);
     }
 
@@ -260,10 +257,6 @@ public abstract class Application {
 
     public Configuration getConfiguration() {
         return configuration;
-    }
-
-    public ResourceBundle getMessages() {
-        return messages;
     }
 
     public Renderer getRenderer() {

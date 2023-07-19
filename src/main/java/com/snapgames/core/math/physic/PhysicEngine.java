@@ -101,7 +101,7 @@ public class PhysicEngine {
                             e.update(time * 100);
                             // apply Behaviors
                             if (e.behaviors.size() > 0) {
-                                e.behaviors.forEach(b -> b.update(e, elapsed));
+                                e.behaviors.forEach(b -> b.update(e, time));
                             }
                         });
         if (Optional.ofNullable(camera).isPresent()) {
