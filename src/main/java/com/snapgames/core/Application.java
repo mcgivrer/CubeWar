@@ -11,6 +11,7 @@ import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.utils.StringUtils;
 import com.snapgames.core.utils.config.Configuration;
+import com.snapgames.core.utils.i18n.I18n;
 
 import javax.swing.*;
 import java.util.*;
@@ -63,6 +64,7 @@ public abstract class Application {
     protected PhysicEngine physicEngine;
     protected Renderer renderer;
     protected InputHandler inputHandler;
+    private I18n i18n;
 
     /**
      * Create the {@link Application}.
@@ -114,6 +116,7 @@ public abstract class Application {
      * Initialize all internal services before anything else.
      */
     private void initializeService() {
+        this.i18n = new I18n();
         this.physicEngine = new PhysicEngine(this);
         this.renderer = new Renderer(this);
         this.inputHandler = new InputHandler(this);
@@ -281,5 +284,9 @@ public abstract class Application {
 
     public String getDebugFilter() {
         return configuration.debugFilter;
+    }
+
+    public I18n getI18n() {
+        return this.i18n;
     }
 }
