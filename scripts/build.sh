@@ -2,9 +2,9 @@
 # more info at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
 # Copyright 2020 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
 # Your program build definition
-export PROGRAM_NAME=JavaTestApp
+export PROGRAM_NAME=cubewar
 export PROGRAM_VERSION=1.0.0
-export PROGRAM_TITLE=JavaTestApp
+export PROGRAM_TITLE=CubeWar
 export AUTHOR_NAME='Frédéric Delorme'
 export VENDOR_NAME=frederic.delorme@gmail.com
 export MAIN_CLASS=com.snapgames.demo.CubeWar
