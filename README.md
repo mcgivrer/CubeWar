@@ -2,9 +2,10 @@
 
 ## Context
 
-This is the readme file for Application (1.0.0) project.
+This is the readme file for JavaTestApp (1.0.0) project.
 
-The java project can be built or executed through the provided `scripts/build.sh` script, see reference later in this README for more info on this build script.
+The java project can be built or executed through the provided `scripts/build.sh` script, see reference later in this
+README for more info on this build script.
 
 ## Build
 
@@ -25,8 +26,10 @@ $> build.sh r
 or you can execute the command line :
 
 ```bash
-$> java -jar target/Application-1.0.0.jar
+$> java -jar target/JavaTestApp-1.0.0.jar
 ```
+
+![A screenshot from the current version](doc/images/screenshot-003-renderer-plugin-archi.png "A screenshot from the current version")
 
 ## Debug
 
@@ -39,11 +42,13 @@ jdb -sourcepath src/main/java/,src/main/resources \
 
 ## Reference
 
+### Build script
+
 > **NOTE** _To get more information this script usga ejust execite:_
 >
 > ```bash
 > $> scripts/build.sh
-> Build of program 'Application-1.0.0' ...
+> Build of program 'JavaTestApp-1.0.0' ...
 > -----------
 > build2 command line usage :
 > ---------------------------
@@ -63,6 +68,21 @@ jdb -sourcepath src/main/java/,src/main/resources \
 > -----------
 > ... done.
 > ```
+
+### Keys from the demo
+
+| Key                             | description                                              |
+|:--------------------------------|:---------------------------------------------------------|
+| `UP`,`DOWN`,<br/>`LEFT`,`RIGHT` | Move player vertically <br/>or horizontally              |
+| `ALT+UP`, `ALT+DOWN`            | Player rotation left or right                            |                                                     |
+| `CTRL+D`,<br/> `D`              | Activate debug display, <br/>change debug level (0 to 5) |
+| `PAGE-UP`, `PAGE-DOWN`          | Camera roll                                              |
+| `ALT+BACKSPACE`                 | Reset camera roll to initial position                    |
+| `CTRL+Z`                        | Reset Scene                                              |
+| `ESCAPE`                        | Exit demonstration                                       |
+| `P`,`PAUSE`                     | set/unset Game update in pause mode                      |
+| `G`                             | Reverse World gravity                                    |
+| `F3`                            | take screen shot (not implemented yet)                   |
 
 Enjoy !
 
