@@ -43,7 +43,8 @@ public class SceneManager {
 
     public void activate(String name) {
         if (current != null) {
-            System.out.printf(">> <!> Disable current scene '%s'(%s) as current one.%n", current.getName(),
+            System.out.printf(">> <!> Disable current scene '%s'(%s) as current one.%n",
+                    current.getName(),
                     current.getClass().getName());
             this.current.dispose();
         }

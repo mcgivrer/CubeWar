@@ -193,6 +193,8 @@ public abstract class Application {
                 datastats.put("2_UPS", realUPS);
                 datastats.put("3_nbObj", scnMgr.getCurrent().getEntities().size());
                 datastats.put("4_pause", this.pause ? "on" : "off");
+                datastats.put("4_lang", I18n.getCurrentLocale().getDisplayLanguage());
+
 
                 elapsedTime = 0;
                 frames = 0;

@@ -15,12 +15,14 @@ public class I18n {
             ResourceBundle.getBundle("i18n.messages", Locale.ROOT);
 
     private static final List<Locale> supportedLanguages = Arrays.asList(Locale.FRENCH, Locale.ENGLISH);
+    private static Locale currentLocale = Locale.getDefault();
 
     public static List<Locale> getListAvailableLanguages() {
         return supportedLanguages;
     }
 
     public static void activate(Locale localeCode) {
+        currentLocale = localeCode;
         messages = ResourceBundle.getBundle("i18n.messages", localeCode);
     }
 
@@ -35,5 +37,9 @@ public class I18n {
     public void roll() {
         activate(getListAvailableLanguages().get(index));
         index = index + 1 < getListAvailableLanguages().size() ? index + 1 : 0;
+    }
+
+    public static Locale getCurrentLocale() {
+        return currentLocale;
     }
 }
