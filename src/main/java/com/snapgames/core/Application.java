@@ -33,9 +33,11 @@ import java.util.*;
  * <p>
  * {@link Entity} can be from 3 physic nature:
  * <ul>
- * <li><code>{@link PhysicType#NONE}</code>, will not be processed by {@link PhysicEngine},</li>
+ * <li><code>{@link PhysicType#NONE}</code>, will not be processed by
+ * {@link PhysicEngine},</li>
  * <li><code>{@link PhysicType#STATIC}</code>, stick to the display screen,</li>
- * <li><code>{@link PhysicType#DYNAMIC}</code>, move according to the first Newton's
+ * <li><code>{@link PhysicType#DYNAMIC}</code>, move according to the first
+ * Newton's
  * law on movement.</li>
  * </ul>
  *
@@ -43,8 +45,8 @@ import java.util.*;
  * @since 1.0.0
  */
 public abstract class Application {
-    private static int FPS = 120;
-    private static int UPS = 60;
+    private static int FPS = 60;
+    private static int UPS = 120;
 
     private ResourceBundle messages;
 
@@ -138,11 +140,14 @@ public abstract class Application {
         UPS = configuration.ups;
 
         scnMgr.getCurrent().create(this);
-        long staticEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType.equals(PhysicType.STATIC))
+        long staticEntities = scnMgr.getCurrent().getEntities().stream()
+                .filter(e -> e.physicType.equals(PhysicType.STATIC))
                 .count();
-        long dynamicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
+        long dynamicEntities = scnMgr.getCurrent().getEntities().stream()
+                .filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
                 .count();
-        long nonePhysicEntities = scnMgr.getCurrent().getEntities().stream().filter(e -> e.physicType.equals(PhysicType.NONE))
+        long nonePhysicEntities = scnMgr.getCurrent().getEntities().stream()
+                .filter(e -> e.physicType.equals(PhysicType.NONE))
                 .count();
         System.out.printf(
                 ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
@@ -157,13 +162,14 @@ public abstract class Application {
         long start = System.nanoTime();
         long previous = start;
         long elapsedTime = 0;
-        int fps = 0;
+        int fpsTime = 0;
         int realFPS = 0;
         int realUPS = 0;
         int frames = 0;
         int updates = 0;
         int wait = 0;
         long cumulatedGameTime = 0;
+        long upsTime = 0;
         Map<String, Object> datastats = new HashMap<>();
         Scene scene = scnMgr.getCurrent();
         do {
@@ -172,17 +178,22 @@ public abstract class Application {
 
             input(inputHandler, scene);
             if (!pause) {
-                physicEngine.update(scnMgr.getCurrent(), elapsed * 0.00000002, datastats);
-                updates++;
+                if (upsTime > (1000.0 / UPS)) {
+                    physicEngine.update(scnMgr.getCurrent(), elapsed * 0.00000002, datastats);
+                    updates++;
+                    upsTime = 0;
+                }
+
+                upsTime += (elapsed * 0.00001);
                 cumulatedGameTime += elapsed * 0.000001;
             }
-            fps += (elapsed * 0.000001);
-            if (fps < (1000 / FPS) && !pause) {
+            if (fpsTime > (1000.0 / FPS)) {
                 renderer.draw(physicEngine.getWorld(), scnMgr.getCurrent(), datastats);
                 frames++;
-            } else {
-                fps = 0;
+                fpsTime = 0;
             }
+
+            fpsTime += (elapsed * 0.00001);
             previous = start;
             elapsedTime += (elapsed * 0.000001);
             if (elapsedTime > 1000) {
