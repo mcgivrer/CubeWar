@@ -300,4 +300,8 @@ public abstract class Application {
     public I18n getI18n() {
         return this.i18n;
     }
+
+    public InputHandler getInputHandler() {
+        return inputHandler;
+    }
 }
