@@ -71,18 +71,18 @@ jdb -sourcepath src/main/java/,src/main/resources \
 
 ### Keys from the demo
 
-| Key                             | description                                              |
-|:--------------------------------|:---------------------------------------------------------|
-| `UP`,`DOWN`,<br/>`LEFT`,`RIGHT` | Move player vertically <br/>or horizontally              |
-| `ALT+UP`, `ALT+DOWN`            | Player rotation left or right                            |                                                     |
-| `CTRL+D`,<br/> `D`              | Activate debug display, <br/>change debug level (0 to 5) |
-| `PAGE-UP`, `PAGE-DOWN`          | Camera roll                                              |
-| `ALT+BACKSPACE`                 | Reset camera roll to initial position                    |
-| `CTRL+Z`                        | Reset Scene                                              |
-| `ESCAPE`                        | Exit demonstration                                       |
-| `P`,`PAUSE`                     | set/unset Game update in pause mode                      |
-| `G`                             | Reverse World gravity                                    |
-| `F3`                            | take screen shot (not implemented yet)                   |
+| Key                                                               | description                                              |
+| :---------------------------------------------------------------- | :------------------------------------------------------- |
+| <kbd>UP</kbd>, <kbd>DOWN</kbd>, <kbd>LEFT</kbd>, <kbd>RIGHT</kbd> | Move player vertically <br/>or horizontally              |
+| <kbd>ALT</kbd>+<kbd>UP</kbd>, <kbd>ALT</kbd>+<kbd>DOWN</kbd>      | Player rotation left or right                            |
+| <kbd>CTRL</kbd>+<kbd>D</kbd>, <kbd>D</kbd>                        | Activate debug display, <br/>change debug level (0 to 5) |
+| <kbd>PAGE-UP</kbd>, <kbd>PAGE-DOWN</kbd>                          | Camera roll                                              |
+| <kbd>ALT</kbd>+<kbd>BACKSPACE</kbd>                               | Reset camera roll to initial position                    |
+| <kbd>CTRL</kbd>+<kbd>Z</kbd>                                      | Reset Scene                                              |
+| <kbd>ESCAPE</kbd>,<kbd>Q</kbd>                                    | Exit demonstration                                       |
+| <kbd>P</kbd>,<kbd>PAUSE</kbd>                                     | set/unset Game update in pause mode                      |
+| <kbd>G</kbd>                                                      | Reverse World gravity                                    |
+| <kbd>F3</kbd>                                                     | take screen shot (not implemented yet)                   |
 
 Enjoy !
 
