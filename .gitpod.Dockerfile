@@ -6,5 +6,5 @@ RUN bash -c "sudo apt-get update && \
     curl -s \"https://get.sdkman.io\" | bash && \
     source \"$HOME/.sdkman/bin/sdkman-init.sh\" && \
     sdk update && \ 
-    sdk env istall && \
+    sdk env install && \
     sdk env use"
