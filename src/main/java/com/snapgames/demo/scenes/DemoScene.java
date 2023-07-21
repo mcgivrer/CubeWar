@@ -11,6 +11,9 @@ import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
+import com.snapgames.demo.input.CameraInput;
+import com.snapgames.demo.input.GameKeyInput;
+import com.snapgames.demo.input.PlayerInput;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -39,6 +42,10 @@ public class DemoScene extends AbstractScene {
         Configuration configuration = app.getConfiguration();
         Graphics2D g2d = app.getRenderer().getBufferGraphics();
         World world = app.getPhysicEngine().getWorld();
+
+        app.getInputHandler()
+                .add(new PlayerInput())
+                .add(new CameraInput());
 
         world.add(
                 new Perturbation(

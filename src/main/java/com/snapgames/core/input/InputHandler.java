@@ -8,6 +8,8 @@ import com.snapgames.core.scene.SceneManager;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InputHandler implements KeyListener {
 
@@ -22,8 +24,15 @@ public class InputHandler implements KeyListener {
     public boolean shiftKey;
     public boolean altKey;
 
+    private List<InputInterface> inputInterfaceList = new ArrayList<>();
+
     public InputHandler(Application app) {
         this.application = app;
+    }
+
+    public InputHandler add(InputInterface ii) {
+        inputInterfaceList.add(ii);
+        return this;
     }
 
     @Override
@@ -31,12 +40,18 @@ public class InputHandler implements KeyListener {
         if (application.getConfiguration().debugLevel > 3) {
             System.out.printf(">> <!> key typed: %s%n", e.getKeyChar());
         }
+        inputInterfaceList.forEach(ii -> {
+            ii.onKeyTyped(this, e);
+        });
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         keys[e.getKeyCode()] = true;
         checkMetaKeys(e);
+        inputInterfaceList.forEach(ii -> {
+            ii.onKeyPressed(this, e);
+        });
     }
 
     private void checkMetaKeys(KeyEvent e) {
@@ -51,46 +66,17 @@ public class InputHandler implements KeyListener {
         PhysicEngine physicEngine = application.getPhysicEngine();
         SceneManager scnMgr = application.getSceneManager();
         keys[e.getKeyCode()] = false;
-        switch (e.getKeyCode()) {
-            // Request exiting game.
-            case KeyEvent.VK_ESCAPE -> {
-                application.requestExit();
-            }
-            // Change debug level
-            case KeyEvent.VK_D -> {
-                if (ctrlKey) {
-                    configuration.debug = !configuration.debug;
-                } else {
-                    configuration.debugLevel = configuration.debugLevel + 1 <= 5 ? configuration.debugLevel + 1 : 0;
-                }
-            }
-            // Reverse gravity
-            case KeyEvent.VK_G -> {
-                World world = physicEngine.getWorld();
-                world.setGravity(world.getGravity().negate());
-            }
-            case KeyEvent.VK_Z -> {
-                if (ctrlKey) {
-                    scnMgr.getCurrent().clearScene();
-                    scnMgr.getCurrent().create(application);
-                }
-            }
-            case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
-                application.setPause(!application.isPaused());
-            }
-            case KeyEvent.VK_F3 -> {
-                application.getRenderer().takeScreenShot();
-            }
-            case KeyEvent.VK_L -> {
-                application.getI18n().roll();
-            }
-            default -> {
-                // nothing to do !
-            }
-        }
+
+        inputInterfaceList.forEach(ii -> {
+            ii.onKeyReleased(this, e);
+        });
     }
 
     public boolean isKeyPressed(int keyCode) {
         return keys[keyCode];
+    }
+
+    public Application getApplication() {
+        return application;
     }
 }
