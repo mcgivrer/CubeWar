@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InputHandler implements KeyListener {
 
@@ -24,7 +25,7 @@ public class InputHandler implements KeyListener {
     public boolean shiftKey;
     public boolean altKey;
 
-    private List<InputInterface> inputInterfaceList = new ArrayList<>();
+    private List<InputInterface> inputInterfaceList = new CopyOnWriteArrayList<>();
 
     public InputHandler(Application app) {
         this.application = app;
