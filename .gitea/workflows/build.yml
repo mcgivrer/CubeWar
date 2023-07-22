@@ -13,7 +13,12 @@ jobs:
         uses: actions/checkout@v3
       - run: echo "💡 The ${{ gitea.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
+      - name: build all
         run: |
-          ls ${{ gitea.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+          curl -s \"https://get.sdkman.io\" | bash
+          source \"$HOME/.sdkman/bin/sdkman-init.sh\"
+          sdk update
+          sdk env install
+          sdk env use
+          scripts/build.sh a
+          
