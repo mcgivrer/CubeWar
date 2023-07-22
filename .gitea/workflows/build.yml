@@ -1,0 +1,34 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Build java with script
+
+on:
+  push:
+    branches: [ develop, feature/, master ]
+  pull_request:
+    branches: [ develop, feature/, master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 20
+      uses: actions/setup-java@v3
+      with:
+        java-version: '20'
+        distribution: 'zulu'
+        cache: maven
+    - name: Build Maven with Xvfb
+      run: |
+       sudo apt-get install xvfb
+       export DISPLAY=":1"
+       export AUDIODEV=null
+       xvfb-run :1 -screen 0 1024x768x24 > /dev/null 2>&1 &
+       scripts/build.sh a
+      env:
+       DISPLAY: :1
+       
