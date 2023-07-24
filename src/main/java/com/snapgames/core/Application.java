@@ -62,9 +62,6 @@ public abstract class Application {
 
     protected Configuration configuration;
     protected SceneManager scnMgr;
-    protected PhysicEngine physicEngine;
-    protected Renderer renderer;
-    protected InputHandler inputHandler;
 
     /**
      * Create the {@link Application}.
@@ -84,19 +81,14 @@ public abstract class Application {
         // Version of the application.
         version = Optional.of(I18n.getMessage("app.version")).orElse("-1.0.0-");
 
-        renderer.createWindow(inputHandler);
+        ((Renderer) GSystemManager.find(Renderer.class))
+                .createWindow(((InputHandler) GSystemManager.find(InputHandler.class)));
         createScenes();
         Scene scene = scnMgr.getCurrent();
         loop();
         dispose();
         System.out.println(">> <!> Scene Ended.");
         System.out.printf(">> <!> Application %s exiting.%n", title);
-    }
-
-    public void dispose() {
-        physicEngine.dispose();
-        renderer.dispose();
-        scnMgr.dispose();
     }
 
     /**
@@ -116,10 +108,11 @@ public abstract class Application {
      */
     private void initializeService() {
         GSystemManager.get();
+
         GSystemManager.add(I18n.get());
-        this.physicEngine = new PhysicEngine(this);
-        this.renderer = new Renderer(this);
-        this.inputHandler = new InputHandler(this);
+        GSystemManager.add(new PhysicEngine(this));
+        GSystemManager.add(new Renderer(this));
+        GSystemManager.add(new InputHandler(this));
         this.scnMgr = new SceneManager(this);
 
         GSystemManager.initialize(this);
@@ -130,6 +123,11 @@ public abstract class Application {
      * displayed from.
      */
     private void loop() {
+
+        PhysicEngine physicEngine = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
+        InputHandler inputHandler = ((InputHandler) GSystemManager.find(InputHandler.class));
+        Renderer renderer = ((Renderer) GSystemManager.find(Renderer.class));
+
         System.out.printf(
                 ">> <!> Activate Scene '%s'(%s).%n",
                 scnMgr.getCurrent().getName(), scnMgr.getCurrent().getClass().getName());
@@ -235,10 +233,9 @@ public abstract class Application {
         scene.input(this, ih);
     }
 
-    public void dispose(Scene scene) {
-        scene.clearScene();
-        renderer.dispose();
-        System.out.printf(">> End of application %s%n", title);
+    public void dispose() {
+        GSystemManager.dispose();
+        scnMgr.dispose();
     }
 
     public void requestExit() {
@@ -251,10 +248,6 @@ public abstract class Application {
 
     public void setPause(boolean p) {
         this.pause = p;
-    }
-
-    public PhysicEngine getPhysicEngine() {
-        return physicEngine;
     }
 
     public void setExit(boolean x) {
@@ -271,10 +264,6 @@ public abstract class Application {
 
     public Configuration getConfiguration() {
         return configuration;
-    }
-
-    public Renderer getRenderer() {
-        return this.renderer;
     }
 
     public SceneManager getSceneManager() {
@@ -295,9 +284,5 @@ public abstract class Application {
 
     public I18n getI18n() {
         return I18n.get();
-    }
-
-    public InputHandler getInputHandler() {
-        return inputHandler;
     }
 }

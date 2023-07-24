@@ -9,18 +9,23 @@ import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.scene.Scene;
+import com.snapgames.core.system.GSystem;
 import com.snapgames.core.utils.config.Configuration;
 
 /**
- * The {@link PhysicEngine} service will process mathematical moves to any Scene {@link Entity}.
+ * The {@link PhysicEngine} service will process mathematical moves to any Scene
+ * {@link Entity}.
  * <p>
  * Mainly some adapted Newton's laws are used to compute motions.
  * Any {@link Entity} is under the first and second Newton's laws.
  * <p>
- * Some local changes can be added to th {@link World} through a {@link com.snapgames.core.math.physic.entity.Perturbation}
+ * Some local changes can be added to th {@link World} through a
+ * {@link com.snapgames.core.math.physic.entity.Perturbation}
  * object, bringing some force or attraction factor to be applied on a specific.
  * <p>
- * Some computation constrains on speed, acceleration and time scla factor can be defined into the configuration file:
+ * Some computation constrains on speed, acceleration and time scla factor can
+ * be defined into the configuration file:
+ * 
  * <pre>
  * app.physic.constrained=true
  * app.physic.ups=120
@@ -32,17 +37,22 @@ import com.snapgames.core.utils.config.Configuration;
  * where:
  *
  * <ul>
- *     <li><code>app.physic.constrained</code> defines if {@link Entity} is constrained to World play area,</li>
- *     <li><code>app.physic.ups</code> defines loop engine update frequency (updates-per-second),</li>
- *     <li><code>app.physic.speed.max</code> set the maximum speed for any {@link Entity} processed by the {@link PhysicEngine},</li>
- *     <li><code>app.physic.acceleration.max</code> set the maximum acceleration for any {@link Entity} processed by the {@link PhysicEngine},</li>
- *     <li><code>app.physic.world</code> defines the World object with a name, the gravity(only vertical) and the rectangle play area.</li>
+ * <li><code>app.physic.constrained</code> defines if {@link Entity} is
+ * constrained to World play area,</li>
+ * <li><code>app.physic.ups</code> defines loop engine update frequency
+ * (updates-per-second),</li>
+ * <li><code>app.physic.speed.max</code> set the maximum speed for any
+ * {@link Entity} processed by the {@link PhysicEngine},</li>
+ * <li><code>app.physic.acceleration.max</code> set the maximum acceleration for
+ * any {@link Entity} processed by the {@link PhysicEngine},</li>
+ * <li><code>app.physic.world</code> defines the World object with a name, the
+ * gravity(only vertical) and the rectangle play area.</li>
  * </ul>
  *
  * @author Frédéric Delorme
  * @since 1.0.0
  */
-public class PhysicEngine {
+public class PhysicEngine implements GSystem {
 
     public transient World world;
 
@@ -55,13 +65,13 @@ public class PhysicEngine {
     public PhysicEngine(Application app) {
         this.application = app;
         setWorld(app.getConfiguration().world);
-        initialize(app.getConfiguration());
     }
 
     /**
      * Initialize the service according to the {@link Configuration} entries.
      *
-     * @param config the {@link Configuration} object corresponding to the loaded properties file.
+     * @param config the {@link Configuration} object corresponding to the loaded
+     *               properties file.
      */
     public void initialize(Configuration config) {
         this.maxEntityAcc = config.maxEntityAcc;
@@ -72,9 +82,11 @@ public class PhysicEngine {
     /**
      * Process any {@link Entity} in the {@link Scene} with the elapsed time.
      *
-     * @param scene   the Scene containing the list of {@link Entity} to be processed.
+     * @param scene   the Scene containing the list of {@link Entity} to be
+     *                processed.
      * @param elapsed the elapsed time since previous call
-     * @param stats   the statistics map to be enhanced or used into the service, or to expose new statistics to other services.
+     * @param stats   the statistics map to be enhanced or used into the service, or
+     *                to expose new statistics to other services.
      */
     public void update(Scene scene, double elapsed, Map<String, Object> stats) {
         Camera camera = scene.getActiveCamera();
@@ -83,12 +95,11 @@ public class PhysicEngine {
         cumulatedTime += elapsed;
 
         // if world contains any Perturbation n, apply to all concerned entities.
-        world.getPerturbations().stream().forEach(p ->
-                entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
+        world.getPerturbations().stream()
+                .forEach(p -> entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
                         .forEach(e -> {
                             e.addForces(p.getForces());
-                        })
-        );
+                        }));
 
         entities.stream()
                 .filter(Entity::isActive)
@@ -210,7 +221,8 @@ public class PhysicEngine {
     }
 
     /**
-     * retrieve the current World object instance used for {@link Entity} processing.
+     * retrieve the current World object instance used for {@link Entity}
+     * processing.
      *
      * @return the World instance used into {@link Entity} processing.
      */
@@ -223,5 +235,15 @@ public class PhysicEngine {
      */
     public void dispose() {
 
+    }
+
+    @Override
+    public Class<? extends GSystem> getSystemName() {
+        return PhysicEngine.class;
+    }
+
+    @Override
+    public void initialize(Application app) {
+        initialize(app.getConfiguration());
     }
 }
