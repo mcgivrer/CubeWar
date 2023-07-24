@@ -1,15 +1,14 @@
 package com.snapgames.core.input;
 
-import com.snapgames.core.Application;
-import com.snapgames.core.utils.config.Configuration;
-import com.snapgames.core.math.physic.PhysicEngine;
-import com.snapgames.core.math.physic.World;
-import com.snapgames.core.scene.SceneManager;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.snapgames.core.Application;
+import com.snapgames.core.math.physic.PhysicEngine;
+import com.snapgames.core.scene.SceneManager;
+import com.snapgames.core.utils.config.Configuration;
 
 public class InputHandler implements KeyListener {
 

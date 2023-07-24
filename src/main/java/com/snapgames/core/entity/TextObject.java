@@ -1,10 +1,10 @@
 package com.snapgames.core.entity;
 
-import com.snapgames.core.utils.i18n.I18n;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.util.List;
-import java.util.Optional;
+
+import com.snapgames.core.utils.i18n.I18n;
 
 /**
  * The {@link TextObject} is an extended {@link Entity} to support Text drawing.

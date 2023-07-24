@@ -1,5 +1,25 @@
 package com.snapgames.core.graphics;
 
+import static com.snapgames.core.utils.StringUtils.prepareStatsString;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
@@ -8,24 +28,8 @@ import com.snapgames.core.graphics.plugins.PerturbationRendererPlugin;
 import com.snapgames.core.graphics.plugins.RendererPlugin;
 import com.snapgames.core.graphics.plugins.TextObjectRendererPlugin;
 import com.snapgames.core.input.InputHandler;
-import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.World;
-import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.Scene;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.snapgames.core.utils.StringUtils.prepareStatsString;
 
 /**
  * The {@link Renderer} service will draw all entities from the {@link Scene}.
