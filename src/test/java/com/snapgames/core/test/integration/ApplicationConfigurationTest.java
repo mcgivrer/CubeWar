@@ -1,8 +1,11 @@
-package com.snapgames.core.test;
+package com.snapgames.core.test.integration;
 
 import com.snapgames.core.math.Vector2D;
+import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.World;
+import com.snapgames.core.system.GSystemManager;
 
+import com.snapgames.core.test.AppTest;
 import org.junit.jupiter.api.*;
 
 import java.awt.*;
@@ -34,6 +37,13 @@ public class ApplicationConfigurationTest {
     public void applicationHasExitArgument() {
         application.run(new String[]{"exit=true"});
         assertTrue(application.exit, "Exit has not ben set correctly.");
+    }
+
+    @Test
+    @Order(1)
+    public void applicationHasTestModeArgument() {
+        application.run(new String[]{"testMode=true"});
+        assertTrue(application.testMode, "testMode has not ben set correctly.");
     }
 
     @Test
@@ -83,7 +93,6 @@ public class ApplicationConfigurationTest {
                 "Buffer resolution configuration has not ben set correctly.");
     }
 
-
     @Test
     public void applicationHasFpsConfiguration() {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
@@ -108,9 +117,9 @@ public class ApplicationConfigurationTest {
         application.run(new String[]{"exit=true", "configPath=./test-config.properties"});
         World w = new World("amazing").setGravity(new Vector2D(0, 0.10))
                 .setPlayArea(new Rectangle2D.Double(0, 0, 1024, 1024));
-        assertEquals(w.toString(), application.getPhysicEngine().getWorld().toString(),
+        PhysicEngine pe = GSystemManager.find(PhysicEngine.class);
+        assertEquals(w.toString(), pe.getWorld().toString(),
                 "Physic World configuration has not ben set correctly.");
     }
-
 
 }

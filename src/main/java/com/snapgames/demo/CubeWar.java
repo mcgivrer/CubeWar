@@ -1,6 +1,9 @@
 package com.snapgames.demo;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.input.InputHandler;
+import com.snapgames.core.scene.SceneManager;
+import com.snapgames.core.system.GSystemManager;
 import com.snapgames.demo.input.GameKeyInput;
 import com.snapgames.demo.scenes.DemoScene;
 
@@ -14,9 +17,9 @@ import com.snapgames.demo.scenes.DemoScene;
 public class CubeWar extends Application {
     @Override
     protected void createScenes() {
-
-        getInputHandler().add(new GameKeyInput());
-        getSceneManager().add(new DemoScene());
+        InputHandler ih = ((InputHandler) GSystemManager.find(InputHandler.class));
+        ih.add(new GameKeyInput());
+        ((SceneManager) GSystemManager.find(SceneManager.class)).add(new DemoScene());
     }
 
     /**

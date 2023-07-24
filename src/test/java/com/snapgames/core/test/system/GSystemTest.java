@@ -24,9 +24,8 @@ public class GSystemTest {
 
     @AfterEach
     public void tearDown() {
-        if (Optional.ofNullable(gsm).isPresent() && GSystemManager.getSystemCount() > 0) {
-            GSystemManager.dispose();
-        }
+
+        GSystemManager.reset();
         gsm = null;
     }
 
