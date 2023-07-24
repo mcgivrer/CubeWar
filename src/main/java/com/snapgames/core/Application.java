@@ -9,6 +9,7 @@ import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
+import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.StringUtils;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.i18n.I18n;
@@ -48,8 +49,6 @@ public abstract class Application {
     private static int FPS = 60;
     private static int UPS = 120;
 
-    private ResourceBundle messages;
-
     public boolean exit = false;
     public boolean pause = false;
 
@@ -66,15 +65,13 @@ public abstract class Application {
     protected PhysicEngine physicEngine;
     protected Renderer renderer;
     protected InputHandler inputHandler;
-    private I18n i18n;
 
     /**
      * Create the {@link Application}.
      * <p>
      * The default message file (from i18n/messages.properties) is loaded.
      */
-    public Application() {
-        messages = ResourceBundle.getBundle("i18n/messages");
+    protected Application() {
     }
 
     public void run(String[] args) {
@@ -83,9 +80,9 @@ public abstract class Application {
 
         // --- Translated information ---
         // Application name.
-        title = Optional.of(messages.getString("app.window.name")).orElse("-Test002-");
+        title = Optional.of(I18n.getMessage("app.window.name")).orElse("-Test002-");
         // Version of the application.
-        version = Optional.of(messages.getString("app.version")).orElse("-1.0.0-");
+        version = Optional.of(I18n.getMessage("app.version")).orElse("-1.0.0-");
 
         renderer.createWindow(inputHandler);
         createScenes();
@@ -118,11 +115,14 @@ public abstract class Application {
      * Initialize all internal services before anything else.
      */
     private void initializeService() {
-        this.i18n = new I18n();
+        GSystemManager.get();
+        GSystemManager.add(I18n.get());
         this.physicEngine = new PhysicEngine(this);
         this.renderer = new Renderer(this);
         this.inputHandler = new InputHandler(this);
         this.scnMgr = new SceneManager(this);
+
+        GSystemManager.initialize(this);
     }
 
     /**
@@ -273,10 +273,6 @@ public abstract class Application {
         return configuration;
     }
 
-    public ResourceBundle getMessages() {
-        return messages;
-    }
-
     public Renderer getRenderer() {
         return this.renderer;
     }
@@ -298,7 +294,7 @@ public abstract class Application {
     }
 
     public I18n getI18n() {
-        return this.i18n;
+        return I18n.get();
     }
 
     public InputHandler getInputHandler() {

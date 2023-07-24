@@ -22,6 +22,7 @@ import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.utils.config.Configuration;
+import com.snapgames.core.utils.i18n.I18n;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.input.CameraInput;
 import com.snapgames.demo.input.PlayerInput;
@@ -30,8 +31,10 @@ import com.snapgames.demo.input.PlayerInput;
  * A {@link Scene} implementing a demonstration of capabilities for this
  * framework.
  * <p>
- * The scene implements a main <code>player</code> {@link GameObject}, a particle systems thanks
- * to the {@link ParticleSystemBuilder}, and a bunch of TextObject to display <code>score</code>, <code>life</code>
+ * The scene implements a main <code>player</code> {@link GameObject}, a
+ * particle systems thanks
+ * to the {@link ParticleSystemBuilder}, and a bunch of TextObject to display
+ * <code>score</code>, <code>life</code>
  * and some <code>message</code> and <code>pause</code> texts.
  *
  * @author Frédéric Delorme
@@ -156,7 +159,7 @@ public class DemoScene extends AbstractScene {
                 .setColor(Color.WHITE)
                 .setShadowWidth(3)
                 .setBorderWidth(2)
-                .setText(app.getMessages().getString("app.title.copyright"))
+                .setI18nKeyCode("app.title.copyright")
                 .setPriority(20)
                 .setStickToCameraView(true)
                 .setDuration(2000)
@@ -164,7 +167,6 @@ public class DemoScene extends AbstractScene {
                 .setMaterial(null);
 
         addEntity(copyRMessage);
-
 
         TextObject pauseObj = new TextObject("pause")
                 .setPosition(
@@ -213,7 +215,7 @@ public class DemoScene extends AbstractScene {
                         new ParticleBehavior<GameObject>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                                     Entity<?> parent) {
+                                    Entity<?> parent) {
 
                                 return new GameObject(
                                         particleNamePrefix + "_" + GameObject.index)
@@ -249,14 +251,13 @@ public class DemoScene extends AbstractScene {
                             }
                         }));
 
-
         // add rain drops particle system.
         addEntity(
                 ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 100,
                         new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                                     Entity<?> parent) {
+                                    Entity<?> parent) {
 
                                 return new GameObject(
                                         particleNamePrefix + "_" + GameObject.index)
