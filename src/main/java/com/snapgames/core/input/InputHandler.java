@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.system.GSystem;
@@ -20,7 +21,7 @@ public class InputHandler implements KeyListener, GSystem {
     public boolean shiftKey;
     public boolean altKey;
 
-    private List<InputInterface> inputInterfaceList = new ArrayList<>();
+    private List<InputInterface> inputInterfaceList = new CopyOnWriteArrayList<>();
 
     public InputHandler(Application app) {
         this.application = app;
