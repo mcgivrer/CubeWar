@@ -1,24 +1,30 @@
 package com.snapgames.demo.scenes;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.geom.Point2D;
+import java.util.Map;
+
 import com.snapgames.core.Application;
 import com.snapgames.core.behavior.ParticleBehavior;
-import com.snapgames.core.entity.*;
+import com.snapgames.core.entity.Camera;
+import com.snapgames.core.entity.Entity;
+import com.snapgames.core.entity.GameObject;
+import com.snapgames.core.entity.GameObjectType;
+import com.snapgames.core.entity.TextObject;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.Vector2D;
-import com.snapgames.core.math.physic.*;
+import com.snapgames.core.math.physic.Material;
+import com.snapgames.core.math.physic.PhysicType;
+import com.snapgames.core.math.physic.World;
 import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.input.CameraInput;
-import com.snapgames.demo.input.GameKeyInput;
 import com.snapgames.demo.input.PlayerInput;
-
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.geom.Point2D;
-import java.util.Map;
 
 /**
  * A {@link Scene} implementing a demonstration of capabilities for this

@@ -1,8 +1,6 @@
 package com.snapgames.core.entity;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.Optional;
 
 /**
  * The {@link GameObject} is the basic Object element to be displayed on screen.
