@@ -30,6 +30,7 @@ import com.snapgames.core.graphics.plugins.TextObjectRendererPlugin;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.World;
 import com.snapgames.core.scene.Scene;
+import com.snapgames.core.system.GSystem;
 
 /**
  * The {@link Renderer} service will draw all entities from the {@link Scene}.
@@ -37,7 +38,7 @@ import com.snapgames.core.scene.Scene;
  * @author Frédéric Delorme
  * @since 1.0.0
  */
-public class Renderer extends JPanel {
+public class Renderer extends JPanel implements GSystem {
 
     private final Application application;
     /**
@@ -52,9 +53,7 @@ public class Renderer extends JPanel {
 
     public Renderer(Application app) {
         this.application = app;
-        addPlugin(new GameObjectRendererPlugin());
-        addPlugin(new TextObjectRendererPlugin());
-        addPlugin(new PerturbationRendererPlugin());
+
     }
 
     private void addPlugin(RendererPlugin<?> rendererPlugin) {
@@ -128,7 +127,8 @@ public class Renderer extends JPanel {
             // draw entities not stick to Camera.
             moveFromCameraPoV(g, scene.getActiveCamera(), -1);
             drawEntities(g, scene, scene.getEntities().stream()
-                    .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera).collect(Collectors.toList()));
+                    .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
+                    .collect(Collectors.toList()));
             // draw all perturbations
             world.getPerturbations().forEach(p -> {
                 RendererPlugin rp = plugins.get(p.getClass());
@@ -222,5 +222,17 @@ public class Renderer extends JPanel {
             // TODO implement buffer image save to file.
         }
         this.drawing = true;
+    }
+
+    @Override
+    public Class<? extends GSystem> getSystemName() {
+        return Renderer.class;
+    }
+
+    @Override
+    public void initialize(Application app) {
+        addPlugin(new GameObjectRendererPlugin());
+        addPlugin(new TextObjectRendererPlugin());
+        addPlugin(new PerturbationRendererPlugin());
     }
 }

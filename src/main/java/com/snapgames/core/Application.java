@@ -62,9 +62,7 @@ public abstract class Application {
 
     protected Configuration configuration;
     protected SceneManager scnMgr;
-    protected PhysicEngine physicEngine;
-    protected Renderer renderer;
-    protected InputHandler inputHandler;
+    public boolean testMode;
 
     /**
      * Create the {@link Application}.
@@ -77,26 +75,22 @@ public abstract class Application {
     public void run(String[] args) {
         init(args);
         initializeService();
-
         // --- Translated information ---
         // Application name.
         title = Optional.of(I18n.getMessage("app.window.name")).orElse("-Test002-");
         // Version of the application.
         version = Optional.of(I18n.getMessage("app.version")).orElse("-1.0.0-");
 
-        renderer.createWindow(inputHandler);
+        ((Renderer) GSystemManager.find(Renderer.class))
+                .createWindow(((InputHandler) GSystemManager.find(InputHandler.class)));
         createScenes();
-        Scene scene = scnMgr.getCurrent();
+        Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
         loop();
-        dispose();
+        if (!testMode) {
+            dispose();
+        }
         System.out.println(">> <!> Scene Ended.");
         System.out.printf(">> <!> Application %s exiting.%n", title);
-    }
-
-    public void dispose() {
-        physicEngine.dispose();
-        renderer.dispose();
-        scnMgr.dispose();
     }
 
     /**
@@ -109,6 +103,9 @@ public abstract class Application {
     private void init(String[] args) {
         List<String> lArgs = Arrays.asList(args);
         configuration = new Configuration(this, pathToConfigFile, lArgs);
+        testMode = configuration.testMode;
+        exit = configuration.requestExit;
+        pathToConfigFile = configuration.pathToConfigFile;
     }
 
     /**
@@ -116,11 +113,12 @@ public abstract class Application {
      */
     private void initializeService() {
         GSystemManager.get();
+
         GSystemManager.add(I18n.get());
-        this.physicEngine = new PhysicEngine(this);
-        this.renderer = new Renderer(this);
-        this.inputHandler = new InputHandler(this);
-        this.scnMgr = new SceneManager(this);
+        GSystemManager.add(new PhysicEngine(this));
+        GSystemManager.add(new Renderer(this));
+        GSystemManager.add(new InputHandler(this));
+        GSystemManager.add(new SceneManager(this));
 
         GSystemManager.initialize(this);
     }
@@ -130,35 +128,40 @@ public abstract class Application {
      * displayed from.
      */
     private void loop() {
+
+        PhysicEngine physicEngine = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
+        InputHandler inputHandler = ((InputHandler) GSystemManager.find(InputHandler.class));
+        Renderer renderer = ((Renderer) GSystemManager.find(Renderer.class));
+        Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
         System.out.printf(
                 ">> <!> Activate Scene '%s'(%s).%n",
-                scnMgr.getCurrent().getName(), scnMgr.getCurrent().getClass().getName());
+                scene.getName(), scene.getClass().getName());
 
         // retrieve Frame-Per-Second
         FPS = configuration.fps;
         // retrieve Update-Per-Second
         UPS = configuration.ups;
 
-        scnMgr.getCurrent().create(this);
-        long staticEntities = scnMgr.getCurrent().getEntities().stream()
+        scene.create(this);
+        long staticEntities = scene.getEntities().stream()
                 .filter(e -> e.physicType.equals(PhysicType.STATIC))
                 .count();
-        long dynamicEntities = scnMgr.getCurrent().getEntities().stream()
+        long dynamicEntities = scene.getEntities().stream()
                 .filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
                 .count();
-        long nonePhysicEntities = scnMgr.getCurrent().getEntities().stream()
+        long nonePhysicEntities = scene.getEntities().stream()
                 .filter(e -> e.physicType.equals(PhysicType.NONE))
                 .count();
         System.out.printf(
                 ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
-                scnMgr.getCurrent().getName(),
+                scene.getName(),
                 staticEntities,
                 dynamicEntities,
                 nonePhysicEntities,
-                scnMgr.getCurrent().getActiveCamera() != null ? 1 : 0);
+                scene.getActiveCamera() != null ? 1 : 0);
 
         System.out.printf(
-                ">> <!> Application now loops on Scene '%s'%n", scnMgr.getCurrent().getName());
+                ">> <!> Application now loops on Scene '%s'%n", scene.getName());
         long start = System.nanoTime();
         long previous = start;
         long elapsedTime = 0;
@@ -171,7 +174,6 @@ public abstract class Application {
         long cumulatedGameTime = 0;
         long upsTime = 0;
         Map<String, Object> datastats = new HashMap<>();
-        Scene scene = scnMgr.getCurrent();
         do {
             start = System.nanoTime();
             long elapsed = start - previous;
@@ -179,7 +181,7 @@ public abstract class Application {
             input(inputHandler, scene);
             if (!pause) {
                 if (upsTime > (1000.0 / UPS)) {
-                    physicEngine.update(scnMgr.getCurrent(), elapsed * 0.00000002, datastats);
+                    physicEngine.update(scene, elapsed * 0.00000002, datastats);
                     updates++;
                     upsTime = 0;
                 }
@@ -188,7 +190,7 @@ public abstract class Application {
                 cumulatedGameTime += elapsed * 0.000001;
             }
             if (fpsTime > (1000.0 / FPS)) {
-                renderer.draw(physicEngine.getWorld(), scnMgr.getCurrent(), datastats);
+                renderer.draw(physicEngine.getWorld(), scene, datastats);
                 frames++;
                 fpsTime = 0;
             }
@@ -205,7 +207,7 @@ public abstract class Application {
                 }
                 datastats.put("1_FPS", realFPS);
                 datastats.put("2_UPS", realUPS);
-                datastats.put("3_nbObj", scnMgr.getCurrent().getEntities().size());
+                datastats.put("3_nbObj", scene.getEntities().size());
                 datastats.put("4_pause", this.pause ? "on" : "off");
 
                 elapsedTime = 0;
@@ -222,7 +224,7 @@ public abstract class Application {
             }
 
             datastats.put("5_internal", StringUtils.formatDuration(cumulatedGameTime));
-        } while (!exit);
+        } while (!(exit || testMode));
     }
 
     /**
@@ -235,10 +237,8 @@ public abstract class Application {
         scene.input(this, ih);
     }
 
-    public void dispose(Scene scene) {
-        scene.clearScene();
-        renderer.dispose();
-        System.out.printf(">> End of application %s%n", title);
+    public void dispose() {
+        GSystemManager.dispose();
     }
 
     public void requestExit() {
@@ -251,10 +251,6 @@ public abstract class Application {
 
     public void setPause(boolean p) {
         this.pause = p;
-    }
-
-    public PhysicEngine getPhysicEngine() {
-        return physicEngine;
     }
 
     public void setExit(boolean x) {
@@ -273,14 +269,6 @@ public abstract class Application {
         return configuration;
     }
 
-    public Renderer getRenderer() {
-        return this.renderer;
-    }
-
-    public SceneManager getSceneManager() {
-        return this.scnMgr;
-    }
-
     public boolean isDebugAt(int dl) {
         return configuration.debugLevel >= dl;
     }
@@ -295,9 +283,5 @@ public abstract class Application {
 
     public I18n getI18n() {
         return I18n.get();
-    }
-
-    public InputHandler getInputHandler() {
-        return inputHandler;
     }
 }

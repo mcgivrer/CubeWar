@@ -1,16 +1,15 @@
 package com.snapgames.core.system;
 
+import com.snapgames.core.Application;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.snapgames.core.Application;
-import com.snapgames.core.test.system.TestSystem;
-
 /**
  * The {@link GSystemManager} intends to create/delete and manage the interbal
  * game systems (see {@link GSystem})
- * 
+ *
  * @author Frédéric Delorme
  * @since 1.0.0
  */
@@ -30,7 +29,7 @@ public class GSystemManager {
 
     /**
      * retrieve the {@link GSystemManager} instance.
-     * 
+     *
      * @return
      */
     public static GSystemManager get() {
@@ -46,12 +45,12 @@ public class GSystemManager {
 
     /**
      * Retrieve a GSYstem from the manager on its own class name.
-     * 
+     *
      * @param <T>         the Type of the required system
      * @param systemClass
      * @return
      */
-    public static <T extends GSystem> T find(Class<TestSystem> systemClass) {
+    public static <T extends GSystem> T find(Class<? extends GSystem> systemClass) {
         return (T) systems.get(systemClass);
     }
 
@@ -59,6 +58,11 @@ public class GSystemManager {
         if (Optional.ofNullable(systems).isPresent()) {
             systems.values().forEach(GSystem::dispose);
         }
+    }
+
+    public static void reset() {
+        dispose();
+        systems.clear();
     }
 
     public static int getSystemCount() {
