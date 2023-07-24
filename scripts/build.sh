@@ -84,7 +84,8 @@ function generatedoc() {
     -doctitle "<h1>${PROGRAM_TITLE}</h1>" \
     -d ${TARGET}/javadoc \
     -sourcepath ${SRC}/main/java ${JAVADOC_CLASSPATH} \
-    echo "   done." >>target/build.log #  -overview ${TARGET}/javadoc/overview.html \
+    -overview ${TARGET}/javadoc/overview.html
+  echo "   done." >>target/build.log # 
 
 }
 #
@@ -96,6 +97,7 @@ function executeTests() {
   rm -Rf ${TARGET}/test-classes/*
   echo "copy test resources"
   cp -r ./src/test/resources/* ${TARGET}/test-classes
+  cp -r ${TARGET}/classes/* ${TARGET}/test-classes
   echo "compile test classes"
   #list test sources
   find ./src/test -name '*.java' >${TARGET}/test-sources.lst
@@ -107,7 +109,7 @@ function executeTests() {
     -g:source,lines,vars \
     -classpath "$LIB_TEST;${CLASSES};." \
     -d ${TARGET}/test-classes @${TARGET}/test-sources.lst \
-    -sourcepath src/main/java/,src/main/resources
+    -sourcepath src/main/java/,src/test/java/,src/test/resources
 
   echo "execute tests through JUnit"
   java ${JAR_OPTS} -jar "$LIB_TEST" --class-path "${CLASSES};${TARGET}/test-classes;${SRC}/test/resources;" --scan-class-path
