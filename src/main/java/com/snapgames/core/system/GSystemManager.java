@@ -51,7 +51,7 @@ public class GSystemManager {
      * @param systemClass
      * @return
      */
-    public static <T extends GSystem> T find(Class<TestSystem> systemClass) {
+    public static <T extends GSystem> T find(Class<? extends GSystem> systemClass) {
         return (T) systems.get(systemClass);
     }
 
