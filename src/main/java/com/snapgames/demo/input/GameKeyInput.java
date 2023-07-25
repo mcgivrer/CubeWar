@@ -10,6 +10,7 @@ import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
+import com.snapgames.core.utils.i18n.I18n;
 
 import java.awt.event.KeyEvent;
 
@@ -65,6 +66,7 @@ public class GameKeyInput implements InputInterface {
             }
             case KeyEvent.VK_L -> {
                 application.getI18n().roll();
+                application.getRenderer().getWindow().setTitle(I18n.getMessage("app.window.name"));
             }
             default -> {
                 // nothing to do !

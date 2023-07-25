@@ -235,4 +235,8 @@ public class Renderer extends JPanel implements GSystem {
         addPlugin(new TextObjectRendererPlugin());
         addPlugin(new PerturbationRendererPlugin());
     }
+
+    public JFrame getWindow() {
+        return frame;
+    }
 }
