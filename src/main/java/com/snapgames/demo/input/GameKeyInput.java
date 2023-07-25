@@ -15,15 +15,6 @@ import com.snapgames.core.utils.i18n.I18n;
 import java.awt.event.KeyEvent;
 
 public class GameKeyInput implements InputInterface {
-    @Override
-    public void input(InputHandler ih) {
-
-    }
-
-    @Override
-    public void onKeyPressed(InputHandler ih, KeyEvent key) {
-
-    }
 
     @Override
     public void onKeyReleased(InputHandler ih, KeyEvent e) {
@@ -56,9 +47,6 @@ public class GameKeyInput implements InputInterface {
                     scn.create(application);
                 }
             }
-            case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
-                application.setPause(!application.isPaused());
-            }
             case KeyEvent.VK_F3 -> {
                 Renderer rdr = GSystemManager.find(Renderer.class);
                 rdr.takeScreenShot();
@@ -72,10 +60,5 @@ public class GameKeyInput implements InputInterface {
                 // nothing to do !
             }
         }
-    }
-
-    @Override
-    public void onKeyTyped(InputHandler ih, KeyEvent key) {
-
     }
 }

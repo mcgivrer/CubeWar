@@ -6,6 +6,7 @@ import static com.snapgames.core.entity.TextObject.ALIGN_RIGHT;
 
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.snapgames.core.entity.TextObject;
@@ -37,35 +38,48 @@ public class TextObjectRendererPlugin implements RendererPlugin<TextObject> {
             textValue = String.format(entity.getText(), entity.getValue());
         }
         if (textValue != null) {
-            entity.width = fm.stringWidth(textValue);
-            entity.height = fm.getHeight();
-            double offsetX = 0;
-            switch (entity.getTextAlign()) {
-                case ALIGN_LEFT -> {
-                    offsetX = 0;
-                }
-                case ALIGN_CENTER -> {
-                    offsetX = (int) (-entity.width * 0.5);
 
+            if (textValue.contains("\n")) {
+                String[] lines = textValue.split("\n");
+                int i = 0;
+                for (String l : lines) {
+                    drawLine(g, entity, fm, l, ++i);
                 }
-                case ALIGN_RIGHT -> {
-                    offsetX = -entity.width;
-                }
-                default -> {
-                    offsetX = 0;
-                    System.err.printf(">> <?> unknown textAlign %d value for %s%n", entity.getTextAlign(),
-                            entity.getName());
-                }
+            } else {
+                drawLine(g, entity, fm, textValue, 0);
             }
-            if (entity.getShadowWidth() > 0 && Optional.ofNullable(entity.getShadowColor()).isPresent()) {
-                drawShadowText(g, entity, textValue, entity.pos.x + offsetX, entity.pos.y);
-            }
-            if (entity.getBorderWidth() > 0 && Optional.ofNullable(entity.getBorderWidth()).isPresent()) {
-                drawBorderText(g, entity, textValue, entity.pos.x + offsetX, entity.pos.y);
-            }
-            g.setColor(entity.getColor());
-            g.drawString(textValue, (int) (entity.pos.x + offsetX), (int) entity.pos.y);
         }
+    }
+
+    private void drawLine(Graphics2D g, TextObject entity, FontMetrics fm, String textValue, int lineOffset) {
+        entity.width = fm.stringWidth(textValue);
+        entity.height = fm.getHeight();
+        double offsetX = 0;
+        switch (entity.getTextAlign()) {
+            case ALIGN_LEFT -> {
+                offsetX = 0;
+            }
+            case ALIGN_CENTER -> {
+                offsetX = (int) (-entity.width * 0.5);
+
+            }
+            case ALIGN_RIGHT -> {
+                offsetX = -entity.width;
+            }
+            default -> {
+                offsetX = 0;
+                System.err.printf(">> <?> unknown textAlign %d value for %s%n", entity.getTextAlign(),
+                        entity.getName());
+            }
+        }
+        if (entity.getShadowWidth() > 0 && Optional.ofNullable(entity.getShadowColor()).isPresent()) {
+            drawShadowText(g, entity, textValue, entity.pos.x + offsetX, (int) entity.pos.y + (lineOffset * fm.getHeight()));
+        }
+        if (entity.getBorderWidth() > 0 && Optional.ofNullable(entity.getBorderWidth()).isPresent()) {
+            drawBorderText(g, entity, textValue, entity.pos.x + offsetX, (int) entity.pos.y + (lineOffset * fm.getHeight()));
+        }
+        g.setColor(entity.getColor());
+        g.drawString(textValue, (int) (entity.pos.x + offsetX), (int) entity.pos.y + (lineOffset * fm.getHeight()));
     }
 
 

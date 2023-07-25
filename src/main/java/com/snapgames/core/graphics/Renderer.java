@@ -127,7 +127,13 @@ public class Renderer extends JPanel implements GSystem {
             // draw entities not stick to Camera.
             moveFromCameraPoV(g, scene.getActiveCamera(), -1);
             drawEntities(g, scene, scene.getEntities().stream()
-                    .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
+                    .filter(e -> e.isActive()
+                                    && (
+                                    (scene.getActiveCamera() != null
+                                            && scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
+                                    || scene.getActiveCamera() == null
+                            )
+                    )
                     .collect(Collectors.toList()));
             // draw all perturbations
             world.getPerturbations().forEach(p -> {

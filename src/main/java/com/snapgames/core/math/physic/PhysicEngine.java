@@ -104,7 +104,6 @@ public class PhysicEngine implements GSystem {
                         }));
 
         entities.stream()
-                .filter(Entity::isActive)
                 .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
                 .forEach(
                         e -> {
@@ -122,7 +121,6 @@ public class PhysicEngine implements GSystem {
         }
         scene.update(application, time);
         long renderedEntities = entities.stream()
-                .filter(Entity::isActive)
                 .filter(e -> (camera != null && camera.inViewport(e)) || e.stickToCamera).count();
         stats.put("3_rendered", renderedEntities);
 
@@ -247,5 +245,15 @@ public class PhysicEngine implements GSystem {
     @Override
     public void initialize(Application app) {
         initialize(app.getConfiguration());
+    }
+
+    public PhysicEngine setMaxAcceleration(double maxAcc) {
+        this.maxEntityAcc = maxAcc;
+        return this;
+    }
+
+    public PhysicEngine setMaxVelocity(double maxVel) {
+        this.maxEntitySpeed = maxVel;
+        return this;
     }
 }

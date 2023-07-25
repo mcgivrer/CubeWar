@@ -27,18 +27,4 @@ public class CameraInput implements InputInterface {
         }
     }
 
-    @Override
-    public void onKeyPressed(InputHandler ih, KeyEvent key) {
-
-    }
-
-    @Override
-    public void onKeyReleased(InputHandler ih, KeyEvent key) {
-
-    }
-
-    @Override
-    public void onKeyTyped(InputHandler ih, KeyEvent key) {
-
-    }
 }

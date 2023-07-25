@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Map;
+import java.util.Optional;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.behavior.ParticleBehavior;
@@ -28,7 +30,9 @@ import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.i18n.I18n;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.input.CameraInput;
+import com.snapgames.demo.input.DemoInput;
 import com.snapgames.demo.input.PlayerInput;
+import com.snapgames.demo.particles.RainParticleBehavior;
 
 /**
  * A {@link Scene} implementing a demonstration of capabilities for this
@@ -44,6 +48,18 @@ import com.snapgames.demo.input.PlayerInput;
  * @since 1.0.0
  */
 public class DemoScene extends AbstractScene {
+
+    PlayerInput playerInput;
+    CameraInput cameraInput;
+    DemoInput demoInput;
+
+    public DemoScene() {
+        playerInput = new PlayerInput();
+        cameraInput = new CameraInput();
+        demoInput = new DemoInput();
+    }
+
+
     @Override
     public String getName() {
         return "demo";
@@ -53,11 +69,16 @@ public class DemoScene extends AbstractScene {
     public void create(Application app) {
         Configuration configuration = app.getConfiguration();
         Graphics2D g2d = ((Renderer) GSystemManager.find(Renderer.class)).getBufferGraphics();
-        World world = ((PhysicEngine) GSystemManager.find(PhysicEngine.class)).getWorld();
+        PhysicEngine pe = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
+        pe.setWorld(configuration.world);
+        pe.setMaxAcceleration(configuration.maxEntityAcc);
+        pe.setMaxVelocity(configuration.maxEntitySpeed);
+        World world = pe.getWorld();
 
         ((InputHandler) GSystemManager.find(InputHandler.class))
-                .add(new PlayerInput())
-                .add(new CameraInput());
+                .add(demoInput)
+                .add(playerInput)
+                .add(cameraInput);
         world.add(
                 new Perturbation(
                         "wind",
@@ -142,37 +163,16 @@ public class DemoScene extends AbstractScene {
                 .setI18nKeyCode("app.title.welcome")
                 .setPriority(20)
                 .setStickToCameraView(true)
-                .setDuration(9000)
+                .setDuration(5000)
                 .setDebug(2)
                 .setMaterial(null);
 
         addEntity(welcomeMessage);
 
-        TextObject copyRMessage = new TextObject("copyright")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.95)
-                .setPhysicType(PhysicType.NONE)
-                .setTextAlign(TextObject.ALIGN_CENTER)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(8.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setI18nKeyCode("app.title.copyright")
-                .setPriority(20)
-                .setStickToCameraView(true)
-                .setDuration(6000)
-                .setDebug(2)
-                .setMaterial(null);
-
-        addEntity(copyRMessage);
-
         TextObject pauseObj = new TextObject("pause")
                 .setPosition(
                         configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.50)
+                        configuration.bufferResolution.getHeight() * 0.40)
                 .setPhysicType(PhysicType.NONE)
                 .setTextAlign(TextObject.ALIGN_CENTER)
                 .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
@@ -185,8 +185,7 @@ public class DemoScene extends AbstractScene {
                 .setPriority(20)
                 .setStickToCameraView(true)
                 .setMaterial(null)
-                .setActive(false)
-                .addBehavior((e, elapsed) -> e.setActive(app.isPaused()));
+                .setActive(false);
 
         addEntity(pauseObj);
 
@@ -208,15 +207,33 @@ public class DemoScene extends AbstractScene {
                 .setDebug(2);
         addEntity(player);
 
-        // add som ball particle system
-
+        TextObject helpPanel = new TextObject("helpPanel")
+                .setPosition(
+                        configuration.bufferResolution.getWidth() * 0.50,
+                        configuration.bufferResolution.getHeight() * 0.50)
+                .setPhysicType(PhysicType.STATIC)
+                .setTextAlign(TextObject.ALIGN_CENTER)
+                .setColor(Color.LIGHT_GRAY)
+                .setShadowColor(new Color(0.4f, 0.4f, 0.4f, 0.8f))
+                .setBorderColor(Color.BLACK)
+                .setFont(g2d.getFont().deriveFont(8.5f))
+                .setShadowWidth(3)
+                .setBorderWidth(2)
+                .setI18nKeyCode("app.demo.help")
+                .setPriority(20)
+                .setStickToCameraView(true)
+                .setDuration(7000)
+                .setDebug(2)
+                .setMaterial(null)
+                .setActive(false);
+        addEntity(helpPanel);
         // create some red ball particle system
         addEntity(
                 ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
                         new ParticleBehavior<GameObject>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                    Entity<?> parent) {
+                                                     Entity<?> parent) {
 
                                 return new GameObject(
                                         particleNamePrefix + "_" + GameObject.index)
@@ -255,64 +272,7 @@ public class DemoScene extends AbstractScene {
         // add rain drops particle system.
         addEntity(
                 ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 100,
-                        new ParticleBehavior<>() {
-                            @Override
-                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                    Entity<?> parent) {
-
-                                return new GameObject(
-                                        particleNamePrefix + "_" + GameObject.index)
-                                        .setPosition(
-                                                Math.random() * parentWorld.getPlayArea().getWidth(),
-                                                Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
-                                        .setSize(1, 1)
-                                        .setPriority(1)
-                                        .setType(GameObjectType.TYPE_LINE)
-                                        .setConstrainedToPlayArea(false)
-                                        // set depth to the rain drop.
-                                        .setLayer((int) (Math.random() * 9) + 1)
-                                        .setPhysicType(PhysicType.DYNAMIC)
-                                        .setColor(Color.YELLOW)
-                                        .setMaterial(Material.WATER)
-                                        .setMass(1.0)
-                                        .setParent(parent)
-                                        .addBehavior(this)
-                                        .addForce(new Vector2D(0.0, Math.random() * 0.0003 * world.getGravity().y));
-                            }
-
-                            /**
-                             * Update the Entity e according to the elapsed time since previous call.
-                             *
-                             * @param e       the Entity to be updated
-                             * @param elapsed the elapsed time since previous call.
-                             */
-                            @Override
-                            public void update(Entity<?> e, double elapsed) {
-                                int layer = e.getLayer();
-                                e.setColor(new Color((layer * 0.1f), (layer * 0.1f), (layer * 0.1f), (layer * 0.1f)));
-                                if (!world.getPlayArea().getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
-                                    e.setPosition(world.getPlayArea().getWidth() * Math.random(),
-                                            Math.random() * world.getPlayArea().getHeight() * 0.1);
-                                    e.setOldPosition(e.x, e.y);
-
-                                }
-                                GameObject parent = (GameObject) e.parent;
-                                double time = parent.getAttribute("particleTime", 0.0);
-                                double particleTimeCycle = parent.getAttribute("particleTimeCycle", 980.0);
-                                double particleFreq = parent.getAttribute("particleFreq", 0.005);
-                                time += elapsed;
-                                int nbP = parent.getAttribute("nbParticles", 0);
-                                if (parent.getChild().size() < nbP && time > particleTimeCycle) {
-                                    for (int i = 0; i < nbP * particleFreq; i++) {
-                                        GameObject particle = this.create(world, 0, parent.name, parent);
-                                        parent.addChild(particle);
-                                        addEntity(particle);
-                                    }
-                                    time = 0;
-                                }
-                                parent.setAttribute("particleTime", time);
-                            }
-                        }));
+                        new RainParticleBehavior()));
 
         Camera cam = new Camera("cam01", configuration.bufferResolution.width, configuration.bufferResolution.height);
         cam.setTarget(player);
@@ -324,62 +284,64 @@ public class DemoScene extends AbstractScene {
     @Override
     public void input(Application app, InputHandler ih) {
         Entity<?> player = getEntity("player");
-        boolean moving = false;
-        // player moves
-        double step = player.getAttribute("speedStep", 0.0005);
-        double jumpFactor = player.getAttribute("jumpFactor", 10.0);
-        double rotStep = player.getAttribute("speedRotStep", 0.01);
+        if (Optional.ofNullable(player).isPresent()) {
+            boolean moving = false;
+            // player moves
+            double step = player.getAttribute("speedStep", 0.0005);
+            double jumpFactor = player.getAttribute("jumpFactor", 10.0);
+            double rotStep = player.getAttribute("speedRotStep", 0.01);
 
-        if (ih.ctrlKey)
-            step = step * 4.0;
-        if (ih.shiftKey)
-            step = step * 2.0;
+            if (ih.ctrlKey)
+                step = step * 4.0;
+            if (ih.shiftKey)
+                step = step * 2.0;
 
-        // player rotation
-        if (ih.altKey) {
-            if (ih.isKeyPressed(KeyEvent.VK_UP)) {
-                player.setRotationSpeed(-rotStep);
+            // player rotation
+            if (ih.altKey) {
+                if (ih.isKeyPressed(KeyEvent.VK_UP)) {
+                    player.setRotationSpeed(-rotStep);
+                }
+                if (ih.isKeyPressed(KeyEvent.VK_DOWN)) {
+                    player.setRotationSpeed(+rotStep);
+                }
+                if (ih.isKeyPressed(KeyEvent.VK_DELETE)) {
+                    player.setRotationSpeed(0.0);
+                    player.setRotation(0.0);
+                }
+            } else {
+                if (ih.isKeyPressed(KeyEvent.VK_UP)) {
+                    player.addForce(new Vector2D(0.0, -step * jumpFactor));
+                    moving = true;
+                }
+                if (ih.isKeyPressed(KeyEvent.VK_DOWN)) {
+                    player.addForce(new Vector2D(0.0, step));
+                    moving = true;
+                }
             }
-            if (ih.isKeyPressed(KeyEvent.VK_DOWN)) {
-                player.setRotationSpeed(+rotStep);
+
+            if (ih.isKeyPressed(KeyEvent.VK_LEFT)) {
+                player.addForce(new Vector2D(-step, 0.0));
+                moving = true;
+            }
+            if (ih.isKeyPressed(KeyEvent.VK_RIGHT)) {
+                player.addForce(new Vector2D(step, 0.0));
+                moving = true;
+            }
+
+            // camera rotation
+            if (ih.isKeyPressed(KeyEvent.VK_PAGE_UP)) {
+                getActiveCamera().setRotationSpeed(0.001);
+            }
+            if (ih.isKeyPressed(KeyEvent.VK_PAGE_DOWN)) {
+                getActiveCamera().setRotationSpeed(-0.001);
             }
             if (ih.isKeyPressed(KeyEvent.VK_DELETE)) {
-                player.setRotationSpeed(0.0);
-                player.setRotation(0.0);
+                getActiveCamera().setRotationSpeed(0.0);
+                getActiveCamera().setRotation(0.0);
             }
-        } else {
-            if (ih.isKeyPressed(KeyEvent.VK_UP)) {
-                player.addForce(new Vector2D(0.0, -step * jumpFactor));
-                moving = true;
+            if (!moving) {
+                player.vel = player.vel.multiply(player.getMaterial().getRoughness());
             }
-            if (ih.isKeyPressed(KeyEvent.VK_DOWN)) {
-                player.addForce(new Vector2D(0.0, step));
-                moving = true;
-            }
-        }
-
-        if (ih.isKeyPressed(KeyEvent.VK_LEFT)) {
-            player.addForce(new Vector2D(-step, 0.0));
-            moving = true;
-        }
-        if (ih.isKeyPressed(KeyEvent.VK_RIGHT)) {
-            player.addForce(new Vector2D(step, 0.0));
-            moving = true;
-        }
-
-        // camera rotation
-        if (ih.isKeyPressed(KeyEvent.VK_PAGE_UP)) {
-            getActiveCamera().setRotationSpeed(0.001);
-        }
-        if (ih.isKeyPressed(KeyEvent.VK_PAGE_DOWN)) {
-            getActiveCamera().setRotationSpeed(-0.001);
-        }
-        if (ih.isKeyPressed(KeyEvent.VK_DELETE)) {
-            getActiveCamera().setRotationSpeed(0.0);
-            getActiveCamera().setRotation(0.0);
-        }
-        if (!moving) {
-            player.vel = player.vel.multiply(player.getMaterial().getRoughness());
         }
     }
 
@@ -401,6 +363,15 @@ public class DemoScene extends AbstractScene {
                         (int) world.getPlayArea().getWidth(),
                         (int) world.getPlayArea().getHeight())
                         .setSpeed(new Vector2D(0.5, 0.5)));
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        ((InputHandler) GSystemManager.find(InputHandler.class))
+                .remove(playerInput)
+                .remove(cameraInput)
+                .remove(demoInput);
     }
 
 }

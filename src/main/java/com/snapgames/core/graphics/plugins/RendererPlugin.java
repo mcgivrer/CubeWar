@@ -1,12 +1,14 @@
 package com.snapgames.core.graphics.plugins;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.scene.Scene;
 
 import java.awt.*;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The {@link RendererPlugin} interface define the required methods to implement the draw operations
@@ -53,16 +55,20 @@ public interface RendererPlugin<T extends Entity<?>> {
             int l = 0;
             float fontSize = 9f;
             g.setFont(g.getFont().deriveFont(fontSize));
-
+            Camera activeCamera = scene.getActiveCamera();
             int maxWidth = info.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
-            int offsetX = (int) (e.pos.x + maxWidth > (
-                    (e.stickToCamera ? 0 : scene.getActiveCamera().x) + scene.getActiveCamera().width) ? -(maxWidth + 4.0)
-                    : 4.0);
-            long nbLines = info.stream().filter(i -> Integer.parseInt((i.contains("_") ? i.substring(0, i.indexOf("_")) : "0")) <= application.getConfiguration().debugLevel).count();
-            int offsetY = (int) (e.pos.y + (fontSize * nbLines) >
-                    ((e.stickToCamera ? 0 : scene.getActiveCamera().y) + scene.getActiveCamera().height)
-                    ? -(9.0 + (fontSize * nbLines))
-                    : 0);
+            int offsetX = 4;
+            int offsetY = 0;
+            if (Optional.ofNullable(activeCamera).isPresent()) {
+                offsetX = (int) (e.pos.x + maxWidth > (
+                        (e.stickToCamera ? 0 : scene.getActiveCamera().x) + scene.getActiveCamera().width) ? -(maxWidth + 4.0)
+                        : 4.0);
+                long nbLines = info.stream().filter(i -> Integer.parseInt((i.contains("_") ? i.substring(0, i.indexOf("_")) : "0")) <= application.getConfiguration().debugLevel).count();
+                offsetY = (int) (e.pos.y + (fontSize * nbLines) >
+                        ((e.stickToCamera ? 0 : scene.getActiveCamera().y) + scene.getActiveCamera().height)
+                        ? -(9.0 + (fontSize * nbLines))
+                        : 0);
+            }
             g.setColor(Color.ORANGE);
             for (String item : info) {
                 if (!item.equals("")) {

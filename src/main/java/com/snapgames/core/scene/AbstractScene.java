@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The {@link AbstractScene} delivers the default implementation and all supportive operation to
@@ -29,7 +30,7 @@ public abstract class AbstractScene implements Scene {
     /**
      * the map of entities maintained for this Scene implementation.
      */
-    private final Map<String, Entity<? extends Entity<?>>> entities = new HashMap<>();
+    private final Map<String, Entity<? extends Entity<?>>> entities = new ConcurrentHashMap<>();
 
     @Override
     public void addEntity(Entity<?> e) {
@@ -64,7 +65,7 @@ public abstract class AbstractScene implements Scene {
     }
 
     @Override
-    public Entity<?> getEntity(String entityName) {
+    public Entity<? extends Entity> getEntity(String entityName) {
         return entities.get(entityName);
     }
 
