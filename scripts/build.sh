@@ -5,24 +5,24 @@
 
 #!/bin/bash
 #!/bin/sh
-cd ./
-ENV=build
 
-function prop {
+ENV="./build.properties"
+
+function getPropertyValue {
   #grep "${1}" env/${ENV}.properties|cut -d'=' -f2
-  grep "${1}" ../${ENV}.properties | cut -d'=' -f2
+  grep "${1}" ${ENV} | cut -d'=' -f2
 }
 
-export PROGRAM_NAME=$(prop project.name)
-export PROGRAM_VERSION=$(prop project.version)
-export PROGRAM_TITLE=$(prop project.title)
-export MAIN_CLASS=$(prop project.main.class)
-export PACKAGES_LIST=$(prop project.javadoc.packages)
-export VENDOR_NAME=$(prop project.author.name)
-export AUTHOR_NAME=$(prop project.author.email)
-export SOURCE_VERSION=$(prop project.build.jdk.version)
-export SRC_ENCODING=$(prop project.build.encoding)
-export JAVADOC_CLASSPATH=$(prop project.javadoc.classpath)
+export PROGRAM_NAME=$(getPropertyValue project.name)
+export PROGRAM_VERSION=$(getPropertyValue project.version)
+export PROGRAM_TITLE=$(getPropertyValue project.title)
+export MAIN_CLASS=$(getPropertyValue project.main.class)
+export PACKAGES_LIST=$(getPropertyValue project.javadoc.packages)
+export VENDOR_NAME=$(getPropertyValue project.author.name)
+export AUTHOR_NAME=$(getPropertyValue project.author.email)
+export SOURCE_VERSION=$(getPropertyValue project.build.jdk.version)
+export SRC_ENCODING=$(getPropertyValue project.build.encoding)
+export JAVADOC_CLASSPATH=$(getPropertyValue project.javadoc.classpath)
 
 # the tools and sources versions
 export GIT_COMMIT_ID=$(git rev-parse HEAD)
