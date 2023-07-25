@@ -223,4 +223,8 @@ public class Renderer extends JPanel {
         }
         this.drawing = true;
     }
+
+    public JFrame getWindow() {
+        return frame;
+    }
 }
