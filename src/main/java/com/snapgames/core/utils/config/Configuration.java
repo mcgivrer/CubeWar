@@ -14,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Configuration extends ConcurrentHashMap<String, Object> {
 
-    private final Application application;
     public boolean physicConstrained;
     public double timeScaleFactor;
-    private String pathToConfigFile;
+    public boolean testMode;
+    public String pathToConfigFile;
     private Properties props = new Properties();
 
     public String name;
@@ -33,10 +33,10 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     public int fps;
     public int ups;
     public String debugFilter;
+    public boolean requestExit;
 
 
     public Configuration(Application app, String pathCfgFile, List<String> lArgs) {
-        this.application = app;
         this.pathToConfigFile = pathCfgFile;
         parseArgs(lArgs);
         try {
@@ -59,9 +59,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         }
 
         parseArgs(lArgs);
-        System.out.printf(">> Initialization application %s (%s)%n",
-                application.title,
-                application.version);
+        System.out.printf(">> Configuration loaded%n");
     }
 
 
@@ -74,6 +72,10 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
 
         // --- Configuration information ---
 
+
+        // test mode (true = on)
+        testMode = getParsedBoolean(config, "app.test.mode", "false");
+
         // debug mode (true = on)
         debug = getParsedBoolean(config, "app.debug", "false");
         // debug level (0-5 where 0=off and 5 max debug info)
@@ -81,7 +83,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         // debug filter: filtering entity on its name
         debugFilter = config.getProperty("app.debug.filter", "none");
         // exit flag to let test only ONE loop execution.
-        application.exit = getParsedBoolean(config, "app.exit", "false");
+        requestExit = getParsedBoolean(config, "app.exit", "false");
 
         // Window size
         winSize = getDimension(config, "app.window.size", "640x400");
@@ -235,8 +237,12 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
             switch (arg[0]) {
                 // do not execute loop, just perform one and exit (used for test purpose only).
                 case "x", "exit" -> {
-                    application.setExit(Boolean.parseBoolean(arg[1]));
+                    requestExit = Boolean.parseBoolean(arg[1]);
                     System.out.printf(">> <!> argument 'exit' set to %s%n", arg[1]);
+                }
+                case "testMode" -> {
+                    testMode = Boolean.parseBoolean(arg[1]);
+                    System.out.printf(">> <!> argument 'Test Mode' set to %s: test mode %s.%n", arg[1], testMode ? "activated" : "NOT activated");
                 }
                 // define debug level for this application run.
                 case "d", "debugLevel" -> {
@@ -252,15 +258,10 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
                     ups = Integer.parseInt(arg[1]);
                     System.out.printf(">> <!> argument 'UPS' set to %s Update-Per-Second.%n", arg[1]);
                 }
-                // set a temporary window title (used for test execution purpose only)
-                case "t", "title" -> {
-                    application.setTitle(arg[1]);
-                    System.out.printf(">> <!> argument 'title' set to %s%n", arg[1]);
-                }
+
                 // define an alternate file configuration path to feed the Application.
                 // used mainly for automated test requirement.
                 case "c", "configPath" -> {
-                    application.setPathToConfigFile(arg[1]);
                     this.pathToConfigFile = arg[1];
                     System.out.printf(">> <!> argument 'configuration file path' set to %s%n", arg[1]);
                 }

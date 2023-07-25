@@ -1,7 +1,6 @@
 package com.snapgames.core.entity;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,9 +10,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.graphics.plugins.RendererPlugin;
+import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.math.physic.Material;
 import com.snapgames.core.math.physic.PhysicType;
-import com.snapgames.core.math.Vector2D;
 
 /**
  * {@link Entity} class representing an entity in the game.

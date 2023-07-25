@@ -9,8 +9,10 @@ import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.test.AppTest;
 import com.snapgames.core.test.scenes.TestScene;
+import com.snapgames.core.utils.config.Configuration;
 import org.junit.jupiter.api.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,8 +37,11 @@ public class PhysicEngineTest {
     @Test
     @Order(1)
     public void testStaticEntity() {
-        application.run(new String[]{"exit=true", "config=./test-pe.properties"});
+        // Just initialize a configuration, but no looping (testMode=true)
+        Configuration cfg = new Configuration(application, "./test-pe.properties", Arrays.asList("testMode=true"));
+        // create a specific instance of the PhysicEngine for test purpose (isolated)
         PhysicEngine pe = new PhysicEngine(application);
+        pe.initialize(cfg);
 
         Scene testScene = new TestScene();
         GameObject obj1 =
@@ -60,16 +65,17 @@ public class PhysicEngineTest {
     @Test
     @Order(2)
     public void testDynamicEntity() {
-        // Just initialize an application with a specific configuration, but no looping (exit=true)
-        application.run(new String[]{"exit=true", "configPath=./test-pe.properties"});
-        // create a specific instance of thePhysicEngine for test purpose (isolated)
+        // Just initialize a configuration, but no looping (testMode=true)
+        Configuration cfg = new Configuration(application, "./test-pe.properties", Arrays.asList("testMode=true"));
+        // create a specific instance of the PhysicEngine for test purpose (isolated)
         PhysicEngine pe = new PhysicEngine(application);
+        pe.initialize(cfg);
         // add a TestScene
         Scene testScene = new TestScene();
         testScene.create(application);
         // gather the already existing player object from test scene
         GameObject player = (GameObject) testScene.getEntity("player");
-        player.addForce(new Vector2D(0.0, 0.1));
+        player.addForce(new Vector2D(0.0, 3.0));
 
         Map<String, Object> stats = new HashMap<>();
         for (int i = 0; i < 100; i++) {
@@ -84,10 +90,11 @@ public class PhysicEngineTest {
     @Test
     @Order(3)
     public void testDynamicEntityWithPerturbation() {
-        // Just initialize an application with a specific configuration, but no looping (exit=true)
-        application.run(new String[]{"exit=true", "configPath=./test-pe.properties"});
-        // create a specific instance of thePhysicEngine for test purpose (isolated)
+        // Just initialize a configuration, but no looping (testMode=true)
+        Configuration cfg = new Configuration(application, "./test-pe.properties", Arrays.asList("testMode=true"));
+        // create a specific instance of the PhysicEngine for test purpose (isolated)
         PhysicEngine pe = new PhysicEngine(application);
+        pe.initialize(cfg);
         // add a TestScene
         Scene testScene = new TestScene();
         testScene.create(application);
@@ -96,10 +103,10 @@ public class PhysicEngineTest {
         player.addForce(new Vector2D(0.0, 0.1));
 
         Perturbation pert01 = new Perturbation("pert01",
-                0,0,
+                0, 0,
                 pe.world.getPlayArea().getWidth(),
                 pe.world.getPlayArea().getHeight())
-                .setForce(new Vector2D(0.10,0.0));
+                .setForce(new Vector2D(0.10, 0.0));
         pe.world.add(pert01);
 
         Map<String, Object> stats = new HashMap<>();
