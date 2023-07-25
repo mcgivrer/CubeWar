@@ -13,7 +13,8 @@ public class TitleInput implements InputInterface {
     public void onKeyReleased(InputHandler ih, KeyEvent key) {
         switch (key.getKeyCode()) {
             case KeyEvent.VK_SPACE, KeyEvent.VK_ENTER -> {
-                ((SceneManager) GSystemManager.find(SceneManager.class)).activate("demo");
+                SceneManager scnMgr = ((SceneManager) GSystemManager.find(SceneManager.class));
+                scnMgr.activate("demo");
             }
             default -> {
                 // nothing to do there !

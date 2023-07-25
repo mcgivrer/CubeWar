@@ -47,9 +47,6 @@ public class GameKeyInput implements InputInterface {
                     scn.create(application);
                 }
             }
-            case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
-                application.setPause(!application.isPaused());
-            }
             case KeyEvent.VK_F3 -> {
                 Renderer rdr = GSystemManager.find(Renderer.class);
                 rdr.takeScreenShot();
