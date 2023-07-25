@@ -7,14 +7,11 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.snapgames.core.Application;
-import com.snapgames.core.math.physic.PhysicEngine;
-import com.snapgames.core.scene.SceneManager;
-import com.snapgames.core.utils.config.Configuration;
+import com.snapgames.core.system.GSystem;
 
-public class InputHandler implements KeyListener {
+public class InputHandler implements KeyListener, GSystem {
 
     private final Application application;
-
 
     /**
      * Key listener components
@@ -62,9 +59,6 @@ public class InputHandler implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        Configuration configuration = application.getConfiguration();
-        PhysicEngine physicEngine = application.getPhysicEngine();
-        SceneManager scnMgr = application.getSceneManager();
         keys[e.getKeyCode()] = false;
 
         inputInterfaceList.forEach(ii -> {
@@ -78,5 +72,20 @@ public class InputHandler implements KeyListener {
 
     public Application getApplication() {
         return application;
+    }
+
+    @Override
+    public Class<? extends GSystem> getSystemName() {
+        return InputHandler.class;
+    }
+
+    @Override
+    public void initialize(Application app) {
+        // nothing specific to perform for this service initialization.
+    }
+
+    @Override
+    public void dispose() {
+        // nothing specific to perform for this service release.
     }
 }

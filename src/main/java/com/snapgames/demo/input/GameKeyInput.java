@@ -1,11 +1,14 @@
 package com.snapgames.demo.input;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.input.InputInterface;
 import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.World;
+import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
+import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.i18n.I18n;
 
@@ -26,8 +29,9 @@ public class GameKeyInput implements InputInterface {
     public void onKeyReleased(InputHandler ih, KeyEvent e) {
         Application application = ih.getApplication();
         Configuration configuration = application.getConfiguration();
-        PhysicEngine physicEngine = application.getPhysicEngine();
-        SceneManager scnMgr = application.getSceneManager();
+        PhysicEngine physicEngine = GSystemManager.find(PhysicEngine.class);
+        Scene scn = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
+        ;
 
         switch (e.getKeyCode()) {
             // Request exiting game.
@@ -49,15 +53,16 @@ public class GameKeyInput implements InputInterface {
             }
             case KeyEvent.VK_Z -> {
                 if (ih.ctrlKey) {
-                    scnMgr.getCurrent().clearScene();
-                    scnMgr.getCurrent().create(application);
+                    scn.clearScene();
+                    scn.create(application);
                 }
             }
             case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
                 application.setPause(!application.isPaused());
             }
             case KeyEvent.VK_F3 -> {
-                application.getRenderer().takeScreenShot();
+                Renderer rdr = GSystemManager.find(Renderer.class);
+                rdr.takeScreenShot();
             }
             case KeyEvent.VK_L -> {
                 application.getI18n().roll();
