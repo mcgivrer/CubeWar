@@ -44,6 +44,16 @@ import com.snapgames.demo.input.PlayerInput;
  * @since 1.0.0
  */
 public class DemoScene extends AbstractScene {
+
+    PlayerInput playerInput;
+    CameraInput cameraInput;
+
+    public DemoScene() {
+        playerInput = new PlayerInput();
+        cameraInput = new CameraInput();
+    }
+
+
     @Override
     public String getName() {
         return "demo";
@@ -56,8 +66,8 @@ public class DemoScene extends AbstractScene {
         World world = ((PhysicEngine) GSystemManager.find(PhysicEngine.class)).getWorld();
 
         ((InputHandler) GSystemManager.find(InputHandler.class))
-                .add(new PlayerInput())
-                .add(new CameraInput());
+                .add(playerInput)
+                .add(cameraInput);
         world.add(
                 new Perturbation(
                         "wind",
@@ -216,7 +226,7 @@ public class DemoScene extends AbstractScene {
                         new ParticleBehavior<GameObject>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                    Entity<?> parent) {
+                                                     Entity<?> parent) {
 
                                 return new GameObject(
                                         particleNamePrefix + "_" + GameObject.index)
@@ -258,7 +268,7 @@ public class DemoScene extends AbstractScene {
                         new ParticleBehavior<>() {
                             @Override
                             public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                    Entity<?> parent) {
+                                                     Entity<?> parent) {
 
                                 return new GameObject(
                                         particleNamePrefix + "_" + GameObject.index)
@@ -401,6 +411,14 @@ public class DemoScene extends AbstractScene {
                         (int) world.getPlayArea().getWidth(),
                         (int) world.getPlayArea().getHeight())
                         .setSpeed(new Vector2D(0.5, 0.5)));
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        ((InputHandler) GSystemManager.find(InputHandler.class))
+                .remove(playerInput)
+                .remove(cameraInput);
     }
 
 }
