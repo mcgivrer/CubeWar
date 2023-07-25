@@ -142,7 +142,7 @@ public class DemoScene extends AbstractScene {
                 .setI18nKeyCode("app.title.welcome")
                 .setPriority(20)
                 .setStickToCameraView(true)
-                .setDuration(5000)
+                .setDuration(9000)
                 .setDebug(2)
                 .setMaterial(null);
 
@@ -163,7 +163,7 @@ public class DemoScene extends AbstractScene {
                 .setI18nKeyCode("app.title.copyright")
                 .setPriority(20)
                 .setStickToCameraView(true)
-                .setDuration(2000)
+                .setDuration(6000)
                 .setDebug(2)
                 .setMaterial(null);
 
