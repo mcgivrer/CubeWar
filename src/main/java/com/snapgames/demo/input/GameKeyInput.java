@@ -31,7 +31,6 @@ public class GameKeyInput implements InputInterface {
         Configuration configuration = application.getConfiguration();
         PhysicEngine physicEngine = GSystemManager.find(PhysicEngine.class);
         Scene scn = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
-        ;
 
         switch (e.getKeyCode()) {
             // Request exiting game.
@@ -66,7 +65,8 @@ public class GameKeyInput implements InputInterface {
             }
             case KeyEvent.VK_L -> {
                 application.getI18n().roll();
-                application.getRenderer().getWindow().setTitle(I18n.getMessage("app.window.name"));
+                Renderer renderer = GSystemManager.find(Renderer.class);
+                renderer.getWindow().setTitle(I18n.getMessage("app.window.name"));
             }
             default -> {
                 // nothing to do !
