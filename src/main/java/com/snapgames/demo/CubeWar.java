@@ -20,8 +20,9 @@ public class CubeWar extends Application {
     protected void createScenes() {
         InputHandler ih = ((InputHandler) GSystemManager.find(InputHandler.class));
         ih.add(new GameKeyInput());
-        ((SceneManager) GSystemManager.find(SceneManager.class)).add(new TitleScene());
-        ((SceneManager) GSystemManager.find(SceneManager.class)).add(new DemoScene());
+        ((SceneManager) GSystemManager.find(SceneManager.class))
+                .add(new TitleScene())
+                .add(new DemoScene());
 
     }
 

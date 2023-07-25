@@ -84,7 +84,6 @@ public abstract class Application {
         ((Renderer) GSystemManager.find(Renderer.class))
                 .createWindow(((InputHandler) GSystemManager.find(InputHandler.class)));
         createScenes();
-        Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
         loop();
         if (!testMode) {
             dispose();
@@ -175,6 +174,7 @@ public abstract class Application {
         long upsTime = 0;
         Map<String, Object> datastats = new HashMap<>();
         do {
+            scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
             start = System.nanoTime();
             long elapsed = start - previous;
 
