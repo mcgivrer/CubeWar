@@ -1,16 +1,29 @@
 #!/bin/bash
 # more info at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
-# Copyright 2020 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
+# Copyright 2023 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
 # Your program build definition
-export PROGRAM_NAME=cubewar
-export PROGRAM_VERSION=1.0.1
-export PROGRAM_TITLE=CubeWar
-export AUTHOR_NAME='Frédéric Delorme'
-export VENDOR_NAME=frederic.delorme@gmail.com
-export MAIN_CLASS=com.snapgames.demo.CubeWar
-export JAVADOC_CLASSPATH="com.snapgames.core com.snapgames.demo"
-export SOURCE_VERSION=20
-export SRC_ENCODING=UTF-8
+
+#!/bin/bash
+#!/bin/sh
+cd ./
+ENV=build
+
+function prop {
+  #grep "${1}" env/${ENV}.properties|cut -d'=' -f2
+  grep "${1}" ../${ENV}.properties | cut -d'=' -f2
+}
+
+export PROGRAM_NAME=$(prop project.name)
+export PROGRAM_VERSION=$(prop project.version)
+export PROGRAM_TITLE=$(prop project.title)
+export MAIN_CLASS=$(prop project.main.class)
+export PACKAGES_LIST=$(prop project.javadoc.packages)
+export VENDOR_NAME=$(prop project.author.name)
+export AUTHOR_NAME=$(prop project.author.email)
+export SOURCE_VERSION=$(prop project.build.jdk.version)
+export SRC_ENCODING=$(prop project.build.encoding)
+export JAVADOC_CLASSPATH=$(prop project.javadoc.classpath)
+
 # the tools and sources versions
 export GIT_COMMIT_ID=$(git rev-parse HEAD)
 export JAVA_BUILD=$(java --version | head -1 | cut -f2 -d' ')
