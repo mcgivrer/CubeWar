@@ -36,36 +36,38 @@ public class TextObjectRendererPlugin implements RendererPlugin<TextObject> {
                 && Optional.ofNullable(entity.getValue()).isPresent()) {
             textValue = String.format(entity.getText(), entity.getValue());
         }
-        entity.width = fm.stringWidth(textValue);
-        entity.height = fm.getHeight();
-        double offsetX = 0;
-        switch (entity.getTextAlign()) {
-            case ALIGN_LEFT -> {
-                offsetX = 0;
-            }
-            case ALIGN_CENTER -> {
-                offsetX = (int) (-entity.width * 0.5);
+        if (textValue != null) {
+            entity.width = fm.stringWidth(textValue);
+            entity.height = fm.getHeight();
+            double offsetX = 0;
+            switch (entity.getTextAlign()) {
+                case ALIGN_LEFT -> {
+                    offsetX = 0;
+                }
+                case ALIGN_CENTER -> {
+                    offsetX = (int) (-entity.width * 0.5);
 
+                }
+                case ALIGN_RIGHT -> {
+                    offsetX = -entity.width;
+                }
+                default -> {
+                    offsetX = 0;
+                    System.err.printf(">> <?> unknown textAlign %d value for %s%n", entity.getTextAlign(),
+                            entity.getName());
+                }
             }
-            case ALIGN_RIGHT -> {
-                offsetX = -entity.width;
+            if (entity.getShadowWidth() > 0 && Optional.ofNullable(entity.getShadowColor()).isPresent()) {
+                drawShadowText(g, entity, textValue, entity.pos.x + offsetX, entity.pos.y);
             }
-            default -> {
-                offsetX = 0;
-                System.err.printf(">> <?> unknown textAlign %d value for %s%n", entity.getTextAlign(),
-                        entity.getName());
+            if (entity.getBorderWidth() > 0 && Optional.ofNullable(entity.getBorderWidth()).isPresent()) {
+                drawBorderText(g, entity, textValue, entity.pos.x + offsetX, entity.pos.y);
             }
+            g.setColor(entity.getColor());
+            g.drawString(textValue, (int) (entity.pos.x + offsetX), (int) entity.pos.y);
         }
-        if (entity.getShadowWidth() > 0 && Optional.ofNullable(entity.getShadowColor()).isPresent()) {
-            drawShadowText(g, entity, textValue, entity.pos.x + offsetX, entity.pos.y);
-        }
-        if (entity.getBorderWidth() > 0 && Optional.ofNullable(entity.getBorderWidth()).isPresent()) {
-            drawBorderText(g, entity, textValue, entity.pos.x + offsetX, entity.pos.y);
-        }
-        g.setColor(entity.getColor());
-        g.drawString(textValue, (int) (entity.pos.x + offsetX), (int) entity.pos.y);
     }
-    
+
 
     private void drawShadowText(Graphics2D g, TextObject entity, String textValue, double x, double y) {
         g.setColor(entity.getShadowColor());
