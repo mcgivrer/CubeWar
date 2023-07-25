@@ -16,26 +16,36 @@ public interface InputInterface {
      *
      * @param ih the {@link InputHandler} instance.
      */
-    void input(InputHandler ih);
+    default void input(InputHandler ih) {
+    }
+
+    ;
 
     /**
      * Process Pressed key event.
      *
      * @param key
      */
-    void onKeyPressed(InputHandler ih, KeyEvent key);
+    default void onKeyPressed(InputHandler ih, KeyEvent key) {
+    }
+
+    ;
 
     /**
      * Process Released key event.
      *
      * @param key
      */
-    void onKeyReleased(InputHandler ih, KeyEvent key);
+    default void onKeyReleased(InputHandler ih, KeyEvent key) {
+    }
+
+    ;
 
     /**
      * Processed Typed key event.
      *
      * @param key
      */
-    void onKeyTyped(InputHandler ih, KeyEvent key);
+    default void onKeyTyped(InputHandler ih, KeyEvent key) {
+    }
 }

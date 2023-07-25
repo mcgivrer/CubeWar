@@ -15,15 +15,6 @@ import com.snapgames.core.utils.i18n.I18n;
 import java.awt.event.KeyEvent;
 
 public class GameKeyInput implements InputInterface {
-    @Override
-    public void input(InputHandler ih) {
-
-    }
-
-    @Override
-    public void onKeyPressed(InputHandler ih, KeyEvent key) {
-
-    }
 
     @Override
     public void onKeyReleased(InputHandler ih, KeyEvent e) {
@@ -72,10 +63,5 @@ public class GameKeyInput implements InputInterface {
                 // nothing to do !
             }
         }
-    }
-
-    @Override
-    public void onKeyTyped(InputHandler ih, KeyEvent key) {
-
     }
 }

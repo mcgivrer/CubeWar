@@ -3,7 +3,7 @@
 # Copyright 2020 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
 # Your program build definition
 export PROGRAM_NAME=cubewar
-export PROGRAM_VERSION=1.0.0
+export PROGRAM_VERSION=1.0.2
 export PROGRAM_TITLE=CubeWar
 export AUTHOR_NAME='Frédéric Delorme'
 export VENDOR_NAME=frederic.delorme@gmail.com
