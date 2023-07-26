@@ -107,14 +107,15 @@ public class PhysicEngine implements GSystem {
                 .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
                 .forEach(
                         e -> {
+                            if (e.behaviors.size() > 0) {
+                                e.behaviors.forEach(b -> b.update(e, elapsed));
+                            }
                             if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
                                 updateEntity(e, time);
                             }
                             e.update(time * 100);
                             // apply Behaviors
-                            if (e.behaviors.size() > 0) {
-                                e.behaviors.forEach(b -> b.update(e, elapsed));
-                            }
+
                         });
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);

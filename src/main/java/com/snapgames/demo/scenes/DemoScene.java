@@ -3,13 +3,10 @@ package com.snapgames.demo.scenes;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.Map;
 import java.util.Optional;
 
 import com.snapgames.core.Application;
-import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.entity.GameObject;
@@ -27,11 +24,11 @@ import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
-import com.snapgames.core.utils.i18n.I18n;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.input.CameraInput;
 import com.snapgames.demo.input.DemoInput;
 import com.snapgames.demo.input.PlayerInput;
+import com.snapgames.demo.particles.BallParticleBehavior;
 import com.snapgames.demo.particles.RainParticleBehavior;
 
 /**
@@ -58,7 +55,6 @@ public class DemoScene extends AbstractScene {
         cameraInput = new CameraInput();
         demoInput = new DemoInput();
     }
-
 
     @Override
     public String getName() {
@@ -230,44 +226,7 @@ public class DemoScene extends AbstractScene {
         // create some red ball particle system
         addEntity(
                 ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
-                        new ParticleBehavior<GameObject>() {
-                            @Override
-                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                                     Entity<?> parent) {
-
-                                return new GameObject(
-                                        particleNamePrefix + "_" + GameObject.index)
-                                        .setPosition(
-                                                Math.random() * parentWorld.getPlayArea().getWidth(),
-                                                Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
-                                        .setSize(8, 8)
-                                        .setPriority(1)
-                                        .setType(GameObjectType.TYPE_ELLIPSE)
-                                        .setConstrainedToPlayArea(true)
-                                        .setLayer(2)
-                                        .setPhysicType(PhysicType.DYNAMIC)
-                                        .setColor(Color.RED.darker().darker())
-                                        .setFillColor(Color.RED)
-                                        .setMaterial(Material.RUBBER)
-                                        .setMass(15.0 * Math.random() + 1.0)
-                                        .setParent(parent)
-                                        .addBehavior(this)
-                                        .addForce(
-                                                new Vector2D(
-                                                        -0.15 + Math.random() * 0.30,
-                                                        -0.15 + Math.random() * 0.30));
-                            }
-
-                            /**
-                             * Update the Entity e according to the elapsed time since previous call.
-                             *
-                             * @param e       the Entity to be updated
-                             * @param elapsed the elapsed time since previous call.
-                             */
-                            @Override
-                            public void update(Entity<?> e, double elapsed) {
-                            }
-                        }));
+                        new BallParticleBehavior(200.0, 2.0)));
 
         // add rain drops particle system.
         addEntity(
