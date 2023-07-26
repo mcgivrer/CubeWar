@@ -79,16 +79,36 @@ public class DemoScene extends AbstractScene {
                 new Perturbation(
                         "wind",
                         0, 0,
-                        world.getPlayArea().getWidth() * 0.15, world.getPlayArea().getHeight())
-                        .setForce(new Vector2D(-0.09, 0.00))
-                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.5f)));
+                        world.getPlayArea().getWidth(), world.getPlayArea().getHeight(),
+                        3, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+                        .setForce(new Vector2D(0.01, 0.00))
+                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.1f)));
         world.add(
                 new Perturbation(
-                        "magnet",
+                        "water",
                         0, world.getPlayArea().getHeight() * 0.85,
                         world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
-                        .setForce(new Vector2D(0.0, -1.0))
-                        .setFillColor(new Color(0.6f, 0.5f, 0.2f, 0.5f)));
+                        .setForce(new Vector2D(0.12, -1.0))
+                        .setColor(new Color(0.5f, 0.4f, 0.9f, 0.6f))
+                        .setFillColor(new Color(0.3f, 0.2f, 0.8f, 0.5f)));
+        world.add(
+                new Perturbation(
+                        "magnet_1",
+                        0, world.getPlayArea().getHeight() * 0.1,
+                        world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(-0.05, 0.0))
+                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                        .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+        world.add(
+                new Perturbation(
+                        "magnet_2",
+                        world.getPlayArea().getWidth() * 0.90, world.getPlayArea().getHeight() * 0.1,
+                        world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(0.05, 0.0))
+                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                        .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+
 
         TextObject score = new TextObject("score")
                 .setPosition(
@@ -103,6 +123,7 @@ public class DemoScene extends AbstractScene {
                 .setText("%05d")
                 .setValue(0)
                 .setPriority(20)
+                .setLayer(1)
                 .setTextAlign(TextObject.ALIGN_RIGHT)
                 .setStickToCameraView(true)
                 .setMaterial(null)
@@ -121,6 +142,7 @@ public class DemoScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setText("❤")
                 .setPriority(20)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setMaterial(null);
 
@@ -138,6 +160,7 @@ public class DemoScene extends AbstractScene {
                 .setText("%d")
                 .setValue(3)
                 .setPriority(21)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setDebug(2)
                 .setMaterial(null);
@@ -158,6 +181,7 @@ public class DemoScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.title.welcome")
                 .setPriority(20)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setDuration(5000)
                 .setDebug(2)
@@ -179,6 +203,7 @@ public class DemoScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.pause.message")
                 .setPriority(20)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setMaterial(null)
                 .setActive(false);
@@ -190,9 +215,10 @@ public class DemoScene extends AbstractScene {
                         configuration.world.getPlayArea().getWidth() * 0.50,
                         configuration.world.getPlayArea().getHeight() * 0.50)
                 .setSize(16, 16)
-                .setType(GameObjectType.TYPE_RECTANGLE)
+                .setType(GameObjectType.TYPE_ELLIPSE)
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
+                .setLayer(2)
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
@@ -216,7 +242,8 @@ public class DemoScene extends AbstractScene {
                 .setShadowWidth(3)
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.demo.help")
-                .setPriority(20)
+                .setPriority(30)
+                .setLayer(2)
                 .setStickToCameraView(true)
                 .setDuration(7000)
                 .setDebug(2)
@@ -230,8 +257,8 @@ public class DemoScene extends AbstractScene {
 
         // add rain drops particle system.
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 100,
-                        new RainParticleBehavior()));
+                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 50,
+                        new RainParticleBehavior(0.003)));
 
         Camera cam = new Camera("cam01", configuration.bufferResolution.width, configuration.bufferResolution.height);
         cam.setTarget(player);

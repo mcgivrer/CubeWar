@@ -279,7 +279,7 @@ public abstract class Application {
         return configuration;
     }
 
-    public boolean isDebugAt(int dl) {
+    public boolean isDebugAtLeast(int dl) {
         return configuration.debugLevel >= dl;
     }
 
