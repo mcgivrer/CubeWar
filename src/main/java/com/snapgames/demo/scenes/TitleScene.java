@@ -15,6 +15,7 @@ import com.snapgames.core.math.physic.Material;
 import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.math.physic.World;
+import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
@@ -43,14 +44,28 @@ public class TitleScene extends AbstractScene {
         PhysicEngine pe = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
         pe.setMaxAcceleration(100.0).setMaxVelocity(200.0);
 
+
         pe.setWorld(
                 new World("title")
                         .setGravity(new Vector2D(0, 0.1))
                         .setPlayArea(new Rectangle2D.Double(0, 0, 400, 240)));
+
+        pe.getWorld().add(
+                new Perturbation(
+                        "wind",
+                        0, 0,
+                        pe.getWorld().getPlayArea().getWidth(), pe.getWorld().getPlayArea().getHeight(),
+                        10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+                        .setForce(new Vector2D(0.1, 0.00))
+                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.5f))
+                        .setLayer(5)
+        );
+
+
         // add rain drops particle system.
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(pe.getWorld(), "raindrop", 1000, 100,
-                        new RainParticleBehavior()));
+                ParticleSystemBuilder.createParticleSystem(pe.getWorld(), "raindrop", 1000, 10,
+                        new RainParticleBehavior(0.03)));
 
         GameObject player = new GameObject("player")
                 .setPosition(
@@ -60,6 +75,7 @@ public class TitleScene extends AbstractScene {
                 .setType(GameObjectType.TYPE_RECTANGLE)
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
+                .setLayer(2)
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
@@ -84,10 +100,31 @@ public class TitleScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.title.main")
                 .setPriority(20)
+                .setLayer(1)
                 .setDebug(2)
                 .setMaterial(null);
 
         addEntity(title);
+
+        TextObject startMessage = new TextObject("startMessage")
+                .setPosition(
+                        configuration.bufferResolution.getWidth() * 0.50,
+                        configuration.bufferResolution.getHeight() * 0.70)
+                .setPhysicType(PhysicType.STATIC)
+                .setTextAlign(TextObject.ALIGN_CENTER)
+                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+                .setBorderColor(Color.BLACK)
+                .setFont(g2d.getFont().deriveFont(9.0f))
+                .setColor(Color.WHITE)
+                .setShadowWidth(3)
+                .setBorderWidth(2)
+                .setI18nKeyCode("app.title.start")
+                .setPriority(20)
+                .setLayer(1)
+                .setDebug(2)
+                .setMaterial(null);
+
+        addEntity(startMessage);
 
         TextObject copyRMessage = new TextObject("copyright")
                 .setPosition(
@@ -103,6 +140,7 @@ public class TitleScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.title.copyright")
                 .setPriority(20)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setDebug(2)
                 .setMaterial(null);

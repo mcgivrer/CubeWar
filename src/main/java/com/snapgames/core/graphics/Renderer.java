@@ -9,7 +9,6 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +130,7 @@ public class Renderer extends JPanel implements GSystem {
                                     && (
                                     (scene.getActiveCamera() != null
                                             && scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
-                                    || scene.getActiveCamera() == null
+                                            || scene.getActiveCamera() == null
                             )
                     )
                     .collect(Collectors.toList()));
@@ -169,7 +168,12 @@ public class Renderer extends JPanel implements GSystem {
 
     private void drawEntities(Graphics2D g, Scene scene, List<Entity> list) {
         list.stream().filter(e -> e.isActive())
-                .sorted(Comparator.comparingInt(Entity::getPriority))
+                .sorted((a, b) -> {
+                            return a.getLayer() < b.getLayer()
+                                    ? 1 : a.getPriority() > b.getPriority()
+                                    ? 1 : a.getPriority() == b.getPriority() ? 0 : -1;
+                        }
+                )
                 .forEach(
                         e -> {
                             RendererPlugin rp = plugins.get(e.getClass());
@@ -183,7 +187,7 @@ public class Renderer extends JPanel implements GSystem {
                                     e.pos.y + e.height * 0.5);
                             rp.drawDebugInfo(application, scene, this, g, e);
 
-                            if (application.isDebugAt(4)) {
+                            if (application.isDebugAtLeast(5)) {
                                 System.out.printf(">> <d> draw entity %s%n", e.getName());
                             }
                         });
