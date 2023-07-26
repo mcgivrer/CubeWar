@@ -1,5 +1,9 @@
 package com.snapgames.demo.scenes;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
+
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.GameObject;
 import com.snapgames.core.entity.GameObjectType;
@@ -15,13 +19,8 @@ import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
-import com.snapgames.demo.input.PlayerInput;
 import com.snapgames.demo.input.TitleInput;
 import com.snapgames.demo.particles.RainParticleBehavior;
-
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
-import java.util.Map;
 
 public class TitleScene extends AbstractScene {
 

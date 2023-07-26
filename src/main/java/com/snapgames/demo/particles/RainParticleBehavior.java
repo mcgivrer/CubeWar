@@ -16,9 +16,25 @@ import com.snapgames.core.system.GSystemManager;
 import java.awt.*;
 import java.awt.geom.Point2D;
 
+/**
+ * Create a particle system animation behavior of rain drops. To be created with
+ * the {@link ParticleSystemBuilder}.
+ * 
+ * @author Frédéric Delorme
+ * @since 1.0.3
+ */
 public class RainParticleBehavior implements ParticleBehavior<GameObject> {
+
+    /**
+     * Create a new Animation behavior for a Rain simulateor particle system.
+     */
+    public RainParticleBehavior() {
+
+    }
+
+    @Override
     public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                             Entity<?> parent) {
+            Entity<?> parent) {
 
         return new GameObject(
                 particleNamePrefix + "_" + GameObject.index)
@@ -37,7 +53,7 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
                 .setMass(1.0)
                 .setParent(parent)
                 .addBehavior(this)
-                .addForce(new Vector2D(0.0, Math.random() * 0.0003 * parentWorld.getGravity().y));
+                .addForce(new Vector2D(0.0, Math.random() * 0.003 * parentWorld.getGravity().y));
     }
 
     /**
@@ -46,6 +62,7 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
      * @param e       the Entity to be updated
      * @param elapsed the elapsed time since previous call.
      */
+    @Override
     public void update(Entity<?> e, double elapsed) {
         Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
         World parentWorld = ((PhysicEngine) GSystemManager.find(PhysicEngine.class)).getWorld();
