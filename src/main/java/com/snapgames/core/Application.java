@@ -1,8 +1,12 @@
 package com.snapgames.core;
 
-import com.snapgames.core.entity.Camera;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import com.snapgames.core.entity.Entity;
-import com.snapgames.core.entity.TextObject;
 import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.PhysicEngine;
@@ -14,34 +18,27 @@ import com.snapgames.core.utils.StringUtils;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.i18n.I18n;
 
-import javax.swing.*;
-import java.util.*;
-
 /**
- * Main {@link Application} class for project Test002
+ * Main {@link Application} class for project <code>TestJavaApp</code>.
  * <p>
  * Some basic minimalist good practice round Java development, without external
  * library, using only the JDK (20).
  * Only added the JUnit library to execute unit tests.
  * <p>
- * This {@link Application} class will manage a bunch of {@link Entity} or
- * {@link TextObject} and a {@link Camera} to display
- * amazing things on the rendering buffer before displaying it on the
- * {@link JFrame} window.
+ * This application class must be jnhérited by your own implementation.
  * <p>
- * It also maintains some basic physic math about moves for the
- * {@link Entity#active}.
- * <p>
- * {@link Entity} can be from 3 physic nature:
- * <ul>
- * <li><code>{@link PhysicType#NONE}</code>, will not be processed by
- * {@link PhysicEngine},</li>
- * <li><code>{@link PhysicType#STATIC}</code>, stick to the display screen,</li>
- * <li><code>{@link PhysicType#DYNAMIC}</code>, move according to the first
- * Newton's
- * law on movement.</li>
- * </ul>
- *
+ * You will only need to instantiate your own class and call the
+ * {@link Application#run(String[])} method to start your app.
+ * 
+ * <pre>
+ * public class MyApp extends Application {
+ *     public static void main(String[] args) {
+ *         MyApp app = new MyApp();
+ *         app.run(args);
+ *     }
+ * }
+ * </pre>
+ * 
  * @author Frédéric
  * @since 1.0.0
  */
@@ -142,22 +139,7 @@ public abstract class Application {
         UPS = configuration.ups;
 
         scene.create(this);
-        long staticEntities = scene.getEntities().stream()
-                .filter(e -> e.physicType.equals(PhysicType.STATIC))
-                .count();
-        long dynamicEntities = scene.getEntities().stream()
-                .filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
-                .count();
-        long nonePhysicEntities = scene.getEntities().stream()
-                .filter(e -> e.physicType.equals(PhysicType.NONE))
-                .count();
-        System.out.printf(
-                ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
-                scene.getName(),
-                staticEntities,
-                dynamicEntities,
-                nonePhysicEntities,
-                scene.getActiveCamera() != null ? 1 : 0);
+        traceStats(scene);
 
         System.out.printf(
                 ">> <!> Application now loops on Scene '%s'%n", scene.getName());
@@ -201,30 +183,58 @@ public abstract class Application {
             if (elapsedTime > 1000) {
                 realFPS = frames;
                 realUPS = updates;
-                datastats.put("0_dbg", configuration.debug ? "ON" : "off");
-                if (configuration.debug) {
-                    datastats.put("0_dbgLvl", configuration.debugLevel);
-                }
-                datastats.put("1_FPS", realFPS);
-                datastats.put("2_UPS", realUPS);
-                datastats.put("3_nbObj", scene.getEntities().size());
-                datastats.put("4_pause", this.pause ? "on" : "off");
+                traceStatsCycle(scene, realFPS, realUPS, datastats);
 
                 elapsedTime = 0;
                 frames = 0;
                 updates = 0;
             }
-            wait = (int) ((1000.0 / UPS) - elapsed * 0.000001);
-            try {
-                Thread.sleep((wait > 1 ? wait : 1));
-            } catch (InterruptedException e) {
-                Thread.interrupted();
-                System.err.printf("Error while waiting for next update/frame %s%n",
-                        Arrays.toString(e.getStackTrace()));
-            }
+            waitNextCycle(elapsed);
 
             datastats.put("5_internal", StringUtils.formatDuration(cumulatedGameTime));
         } while (!(exit || testMode));
+    }
+
+    private void traceStatsCycle(Scene scene, int realFPS, int realUPS, Map<String, Object> datastats) {
+        datastats.put("0_dbg", configuration.debug ? "ON" : "off");
+        if (configuration.debug) {
+            datastats.put("0_dbgLvl", configuration.debugLevel);
+        }
+        datastats.put("1_FPS", realFPS);
+        datastats.put("2_UPS", realUPS);
+        datastats.put("3_nbObj", scene.getEntities().size());
+        datastats.put("4_pause", this.pause ? "on" : "off");
+    }
+
+    private void waitNextCycle(long elapsed) {
+        int wait;
+        wait = (int) ((1000.0 / UPS) - elapsed * 0.000001);
+        try {
+            Thread.sleep((wait > 1 ? wait : 1));
+        } catch (InterruptedException e) {
+            Thread.interrupted();
+            System.err.printf("Error while waiting for next update/frame %s%n",
+                    Arrays.toString(e.getStackTrace()));
+        }
+    }
+
+    private void traceStats(Scene scene) {
+        long staticEntities = scene.getEntities().stream()
+                .filter(e -> e.physicType.equals(PhysicType.STATIC))
+                .count();
+        long dynamicEntities = scene.getEntities().stream()
+                .filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
+                .count();
+        long nonePhysicEntities = scene.getEntities().stream()
+                .filter(e -> e.physicType.equals(PhysicType.NONE))
+                .count();
+        System.out.printf(
+                ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
+                scene.getName(),
+                staticEntities,
+                dynamicEntities,
+                nonePhysicEntities,
+                scene.getActiveCamera() != null ? 1 : 0);
     }
 
     /**
@@ -269,7 +279,7 @@ public abstract class Application {
         return configuration;
     }
 
-    public boolean isDebugAt(int dl) {
+    public boolean isDebugAtLeast(int dl) {
         return configuration.debugLevel >= dl;
     }
 

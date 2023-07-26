@@ -96,7 +96,7 @@ public class PhysicEngine implements GSystem {
         double time = (elapsed * timeScaleFactor);
         cumulatedTime += elapsed;
 
-        // if world contains any Perturbation n, apply to all concerned entities.
+        // if world contains any Perturbation, apply to all concerned entities.
         world.getPerturbations().stream()
                 .forEach(p -> entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
                         .forEach(e -> {
@@ -107,14 +107,15 @@ public class PhysicEngine implements GSystem {
                 .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
                 .forEach(
                         e -> {
+                            if (e.behaviors.size() > 0) {
+                                e.behaviors.forEach(b -> b.update(e, elapsed));
+                            }
                             if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
                                 updateEntity(e, time);
                             }
                             e.update(time * 100);
                             // apply Behaviors
-                            if (e.behaviors.size() > 0) {
-                                e.behaviors.forEach(b -> b.update(e, elapsed));
-                            }
+
                         });
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);
@@ -142,16 +143,16 @@ public class PhysicEngine implements GSystem {
         // compute acceleration
         entity.setAcceleration(entity.acceleration.addAll(entity.getForces()));
         entity.setAcceleration(entity.acceleration.multiply(
-                entity.mass * (entity.getMaterial() != null ? entity.getMaterial().getDensity() : 1.0)));
+                (entity.getMaterial() != null ? entity.getMaterial().getDensity() : 1.0) * entity.mass));
         if (configuration.physicConstrained) {
             entity.acceleration = entity.acceleration.maximize(entity.getAttribute("maxAccelY", this.maxEntityAcc));
         }
         // compute velocity
         double roughness = 1.0;
         if (entity.contact > 0) {
-            roughness = entity.getMaterial().getRoughness();
+            roughness = entity.getMaterial() != null ? entity.getMaterial().getRoughness() : 1.0;
         } else {
-            roughness = world.getMaterial().getRoughness();
+            roughness = world.getMaterial() != null ? world.getMaterial().getRoughness() : 1.0;
         }
         entity.setSpeed(entity.vel.add(entity.acceleration.multiply(elapsed * elapsed * 0.5)).multiply(roughness));
         if (configuration.physicConstrained) {
@@ -181,30 +182,30 @@ public class PhysicEngine implements GSystem {
      * @param entity the {@link Entity} to be keep inside the play area.
      */
     private void constrainPlayArea(Entity<? extends Entity<?>> entity) {
-
+        double elasticity = entity.getMaterial() != null ? entity.getMaterial().getElasticity() : 1.0;
         if (!entity.constrainedToPlayArea)
             return;
         if (entity.x < 0) {
             entity.setPosition(0, entity.pos.y);
 
-            entity.setSpeed(entity.vel.x * -entity.getMaterial().getElasticity(), entity.vel.y);
+            entity.setSpeed(entity.vel.x * -elasticity, entity.vel.y);
             entity.contact += 1;
         }
         if (entity.x + entity.width > world.getPlayArea().getWidth()) {
             entity.setPosition(world.getPlayArea().getWidth() - entity.width, entity.pos.y);
-            entity.setSpeed(entity.vel.x * -entity.getMaterial().getElasticity(), entity.vel.y);
+            entity.setSpeed(entity.vel.x * -elasticity, entity.vel.y);
             entity.contact += 2;
         }
         if (entity.y < 0) {
             entity.setPosition(entity.pos.x, 0);
 
-            entity.setSpeed(entity.vel.x, entity.vel.y * -entity.getMaterial().getElasticity());
+            entity.setSpeed(entity.vel.x, entity.vel.y * -elasticity);
             entity.contact += 4;
         }
         if (entity.y + entity.height > world.getPlayArea().getHeight()) {
             entity.setPosition(entity.pos.x, world.getPlayArea().getHeight() - entity.height);
 
-            entity.setSpeed(entity.vel.x, entity.vel.y * -entity.getMaterial().getElasticity());
+            entity.setSpeed(entity.vel.x, entity.vel.y * -elasticity);
             entity.contact += 8;
         }
         entity.x = entity.pos.x;

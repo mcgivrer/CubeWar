@@ -16,7 +16,26 @@ import com.snapgames.core.system.GSystemManager;
 import java.awt.*;
 import java.awt.geom.Point2D;
 
+/**
+ * Create a particle system animation behavior of rain drops. To be created with
+ * the {@link com.snapgames.core.utils.particles.ParticleSystemBuilder}.
+ *
+ * @author Frédéric Delorme
+ * @since 1.0.3
+ */
 public class RainParticleBehavior implements ParticleBehavior<GameObject> {
+
+    private double accFactor;
+
+    /**
+     * Create a new Animation behavior for a Rain simulator particle system.
+     */
+    public RainParticleBehavior(double accelerationFactorY) {
+        this.accFactor = accelerationFactorY;
+
+    }
+
+    @Override
     public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
                              Entity<?> parent) {
 
@@ -30,14 +49,14 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
                 .setType(GameObjectType.TYPE_LINE)
                 .setConstrainedToPlayArea(false)
                 // set depth to the rain drop.
-                .setLayer((int) (Math.random() * 9) + 1)
+                .setLayer((int) (Math.random() * 9) + 10)
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setColor(Color.YELLOW)
                 .setMaterial(Material.WATER)
                 .setMass(1.0)
                 .setParent(parent)
                 .addBehavior(this)
-                .addForce(new Vector2D(0.0, Math.random() * 0.0003 * parentWorld.getGravity().y));
+                .addForce(new Vector2D(0.0, Math.random() * accFactor * parentWorld.getGravity().y));
     }
 
     /**
@@ -46,15 +65,22 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
      * @param e       the Entity to be updated
      * @param elapsed the elapsed time since previous call.
      */
+    @Override
     public void update(Entity<?> e, double elapsed) {
         Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
         World parentWorld = ((PhysicEngine) GSystemManager.find(PhysicEngine.class)).getWorld();
 
         int layer = e.getLayer();
-        e.setColor(new Color((layer * 0.1f), (layer * 0.1f), (layer * 0.1f), (layer * 0.1f)));
+        float layerColor = (layer - 10) * 0.1f;
+        e.setColor(new Color(layerColor, layerColor, layerColor, layerColor));
         if (!parentWorld.getPlayArea().getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
-            e.setPosition(parentWorld.getPlayArea().getWidth() * Math.random(),
-                    Math.random() * parentWorld.getPlayArea().getHeight() * 0.1);
+            if (Math.random() > 0.3) {
+                e.setPosition(parentWorld.getPlayArea().getWidth() * Math.random(),
+                        Math.random() * parentWorld.getPlayArea().getHeight() * 0.1);
+            } else {
+                e.setPosition(parentWorld.getPlayArea().getWidth() * Math.random() * 0.1,
+                        Math.random() * parentWorld.getPlayArea().getHeight());
+            }
             e.setOldPosition(e.x, e.y);
 
         }

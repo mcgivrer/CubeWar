@@ -3,13 +3,10 @@ package com.snapgames.demo.scenes;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.Map;
 import java.util.Optional;
 
 import com.snapgames.core.Application;
-import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.entity.GameObject;
@@ -27,11 +24,11 @@ import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
-import com.snapgames.core.utils.i18n.I18n;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.input.CameraInput;
 import com.snapgames.demo.input.DemoInput;
 import com.snapgames.demo.input.PlayerInput;
+import com.snapgames.demo.particles.BallParticleBehavior;
 import com.snapgames.demo.particles.RainParticleBehavior;
 
 /**
@@ -59,7 +56,6 @@ public class DemoScene extends AbstractScene {
         demoInput = new DemoInput();
     }
 
-
     @Override
     public String getName() {
         return "demo";
@@ -83,16 +79,36 @@ public class DemoScene extends AbstractScene {
                 new Perturbation(
                         "wind",
                         0, 0,
-                        world.getPlayArea().getWidth() * 0.15, world.getPlayArea().getHeight())
-                        .setForce(new Vector2D(-0.09, 0.00))
-                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.5f)));
+                        world.getPlayArea().getWidth(), world.getPlayArea().getHeight(),
+                        3, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+                        .setForce(new Vector2D(0.01, 0.00))
+                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.1f)));
         world.add(
                 new Perturbation(
-                        "magnet",
+                        "water",
                         0, world.getPlayArea().getHeight() * 0.85,
                         world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
-                        .setForce(new Vector2D(0.0, -1.0))
-                        .setFillColor(new Color(0.6f, 0.5f, 0.2f, 0.5f)));
+                        .setForce(new Vector2D(0.12, -1.0))
+                        .setColor(new Color(0.5f, 0.4f, 0.9f, 0.6f))
+                        .setFillColor(new Color(0.3f, 0.2f, 0.8f, 0.5f)));
+        world.add(
+                new Perturbation(
+                        "magnet_1",
+                        0, world.getPlayArea().getHeight() * 0.1,
+                        world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(-0.05, 0.0))
+                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                        .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+        world.add(
+                new Perturbation(
+                        "magnet_2",
+                        world.getPlayArea().getWidth() * 0.90, world.getPlayArea().getHeight() * 0.1,
+                        world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight())
+                        .setForce(new Vector2D(0.05, 0.0))
+                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                        .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+
 
         TextObject score = new TextObject("score")
                 .setPosition(
@@ -107,6 +123,7 @@ public class DemoScene extends AbstractScene {
                 .setText("%05d")
                 .setValue(0)
                 .setPriority(20)
+                .setLayer(1)
                 .setTextAlign(TextObject.ALIGN_RIGHT)
                 .setStickToCameraView(true)
                 .setMaterial(null)
@@ -125,6 +142,7 @@ public class DemoScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setText("❤")
                 .setPriority(20)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setMaterial(null);
 
@@ -142,6 +160,7 @@ public class DemoScene extends AbstractScene {
                 .setText("%d")
                 .setValue(3)
                 .setPriority(21)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setDebug(2)
                 .setMaterial(null);
@@ -162,6 +181,7 @@ public class DemoScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.title.welcome")
                 .setPriority(20)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setDuration(5000)
                 .setDebug(2)
@@ -183,6 +203,7 @@ public class DemoScene extends AbstractScene {
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.pause.message")
                 .setPriority(20)
+                .setLayer(1)
                 .setStickToCameraView(true)
                 .setMaterial(null)
                 .setActive(false);
@@ -194,9 +215,10 @@ public class DemoScene extends AbstractScene {
                         configuration.world.getPlayArea().getWidth() * 0.50,
                         configuration.world.getPlayArea().getHeight() * 0.50)
                 .setSize(16, 16)
-                .setType(GameObjectType.TYPE_RECTANGLE)
+                .setType(GameObjectType.TYPE_ELLIPSE)
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
+                .setLayer(2)
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
@@ -220,7 +242,8 @@ public class DemoScene extends AbstractScene {
                 .setShadowWidth(3)
                 .setBorderWidth(2)
                 .setI18nKeyCode("app.demo.help")
-                .setPriority(20)
+                .setPriority(30)
+                .setLayer(2)
                 .setStickToCameraView(true)
                 .setDuration(7000)
                 .setDebug(2)
@@ -230,49 +253,12 @@ public class DemoScene extends AbstractScene {
         // create some red ball particle system
         addEntity(
                 ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
-                        new ParticleBehavior<GameObject>() {
-                            @Override
-                            public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                                                     Entity<?> parent) {
-
-                                return new GameObject(
-                                        particleNamePrefix + "_" + GameObject.index)
-                                        .setPosition(
-                                                Math.random() * parentWorld.getPlayArea().getWidth(),
-                                                Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
-                                        .setSize(8, 8)
-                                        .setPriority(1)
-                                        .setType(GameObjectType.TYPE_ELLIPSE)
-                                        .setConstrainedToPlayArea(true)
-                                        .setLayer(2)
-                                        .setPhysicType(PhysicType.DYNAMIC)
-                                        .setColor(Color.RED.darker().darker())
-                                        .setFillColor(Color.RED)
-                                        .setMaterial(Material.RUBBER)
-                                        .setMass(15.0 * Math.random() + 1.0)
-                                        .setParent(parent)
-                                        .addBehavior(this)
-                                        .addForce(
-                                                new Vector2D(
-                                                        -0.15 + Math.random() * 0.30,
-                                                        -0.15 + Math.random() * 0.30));
-                            }
-
-                            /**
-                             * Update the Entity e according to the elapsed time since previous call.
-                             *
-                             * @param e       the Entity to be updated
-                             * @param elapsed the elapsed time since previous call.
-                             */
-                            @Override
-                            public void update(Entity<?> e, double elapsed) {
-                            }
-                        }));
+                        new BallParticleBehavior(200.0, 2.0)));
 
         // add rain drops particle system.
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 100,
-                        new RainParticleBehavior()));
+                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 50,
+                        new RainParticleBehavior(0.003)));
 
         Camera cam = new Camera("cam01", configuration.bufferResolution.width, configuration.bufferResolution.height);
         cam.setTarget(player);
