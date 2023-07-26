@@ -218,7 +218,7 @@ public class DemoScene extends AbstractScene {
                 .setType(GameObjectType.TYPE_ELLIPSE)
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
-                .setLayer(2)
+                .setLayer(80)
                 .setColor(Color.WHITE)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
