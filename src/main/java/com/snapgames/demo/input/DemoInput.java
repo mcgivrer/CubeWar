@@ -1,15 +1,14 @@
 package com.snapgames.demo.input;
 
+import java.awt.event.KeyEvent;
+import java.util.Optional;
+
 import com.snapgames.core.Application;
-import com.snapgames.core.entity.GameObject;
 import com.snapgames.core.entity.TextObject;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.input.InputInterface;
 import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.system.GSystemManager;
-
-import java.awt.event.KeyEvent;
-import java.util.Optional;
 
 public class DemoInput implements InputInterface {
 
