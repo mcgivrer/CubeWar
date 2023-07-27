@@ -29,7 +29,7 @@ import com.snapgames.core.utils.i18n.I18n;
  * <p>
  * You will only need to instantiate your own class and call the
  * {@link Application#run(String[])} method to start your app.
- * 
+ *
  * <pre>
  * public class MyApp extends Application {
  *     public static void main(String[] args) {
@@ -38,7 +38,7 @@ import com.snapgames.core.utils.i18n.I18n;
  *     }
  * }
  * </pre>
- * 
+ *
  * @author Frédéric
  * @since 1.0.0
  */
