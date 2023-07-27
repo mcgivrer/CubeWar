@@ -1,23 +1,35 @@
 package com.snapgames.core.graphics;
 
-import com.snapgames.core.Application;
-import com.snapgames.core.entity.Camera;
-import com.snapgames.core.entity.Entity;
-import com.snapgames.core.input.InputHandler;
-import com.snapgames.core.math.physic.World;
-import com.snapgames.core.scene.Scene;
+import static com.snapgames.core.utils.StringUtils.prepareStatsString;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static com.snapgames.core.utils.StringUtils.prepareStatsString;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
+import com.snapgames.core.Application;
+import com.snapgames.core.entity.Camera;
+import com.snapgames.core.entity.Entity;
+import com.snapgames.core.graphics.plugins.GameObjectRendererPlugin;
+import com.snapgames.core.graphics.plugins.PerturbationRendererPlugin;
+import com.snapgames.core.graphics.plugins.RendererPlugin;
+import com.snapgames.core.graphics.plugins.TextObjectRendererPlugin;
+import com.snapgames.core.input.InputHandler;
+import com.snapgames.core.math.physic.World;
+import com.snapgames.core.scene.Scene;
+import com.snapgames.core.system.GSystem;
 
 /**
  * The {@link Renderer} service will draw all entities from the {@link Scene}.
@@ -25,8 +37,7 @@ import static com.snapgames.core.utils.StringUtils.prepareStatsString;
  * @author Frédéric Delorme
  * @since 1.0.0
  */
-public class Renderer extends JPanel {
-
+public class Renderer extends JPanel implements GSystem {
 
     private final Application application;
     /**
@@ -34,9 +45,18 @@ public class Renderer extends JPanel {
      */
     private JFrame frame;
     private BufferedImage buffer;
+    private boolean drawing = true;
+    private static int sc_index;
+
+    private Map<Class<?>, RendererPlugin<? extends Entity>> plugins = new HashMap<>();
 
     public Renderer(Application app) {
         this.application = app;
+
+    }
+
+    private void addPlugin(RendererPlugin<?> rendererPlugin) {
+        this.plugins.put(rendererPlugin.getEntityClass(), rendererPlugin);
     }
 
     /**
@@ -84,104 +104,93 @@ public class Renderer extends JPanel {
      *              purpose. (only if Application#debug >0)
      */
     public void draw(World world, Scene scene, Map<String, Object> stats) {
+        if (drawing) {
+            // prepare rendering buffer
+            Graphics2D g = buffer.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // prepare rendering buffer
-        Graphics2D g = buffer.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            // clear buffer
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
-        // clear buffer
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+            // draw playArea
+            moveFromCameraPoV(g, scene.getActiveCamera(), -1);
+            drawGrid(g, world.getPlayArea());
+            g.setColor(Color.BLUE);
+            g.draw(world.getPlayArea());
+            moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
-        // draw playArea
-        moveFromCameraPoV(g, scene.getActiveCamera(), -1);
-        drawGrid(g, world.getPlayArea());
-        g.setColor(Color.BLUE);
-        g.draw(world.getPlayArea());
-        moveFromCameraPoV(g, scene.getActiveCamera(), 1);
+            // draw entities not stick to Camera.
+            moveFromCameraPoV(g, scene.getActiveCamera(), -1);
+            drawEntities(g, scene, scene.getEntities().stream()
+                    .filter(e -> e.isActive()
+                                    && (
+                                    (scene.getActiveCamera() != null
+                                            && scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
+                                            || scene.getActiveCamera() == null
+                            )
+                    )
+                    .collect(Collectors.toList()));
+            // draw all perturbations
+            world.getPerturbations().forEach(p -> {
+                RendererPlugin rp = plugins.get(p.getClass());
+                rp.drawDebugInfo(application, scene, this, g, p);
+            });
+            scene.draw(application, g, stats);
+            moveFromCameraPoV(g, scene.getActiveCamera(), 1);
 
-        // draw entities not stick to Camera.
-        moveFromCameraPoV(g, scene.getActiveCamera(), -1);
-        drawAllEntities(g, scene, false);
-        scene.draw(application, g, stats);
-        moveFromCameraPoV(g, scene.getActiveCamera(), 1);
+            // draw all stick-to-camera's Entity.
+            drawEntities(g, scene, scene.getEntities().stream()
+                    .filter(e -> e.stickToCamera).collect(Collectors.toList()));
 
-        // draw all stick-to-camera's Entity.
-        drawAllEntities(g, scene, true);
+            g.dispose();
 
-        g.dispose();
-
-        // copy to JFrame
-        Graphics2D gScreen = (Graphics2D) frame.getBufferStrategy().getDrawGraphics();
-        gScreen.drawImage(
-                buffer, 0, 0, frame.getWidth(), frame.getHeight(),
-                0, 0, buffer.getWidth(), buffer.getHeight(),
-                null);
-        if (application.getConfiguration().debug && application.getConfiguration().debugLevel > 0) {
-            gScreen.setColor(Color.ORANGE);
-            gScreen.drawString(
-                    prepareStatsString(stats, "[ ", " | ", " ]"),
-                    20, frame.getHeight() - 20);
+            // copy to JFrame
+            Graphics2D gScreen = (Graphics2D) frame.getBufferStrategy().getDrawGraphics();
+            gScreen.drawImage(
+                    buffer, 0, 0, frame.getWidth(), frame.getHeight(),
+                    0, 0, buffer.getWidth(), buffer.getHeight(),
+                    null);
+            if (application.getConfiguration().debug && application.getConfiguration().debugLevel > 0) {
+                gScreen.setColor(Color.ORANGE);
+                gScreen.drawString(
+                        prepareStatsString(stats, "[ ", " | ", " ]"),
+                        20, frame.getHeight() - 20);
+            }
+            gScreen.dispose();
+            // switch to next available drawing buffer
+            frame.getBufferStrategy().show();
         }
-        gScreen.dispose();
-        // switch to next available drawing buffer
-        frame.getBufferStrategy().show();
     }
 
-    private void drawAllEntities(Graphics2D g, Scene scene, boolean stickToCamera) {
-        scene.getEntities().stream()
-                .filter(e -> e.isActive() && e.stickToCamera == stickToCamera)
-                .filter(e -> scene.getActiveCamera().inViewport(e) || e.physicType == Entity.STATIC)
-                .sorted(Comparator.comparingInt(Entity::getPriority))
+    private void drawEntities(Graphics2D g, Scene scene, List<Entity> list) {
+        list.stream().filter(e -> e.isActive())
+                .sorted((a, b) -> {
+                            return a.getLayer() < b.getLayer()
+                                    ? 1 : a.getPriority() > b.getPriority()
+                                    ? 1 : a.getPriority() == b.getPriority() ? 0 : -1;
+                        }
+                )
                 .forEach(
                         e -> {
+                            RendererPlugin rp = plugins.get(e.getClass());
                             g.rotate(-e.rotation,
                                     e.pos.x + e.width * 0.5,
                                     e.pos.y + e.height * 0.5);
-                            e.draw(g);
+                            rp.draw(this, g, e);
+                            e.setDrawnBy(rp.getClass());
                             g.rotate(e.rotation,
                                     e.pos.x + e.width * 0.5,
                                     e.pos.y + e.height * 0.5);
-                            drawEntityDebugInfo(g, scene, e);
+                            rp.drawDebugInfo(application, scene, this, g, e);
 
-                            if (application.isDebugAt(4)) {
+                            if (application.isDebugAtLeast(5)) {
                                 System.out.printf(">> <d> draw entity %s%n", e.getName());
                             }
                         });
-    }
-
-    private void drawEntityDebugInfo(Graphics2D g, Scene scene, Entity<? extends Entity<?>> e) {
-        if (application.getConfiguration().debugLevel > 0 && application.getConfiguration().debugLevel >= e.debug) {
-            List<String> info = e.getDebugInfo();
-            int l = 0;
-            float fontSize = 9f;
-            g.setFont(g.getFont().deriveFont(fontSize));
-
-            int maxWidth = info.stream().mapToInt(s -> g.getFontMetrics().stringWidth(s)).max().orElse(0);
-            int offsetX = (int) (e.pos.x + maxWidth > (
-                    (e.stickToCamera ? 0 : scene.getActiveCamera().x) + scene.getActiveCamera().width) ? -(maxWidth + 4.0)
-                    : 4.0);
-            int offsetY = (int) (e.pos.y + (fontSize * info.size()) >
-                    ((e.stickToCamera ? 0 : scene.getActiveCamera().y) + scene.getActiveCamera().height)
-                    ? -(9.0 + (fontSize * info.size()))
-                    : -9.0);
-            g.setColor(Color.ORANGE);
-            for (String item : info) {
-                if (!item.equals("")) {
-                    String levelStr = item.contains("_") ? item.substring(0, info.indexOf("_")) : "0";
-                    int level = Integer.parseInt(levelStr);
-                    if (level <= application.getConfiguration().debugLevel) {
-                        g.drawString(item.substring(info.indexOf("_") + 1),
-                                (int) (e.pos.x + e.getWidth() + offsetX),
-                                (int) (e.pos.y + offsetY + (l * fontSize)));
-                        l++;
-                    }
-                }
-            }
-        }
     }
 
     private void moveFromCameraPoV(Graphics2D g, Camera camera, double direction) {
@@ -215,5 +224,29 @@ public class Renderer extends JPanel {
             frame.dispose();
         }
 
+    }
+
+    public void takeScreenShot() {
+        this.drawing = false;
+        if (Optional.ofNullable(buffer).isPresent()) {
+            // TODO implement buffer image save to file.
+        }
+        this.drawing = true;
+    }
+
+    @Override
+    public Class<? extends GSystem> getSystemName() {
+        return Renderer.class;
+    }
+
+    @Override
+    public void initialize(Application app) {
+        addPlugin(new GameObjectRendererPlugin());
+        addPlugin(new TextObjectRendererPlugin());
+        addPlugin(new PerturbationRendererPlugin());
+    }
+
+    public JFrame getWindow() {
+        return frame;
     }
 }

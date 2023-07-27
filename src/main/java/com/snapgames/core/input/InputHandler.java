@@ -1,18 +1,18 @@
 package com.snapgames.core.input;
 
-import com.snapgames.core.Application;
-import com.snapgames.core.utils.config.Configuration;
-import com.snapgames.core.math.physic.PhysicEngine;
-import com.snapgames.core.math.physic.World;
-import com.snapgames.core.scene.SceneManager;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class InputHandler implements KeyListener {
+import com.snapgames.core.Application;
+import com.snapgames.core.system.GSystem;
+import com.snapgames.demo.input.TitleInput;
+
+public class InputHandler implements KeyListener, GSystem {
 
     private final Application application;
-
 
     /**
      * Key listener components
@@ -22,8 +22,15 @@ public class InputHandler implements KeyListener {
     public boolean shiftKey;
     public boolean altKey;
 
+    private List<InputInterface> inputInterfaceList = new CopyOnWriteArrayList<>();
+
     public InputHandler(Application app) {
         this.application = app;
+    }
+
+    public InputHandler add(InputInterface ii) {
+        inputInterfaceList.add(ii);
+        return this;
     }
 
     @Override
@@ -31,12 +38,18 @@ public class InputHandler implements KeyListener {
         if (application.getConfiguration().debugLevel > 3) {
             System.out.printf(">> <!> key typed: %s%n", e.getKeyChar());
         }
+        inputInterfaceList.forEach(ii -> {
+            ii.onKeyTyped(this, e);
+        });
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         keys[e.getKeyCode()] = true;
         checkMetaKeys(e);
+        inputInterfaceList.forEach(ii -> {
+            ii.onKeyPressed(this, e);
+        });
     }
 
     private void checkMetaKeys(KeyEvent e) {
@@ -47,40 +60,38 @@ public class InputHandler implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        Configuration configuration = application.getConfiguration();
-        PhysicEngine physicEngine = application.getPhysicEngine();
-        SceneManager scnMgr = application.getSceneManager();
         keys[e.getKeyCode()] = false;
-        switch (e.getKeyCode()) {
-            // Request exiting game.
-            case KeyEvent.VK_ESCAPE -> {
-                application.requestExit();
-            }
-            // Change debug level
-            case KeyEvent.VK_D -> {
-                configuration.debugLevel = configuration.debugLevel + 1 <= 5 ? configuration.debugLevel + 1 : 0;
-            }
-            // Reverse gravity
-            case KeyEvent.VK_G -> {
-                World world = physicEngine.getWorld();
-                world.setGravity(world.getGravity().negate());
-            }
-            case KeyEvent.VK_Z -> {
-                if (ctrlKey) {
-                    scnMgr.getCurrent().clearScene();
-                    scnMgr.getCurrent().create(application);
-                }
-            }
-            case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
-                application.setPause(!application.isPause());
-            }
-            default -> {
-                // nothing to do !
-            }
-        }
+
+        inputInterfaceList.forEach(ii -> {
+            ii.onKeyReleased(this, e);
+        });
     }
 
     public boolean isKeyPressed(int keyCode) {
         return keys[keyCode];
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    @Override
+    public Class<? extends GSystem> getSystemName() {
+        return InputHandler.class;
+    }
+
+    @Override
+    public void initialize(Application app) {
+        // nothing specific to perform for this service initialization.
+    }
+
+    @Override
+    public void dispose() {
+        // nothing specific to perform for this service release.
+    }
+
+    public InputHandler remove(InputInterface ti) {
+        inputInterfaceList.remove(ti);
+        return this;
     }
 }

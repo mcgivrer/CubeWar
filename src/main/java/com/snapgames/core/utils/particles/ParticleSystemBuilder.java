@@ -30,11 +30,12 @@ public class ParticleSystemBuilder {
             World parentWorld,
             String particleNamePrefix,
             int nbParticles,
+            int threshold,
             ParticleBehavior<GameObject> b) {
 
         GameObject parentParticle = new GameObject(particleNamePrefix + "'s", 0, 0, 0, 0);
         parentParticle.setAttribute("nbParticles", nbParticles);
-        for (int i = 0; i < nbParticles / 100; i++) {
+        for (int i = 0; i < nbParticles / threshold; i++) {
             GameObject particle = b.create(parentWorld, 0, particleNamePrefix, parentParticle);
             parentParticle.addChild(particle);
         }

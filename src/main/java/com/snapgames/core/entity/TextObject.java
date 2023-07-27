@@ -1,8 +1,10 @@
 package com.snapgames.core.entity;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
 import java.util.List;
-import java.util.Optional;
+
+import com.snapgames.core.utils.i18n.I18n;
 
 /**
  * The {@link TextObject} is an extended {@link Entity} to support Text drawing.
@@ -37,10 +39,11 @@ public class TextObject extends Entity<TextObject> {
     int borderWidth;
     Color borderColor;
     int textAlign = ALIGN_LEFT;
+    String i18nKeyCode;
 
     /**
      * Create a new {@link TextObject} at (x,y) with name n.
-     * 
+     *
      * @param n name of the new {@link TextObject}
      * @param x horizontal position of the new {@link TextObject}
      * @param y vertical position of the new {@link TextObject}
@@ -51,66 +54,11 @@ public class TextObject extends Entity<TextObject> {
 
     /**
      * Create a new {@link TextObject} at (x,y) with name n.
-     * 
+     *
      * @param n name of the new {@link TextObject}
      */
     public TextObject(String n) {
         super(n);
-    }
-
-    @Override
-    public void draw(Graphics2D g) {
-        if (Optional.ofNullable(font).isPresent()) {
-            g.setFont(font);
-        }
-        FontMetrics fm = g.getFontMetrics();
-        String textValue = text;
-        if (text.contains("%") && Optional.ofNullable(value).isPresent()) {
-            textValue = String.format(text, value);
-        }
-        this.width = fm.stringWidth(textValue);
-        this.height = fm.getHeight();
-        double offsetX = 0;
-        switch (textAlign) {
-            case ALIGN_LEFT -> {
-                offsetX = 0;
-            }
-            case ALIGN_CENTER -> {
-                offsetX = (int) (-this.width * 0.5);
-
-            }
-            case ALIGN_RIGHT -> {
-                offsetX = -this.width;
-            }
-            default -> {
-                offsetX = 0;
-                System.err.printf(">> <?> unknown textAlign %d value for %s%n", textAlign, name);
-            }
-        }
-        if (shadowWidth > 0 && Optional.ofNullable(shadowColor).isPresent()) {
-            drawShadowText(g, textValue, pos.x + offsetX, pos.y);
-        }
-        if (borderWidth > 0 && Optional.ofNullable(borderColor).isPresent()) {
-            drawBorderText(g, textValue, pos.x + offsetX, pos.y);
-        }
-        g.setColor(color);
-        g.drawString(textValue, (int) (pos.x + offsetX), (int) pos.y);
-    }
-
-    private void drawShadowText(Graphics2D g, String textValue, double x, double y) {
-        g.setColor(shadowColor);
-        for (int i = 0; i < shadowWidth; i++) {
-            g.drawString(textValue, (int) pos.x + i, (int) pos.y + i);
-        }
-    }
-
-    private void drawBorderText(Graphics2D g, String textValue, double x, double y) {
-        g.setColor(borderColor);
-        for (int i = -borderWidth; i < borderWidth; i++) {
-            for (int j = -borderWidth; j < borderWidth; j++) {
-                g.drawString(textValue, (int) pos.x + i, (int) pos.y + j);
-            }
-        }
     }
 
     public TextObject setShadowColor(Color sc) {
@@ -160,5 +108,50 @@ public class TextObject extends Entity<TextObject> {
         infos.add(String.format("3_text:%s", text));
         infos.add(String.format("3_val:%s", value != null ? value.toString() : "null"));
         return infos;
+    }
+
+    @Override
+    public void update(double elapsed) {
+        super.update(elapsed);
+        if (i18nKeyCode != null) {
+            this.setText(I18n.getMessage(i18nKeyCode));
+        }
+    }
+
+    public Font getFont() {
+        return font;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public int getTextAlign() {
+        return textAlign;
+    }
+
+    public int getShadowWidth() {
+        return shadowWidth;
+    }
+
+    public Color getShadowColor() {
+        return shadowColor;
+    }
+
+    public int getBorderWidth() {
+        return borderWidth;
+    }
+
+    public Color getBorderColor() {
+        return borderColor;
+    }
+
+    public TextObject setI18nKeyCode(String i18nKeyCode) {
+        this.i18nKeyCode = i18nKeyCode;
+        return this;
     }
 }

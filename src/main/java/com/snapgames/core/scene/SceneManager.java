@@ -1,6 +1,7 @@
 package com.snapgames.core.scene;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.system.GSystem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Optional;
  * @version 1.0
  * @since 1.0
  */
-public class SceneManager {
+public class SceneManager implements GSystem {
     private final Application application;
     private Scene current;
     private Map<String, Scene> scenes = new HashMap<>();
@@ -51,6 +52,17 @@ public class SceneManager {
         this.current.create(application);
     }
 
+    @Override
+    public Class<? extends GSystem> getSystemName() {
+        return SceneManager.class;
+    }
+
+    @Override
+    public void initialize(Application app) {
+
+    }
+
+    @Override
     public void dispose() {
         scenes.clear();
         System.out.printf(">> <!> Scenes managed list has been cleared.%n");
