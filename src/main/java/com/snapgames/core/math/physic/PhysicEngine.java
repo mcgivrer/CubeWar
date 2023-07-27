@@ -1,5 +1,6 @@
 package com.snapgames.core.math.physic;
 
+import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
+import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
 import com.snapgames.core.utils.config.Configuration;
@@ -100,7 +102,14 @@ public class PhysicEngine implements GSystem {
         world.getPerturbations().stream()
                 .forEach(p -> entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
                         .forEach(e -> {
-                            e.addForces(p.getForces());
+                            // applying penetration factor.
+                            Rectangle2D intersection = e.getBounds2D().createIntersection(p);
+                            Vector2D dist = new Vector2D(intersection.getWidth(), intersection.getHeight());
+                            Vector2D eDist = new Vector2D(e.getWidth(), e.getHeight());
+                            double vf = dist.length() / eDist.length();
+                            // apply reduction factor on forces according to distance
+                            p.getForces().forEach(f -> e.addForce(f.multiply(vf)));
+
                         }));
 
         entities.stream()
