@@ -1,16 +1,28 @@
 #!/bin/bash
-# more info at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
-# Copyright 2020 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
-# Your program build definition
-export PROGRAM_NAME=JavaTestApp
-export PROGRAM_VERSION=1.0.0
-export PROGRAM_TITLE=JavaTestApp
-export AUTHOR_NAME='Frédéric Delorme'
-export VENDOR_NAME=frederic.delorme@gmail.com
-export MAIN_CLASS=com.snapgames.demo.Application
-export JAVADOC_CLASSPATH="com.snapgames.demo"
-export SOURCE_VERSION=20
-export SRC_ENCODING=UTF-8
+#inspired from build script at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
+# Copyright 2023 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
+#
+# Your program build definition is now in the build.properties file.
+# You can change the build properties file at your convenience.
+
+ENV="./build.properties"
+
+function getPropertyValue {
+  #grep "${1}" env/${ENV}.properties|cut -d'=' -f2
+  grep "${1}" ${ENV} | cut -d'=' -f2
+}
+
+export PROGRAM_NAME=$(getPropertyValue project.name)
+export PROGRAM_VERSION=$(getPropertyValue project.version)
+export PROGRAM_TITLE=$(getPropertyValue project.title)
+export MAIN_CLASS=$(getPropertyValue project.main.class)
+export PACKAGES_LIST=$(getPropertyValue project.javadoc.packages)
+export VENDOR_NAME=$(getPropertyValue project.author.name)
+export AUTHOR_NAME=$(getPropertyValue project.author.email)
+export SOURCE_VERSION=$(getPropertyValue project.build.jdk.version)
+export SRC_ENCODING=$(getPropertyValue project.build.encoding)
+export JAVADOC_CLASSPATH=$(getPropertyValue project.javadoc.classpath)
+
 # the tools and sources versions
 export GIT_COMMIT_ID=$(git rev-parse HEAD)
 export JAVA_BUILD=$(java --version | head -1 | cut -f2 -d' ')
@@ -84,7 +96,8 @@ function generatedoc() {
     -doctitle "<h1>${PROGRAM_TITLE}</h1>" \
     -d ${TARGET}/javadoc \
     -sourcepath ${SRC}/main/java ${JAVADOC_CLASSPATH} \
-    echo "   done." >>target/build.log #  -overview ${TARGET}/javadoc/overview.html \
+    -overview ${TARGET}/javadoc/overview.html
+  echo "   done." >>target/build.log # 
 
 }
 #
@@ -96,6 +109,7 @@ function executeTests() {
   rm -Rf ${TARGET}/test-classes/*
   echo "copy test resources"
   cp -r ./src/test/resources/* ${TARGET}/test-classes
+  cp -r ${TARGET}/classes/* ${TARGET}/test-classes
   echo "compile test classes"
   #list test sources
   find ./src/test -name '*.java' >${TARGET}/test-sources.lst
@@ -107,7 +121,7 @@ function executeTests() {
     -g:source,lines,vars \
     -classpath "$LIB_TEST;${CLASSES};." \
     -d ${TARGET}/test-classes @${TARGET}/test-sources.lst \
-    -sourcepath src/main/java/,src/main/resources
+    -sourcepath src/main/java/,src/test/java/,src/test/resources
 
   echo "execute tests through JUnit"
   java ${JAR_OPTS} -jar "$LIB_TEST" --class-path "${CLASSES};${TARGET}/test-classes;${SRC}/test/resources;" --scan-class-path
@@ -151,6 +165,7 @@ function sign() {
 function help() {
   echo "build2 command line usage :"
   echo "---------------------------"
+  echo "NOTE: Do not forget to provide a 'build.properties' file containing required key=value."
   echo "$> build2 [options]"
   echo "where:"
   echo " - a|A|all     : perform all following operations"

@@ -77,7 +77,9 @@ public class StringUtils {
         h = (int) (dec * 24.0);
 
         d = (int) time;
+        if (d > 0)
+            return (String.format("%dd-%02d:%02d:%02d.%03d", d, h, m, s, ms));
 
-        return (String.format("%d d - %02d:%02d:%02d.%03d", d, h, m, s, ms));
+        return (String.format("%02d:%02d:%02d.%03d", h, m, s, ms));
     }
 }

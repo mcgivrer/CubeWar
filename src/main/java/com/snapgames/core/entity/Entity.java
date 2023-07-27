@@ -1,39 +1,30 @@
 package com.snapgames.core.entity;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.snapgames.core.behavior.Behavior;
+import com.snapgames.core.graphics.plugins.RendererPlugin;
+import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.math.physic.Material;
-import com.snapgames.core.math.physic.Vector2D;
+import com.snapgames.core.math.physic.PhysicType;
 
 /**
- * Classe interne représentant une entité dans le jeu.
+ * {@link Entity} class representing an entity in the game.
  *
  * <p>
- * Chaque entité possède un nom, une position, une taille, une vitesse, une
- * durée de vie, des attributs et des propriétés graphiques.
+ * Each entity has a name, a position, a size, a velocity, a lifespan, attributes, and graphical properties.
+ * It is defined and declared into a {@link com.snapgames.core.scene.Scene}, and will be managed by the
+ * {@link com.snapgames.core.math.physic.PhysicEngine} and the {@link com.snapgames.core.graphics.Renderer} as a node.
  * </p>
  */
 public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
-    public final static int NONE = 0;
-    public final static int STATIC = 1;
-    public final static int DYNAMIC = 2;
-
-    public final static int TYPE_POINT = 1;
-    public final static int TYPE_LINE = 2;
-    public final static int TYPE_RECTANGLE = 3;
-    public final static int TYPE_ELLIPSE = 4;
-    public final static int TYPE_IMAGE = 5;
 
     public static int index = 0;
     protected int id = ++index;
@@ -45,31 +36,36 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public Vector2D vel = Vector2D.ZERO();
     public Vector2D acceleration = Vector2D.ZERO();
 
+
     public List<Vector2D> forces = new ArrayList<>();
     public double dRotation;
     public double mass;
     public boolean active;
 
-    int duration = -1;
-    int life;
+    protected int duration = -1;
+    protected int lifespan;
 
-    Color color = Color.WHITE;
-    Color fillColor = Color.RED;
-    int priority = 1;
+    protected Color color = Color.WHITE;
+    protected Color fillColor = Color.RED;
+    protected int layer;
+    protected int priority = 1;
+    private Class<? extends RendererPlugin> drawnBy;
 
     Map<String, Object> attributes = new HashMap<>();
     public List<Behavior<T>> behaviors = new ArrayList<>();
-    public int physicType;
+    public PhysicType physicType = PhysicType.DYNAMIC;
     public Material material;
-    public int type;
-    public int layer;
+
+
     public boolean constrainedToPlayArea;
     public boolean stickToCamera;
     public int contact;
+
     public int debug = 5;
+
     public Entity<?> parent;
     public List<Entity<?>> child = new CopyOnWriteArrayList<>();
-    private BufferedImage image;
+
 
     /**
      * Entity's constructor with a name, a position (x,y) and a size (w,h).
@@ -85,7 +81,6 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         setPosition(x, y);
         setSize((int) w, (int) h);
         setActive(true);
-        setType(TYPE_RECTANGLE);
         setStickToCameraView(false);
         setConstrainedToPlayArea(true);
         setMaterial(Material.DEFAULT);
@@ -113,9 +108,9 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
      */
     public void update(double elapsed) {
 
-        life += elapsed;
-        if (life > duration && duration != -1) {
-            active = false;
+        lifespan += elapsed;
+        if (duration != -1 && lifespan > duration) {
+            this.active = false;
         }
 
     }
@@ -128,7 +123,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public T setActive(boolean active) {
         this.active = active;
         if (duration != -1) {
-            life = duration;
+            lifespan = duration;
         }
         child.forEach(c -> c.setActive(active));
         return (T) this;
@@ -146,58 +141,6 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public T setDebug(int d) {
         this.debug = d;
         return (T) this;
-    }
-
-    /**
-     * Dessine l'entité.
-     *
-     * @param g le contexte graphique sur lequel dessiner
-     */
-    public void draw(Graphics2D g) {
-        switch (type) {
-            case TYPE_POINT -> {
-                if (color != null) {
-                    g.setColor(color);
-                    g.drawRect((int) pos.x, (int) pos.y, 1, 1);
-                }
-            }
-            case TYPE_LINE -> {
-                if (color != null) {
-                    g.setColor(color);
-                    g.drawLine((int) pos.x, (int) pos.y, (int) oldPos.x, (int) oldPos.y);
-                }
-            }
-            case TYPE_RECTANGLE -> {
-                if (fillColor != null) {
-                    g.setColor(fillColor);
-                    g.fill(this);
-                }
-                if (color != null) {
-                    g.setColor(color);
-                    g.draw(this);
-                }
-            }
-            case TYPE_ELLIPSE -> {
-                if (fillColor != null) {
-                    g.setColor(fillColor);
-                    g.fillOval((int) pos.x, (int) pos.y, (int) width, (int) height);
-                }
-                if (color != null) {
-                    g.setColor(color);
-                    g.drawOval((int) pos.x, (int) pos.y, (int) width, (int) height);
-                }
-            }
-            case TYPE_IMAGE -> {
-                if (Optional.ofNullable(image).isPresent()) {
-                    if (vel.x > 0) {
-                        g.drawImage(image, (int) pos.x, (int) pos.y, null);
-                    } else {
-                        g.drawImage(image, (int) (pos.x - width), (int) pos.y, (int) -width, (int) height, null);
-                    }
-                }
-            }
-            default -> System.err.printf("Unknown Entity type %d%n", type);
-        }
     }
 
     public T addBehavior(Behavior<T> b) {
@@ -257,7 +200,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
-    public T setSize(int w, int h) {
+    public T setSize(double w, double h) {
         this.width = w;
         this.height = h;
         return (T) this;
@@ -296,21 +239,11 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
-    public T setPhysicType(int t) {
-        assert (t == NONE || t == STATIC || t == DYNAMIC);
+    public T setPhysicType(PhysicType t) {
         this.physicType = t;
         return (T) this;
     }
 
-    public T setType(int t) {
-        this.type = t;
-        return (T) this;
-    }
-
-    public T setImage(BufferedImage img) {
-        this.image = img;
-        return (T) this;
-    }
 
     public T setColor(Color c) {
         this.color = c;
@@ -399,6 +332,10 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return forces;
     }
 
+    public int getLayer() {
+        return this.layer;
+    }
+
     public int getPriority() {
         return this.priority;
     }
@@ -417,5 +354,28 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
     public Vector2D getAcceleration() {
         return acceleration;
+    }
+
+    /**
+     * Add a list of Force to the {@link Entity}.
+     *
+     * @param forces list of forces.
+     * @return the updated T Entity.
+     */
+    public T addForces(List<Vector2D> forces) {
+        forces.forEach(f -> this.addForce(f));
+        return (T) this;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public Color getFillColor() {
+        return fillColor;
+    }
+
+    public void setDrawnBy(Class<? extends RendererPlugin> aClass) {
+        drawnBy = aClass;
     }
 }

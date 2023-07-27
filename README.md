@@ -29,6 +29,8 @@ or you can execute the command line :
 $> java -jar target/JavaTestApp-1.0.0.jar
 ```
 
+![A screenshot from the current version](doc/images/screenshot-003-renderer-plugin-archi.png "A screenshot from the current version")
+
 ## Debug
 
 you may use the jdb command line :
@@ -39,6 +41,8 @@ jdb -sourcepath src/main/java/,src/main/resources \
 ```
 
 ## Reference
+
+### Build script
 
 > **NOTE** _To get more information this script usga ejust execite:_
 >
@@ -64,6 +68,21 @@ jdb -sourcepath src/main/java/,src/main/resources \
 > -----------
 > ... done.
 > ```
+
+### Keys from the demo
+
+| Key                                                               | description                                              |
+| :---------------------------------------------------------------- | :------------------------------------------------------- |
+| <kbd>UP</kbd>, <kbd>DOWN</kbd>, <kbd>LEFT</kbd>, <kbd>RIGHT</kbd> | Move player vertically <br/>or horizontally              |
+| <kbd>ALT</kbd>+<kbd>UP</kbd>, <kbd>ALT</kbd>+<kbd>DOWN</kbd>      | Player rotation left or right                            |
+| <kbd>CTRL</kbd>+<kbd>D</kbd>, <kbd>D</kbd>                        | Activate debug display, <br/>change debug level (0 to 5) |
+| <kbd>PAGE-UP</kbd>, <kbd>PAGE-DOWN</kbd>                          | Camera roll                                              |
+| <kbd>ALT</kbd>+<kbd>BACKSPACE</kbd>                               | Reset camera roll to initial position                    |
+| <kbd>CTRL</kbd>+<kbd>Z</kbd>                                      | Reset Scene                                              |
+| <kbd>ESCAPE</kbd>,<kbd>Q</kbd>                                    | Exit demonstration                                       |
+| <kbd>P</kbd>,<kbd>PAUSE</kbd>                                     | set/unset Game update in pause mode                      |
+| <kbd>G</kbd>                                                      | Reverse World gravity                                    |
+| <kbd>F3</kbd>                                                     | take screen shot (not implemented yet)                   |
 
 Enjoy !
 
