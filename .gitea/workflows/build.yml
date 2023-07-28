@@ -14,11 +14,10 @@ jobs:
 
       - name: build dependencies
         run: scripts/build.sh a
-      - name: publish release
-          uses: https://gitea.com/actions/release-action@main
-          with:
-            files: |-
-              target/*.jar            
-              target/buid/*.run            
-            api_key: '${{secrets.RELEASE_TOKEN}}'
+      - uses: https://gitea.com/actions/release-action@main
+        with:
+          files: |-
+            target/*.jar            
+            target/buid/*.run            
+          api_key: '${{secrets.RELEASE_TOKEN}}'
           
