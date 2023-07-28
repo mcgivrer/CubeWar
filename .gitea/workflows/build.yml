@@ -14,6 +14,10 @@ jobs:
           apt-get install -y curl zip unzip
           curl -s "https://get.sdkman.io" | bash
       - name: prepare java build env
+        env:
+          - PATH=$PATH:/root/.sdkman/bin/sdkman-init.sh"
+          - PATH=$PATH:/root/.sdkman/candidates/maven/current
+          - PATH=$PATH:/root/.sdkman/candidates/java/current
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk update
