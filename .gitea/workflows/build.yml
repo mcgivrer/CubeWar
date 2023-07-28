@@ -8,8 +8,8 @@ jobs:
     steps:
       - name: install dependencies
         run: |
-          sudo apt install zip
-          sudo apt install unzip
+          apt install zip
+          apt install unzip
       - name: build all
         run: |
           curl -s "https://get.sdkman.io" | bash
