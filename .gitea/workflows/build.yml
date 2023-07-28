@@ -12,12 +12,14 @@ jobs:
         run: |
           apt-get update
           apt-get install -y curl zip unzip
-      - name: build all
-        run: |
           curl -s "https://get.sdkman.io" | bash
           source "$HOME/.sdkman/bin/sdkman-init.sh"
+      - name: prepare java build env
+        run: |
           sdk update
           sdk env install
           sdk env use
+      - name: build project
+        run: |
           scripts/build.sh a
           
