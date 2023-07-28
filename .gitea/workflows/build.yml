@@ -16,9 +16,8 @@ jobs:
       - name: prepare java build env
         env:
           - PATH=$PATH:/root/.sdkman/bin/sdkman-init.sh"
-          - PATH=$PATH:/root/.sdkman/candidates/maven/current
-          - PATH=$PATH:/root/.sdkman/candidates/java/current
-          - JAVA_HOME=/root/.sdkman/candidates/java/current
+          - JAVA_HOME=/root/.sdkman/candidates/java/current:/root/.sdkman/candidates/maven/current
+          - PATH=$PATH:JAVA_HOME:.
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk update
