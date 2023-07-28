@@ -1,0 +1,16 @@
+name: Gitea Actions SDKMAN assisted java build
+run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
+on: [push]
+
+jobs:
+  Explore-Gitea-Actions:
+    runs-on: docker-sdkman-java
+    steps:
+      - name: checkout repository
+        uses: https://github.com/actions/checkout@v3
+        env:
+          - PATH=$PATH:/root/.sdkman/bin/sdkman-init.sh"
+          - PATH=$PATH:/root/.sdkman/candidates/maven/current
+          - PATH=$PATH:/root/.sdkman/candidates/java/current
+        run: |
+          scripts/build.sh a
