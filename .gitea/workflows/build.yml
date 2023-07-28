@@ -6,6 +6,10 @@ jobs:
   Explore-Gitea-Actions:
     runs-on: ubuntu-latest
     steps:
+      - name: install dependencies
+        run: |
+          sudo apt install zip
+          sudo apt install unzip
       - name: build all
         run: |
           curl -s "https://get.sdkman.io" | bash
