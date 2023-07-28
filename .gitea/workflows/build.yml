@@ -18,6 +18,7 @@ jobs:
           - PATH=$PATH:/root/.sdkman/bin/sdkman-init.sh"
           - PATH=$PATH:/root/.sdkman/candidates/maven/current
           - PATH=$PATH:/root/.sdkman/candidates/java/current
+          - JAVA_HOME=/root/.sdkman/candidates/java/current
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk update
