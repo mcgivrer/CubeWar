@@ -1,7 +1,6 @@
 package com.snapgames.core.test;
 
 import com.snapgames.core.Application;
-import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.test.scenes.TestScene;
