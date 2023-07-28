@@ -6,7 +6,8 @@ jobs:
   Explore-Gitea-Actions:
     runs-on: ubuntu-latest
     steps:
-      uses: https://github.com/actions/checkout@v3
+      - name: checkout repository
+        uses: https://github.com/actions/checkout@v3
       - name: install dependencies
         run: |
           apt-get update
