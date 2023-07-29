@@ -1,4 +1,5 @@
 # README
+![Build](http://nextserver02:4000/frederic/build/main/badge.png)
 
 ## Context
 
