@@ -5,6 +5,7 @@ RUN bash -c "sudo apt-get update && \
     . /home/gitpod/.sdkman/bin/sdkman-init.sh &&\
     curl -s \"https://get.sdkman.io\" | bash && \
     source \"$HOME/.sdkman/bin/sdkman-init.sh\" && \
-    sdk update && \ 
+    . \"$HOME/.sdkman/bin/sdkman-init.sh\" && \
+    sdk update && \
     sdk env install && \
     sdk env use"
