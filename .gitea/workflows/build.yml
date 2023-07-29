@@ -6,23 +6,17 @@ jobs:
   Explore-Gitea-Actions:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout repository
-        uses: https://github.com/actions/checkout@v3
-      - name: install dependencies
-        run: |
-          apt-get update
-          apt-get install -y curl zip unzip
-          curl -s "https://get.sdkman.io" | bash
-      - name: prepare java build env
-        env:
-          - PATH=$PATH:/root/.sdkman/bin/sdkman-init.sh"
-          - JAVA_HOME=/root/.sdkman/candidates/java/current:/root/.sdkman/candidates/maven/current
-          - PATH=$PATH:JAVA_HOME:.
-        run: |
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk update
-          sdk env install
-          sdk env use
-          chmod +x scripts/build.sh
-          scripts/build.sh a
-          
+      - uses: https://github.com/actions/checkout@v3
+      - uses: https://github.com/actions/setup-java@v3
+        with:
+          distribution: 'zulu' # See 'Supported distributions' for available options
+          java-version: '20'
+
+      - name: build dependencies
+        run: scripts/build.sh a
+      - uses: https://gitea.com/actions/release-action@main
+        with:
+          files: |-
+            target/*.jar
+            target/buid/*.run
+          api_key: '${{secrets.RELEASE_TOKEN}}'
