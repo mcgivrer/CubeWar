@@ -9,6 +9,7 @@ import java.util.Optional;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.input.InputHandler;
+import com.snapgames.core.math.physic.CollisionDetection;
 import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.PhysicType;
 import com.snapgames.core.scene.Scene;
@@ -79,7 +80,7 @@ public abstract class Application {
         version = Optional.of(I18n.getMessage("app.version")).orElse("-1.0.0-");
 
         ((Renderer) GSystemManager.find(Renderer.class))
-                .createWindow(((InputHandler) GSystemManager.find(InputHandler.class)));
+            .createWindow(((InputHandler) GSystemManager.find(InputHandler.class)));
         createScenes();
         loop();
         if (!testMode) {
@@ -112,6 +113,7 @@ public abstract class Application {
 
         GSystemManager.add(I18n.get());
         GSystemManager.add(new PhysicEngine(this));
+        GSystemManager.add(new CollisionDetection(this));
         GSystemManager.add(new Renderer(this));
         GSystemManager.add(new InputHandler(this));
         GSystemManager.add(new SceneManager(this));
@@ -126,12 +128,14 @@ public abstract class Application {
     private void loop() {
 
         PhysicEngine physicEngine = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
+        CollisionDetection cd = ((CollisionDetection) GSystemManager.find(CollisionDetection.class));
         InputHandler inputHandler = ((InputHandler) GSystemManager.find(InputHandler.class));
         Renderer renderer = ((Renderer) GSystemManager.find(Renderer.class));
         Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
+
         System.out.printf(
-                ">> <!> Activate Scene '%s'(%s).%n",
-                scene.getName(), scene.getClass().getName());
+            ">> <!> Activate Scene '%s'(%s).%n",
+            scene.getName(), scene.getClass().getName());
 
         // retrieve Frame-Per-Second
         FPS = configuration.fps;
@@ -142,7 +146,7 @@ public abstract class Application {
         traceStats(scene);
 
         System.out.printf(
-                ">> <!> Application now loops on Scene '%s'%n", scene.getName());
+            ">> <!> Application now loops on Scene '%s'%n", scene.getName());
         long start = System.nanoTime();
         long previous = start;
         long elapsedTime = 0;
@@ -163,7 +167,9 @@ public abstract class Application {
             input(inputHandler, scene);
             if (!pause) {
                 if (upsTime > (1000.0 / UPS)) {
+                    cd.update(scene, elapsed * 0.00000002, datastats);
                     physicEngine.update(scene, elapsed * 0.00000002, datastats);
+                    cd.reset();
                     updates++;
                     upsTime = 0;
                 }
@@ -214,27 +220,27 @@ public abstract class Application {
         } catch (InterruptedException e) {
             Thread.interrupted();
             System.err.printf("Error while waiting for next update/frame %s%n",
-                    Arrays.toString(e.getStackTrace()));
+                Arrays.toString(e.getStackTrace()));
         }
     }
 
     private void traceStats(Scene scene) {
         long staticEntities = scene.getEntities().stream()
-                .filter(e -> e.physicType.equals(PhysicType.STATIC))
-                .count();
+            .filter(e -> e.physicType.equals(PhysicType.STATIC))
+            .count();
         long dynamicEntities = scene.getEntities().stream()
-                .filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
-                .count();
+            .filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
+            .count();
         long nonePhysicEntities = scene.getEntities().stream()
-                .filter(e -> e.physicType.equals(PhysicType.NONE))
-                .count();
+            .filter(e -> e.physicType.equals(PhysicType.NONE))
+            .count();
         System.out.printf(
-                ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
-                scene.getName(),
-                staticEntities,
-                dynamicEntities,
-                nonePhysicEntities,
-                scene.getActiveCamera() != null ? 1 : 0);
+            ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
+            scene.getName(),
+            staticEntities,
+            dynamicEntities,
+            nonePhysicEntities,
+            scene.getActiveCamera() != null ? 1 : 0);
     }
 
     /**

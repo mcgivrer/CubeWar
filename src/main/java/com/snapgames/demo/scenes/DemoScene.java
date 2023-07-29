@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.entity.GameObject;
@@ -25,6 +26,7 @@ import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
+import com.snapgames.demo.BallResponseBehavior;
 import com.snapgames.demo.input.CameraInput;
 import com.snapgames.demo.input.DemoInput;
 import com.snapgames.demo.input.PlayerInput;
@@ -260,7 +262,8 @@ public class DemoScene extends AbstractScene {
         // create some red ball particle system
         addEntity(
             ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
-                new BallParticleBehavior(200.0, 2.0)));
+                new BallParticleBehavior(200.0, 2.0),
+                ((Behavior) new BallResponseBehavior())));
 
         // add rain drops particle system.
         addEntity(
