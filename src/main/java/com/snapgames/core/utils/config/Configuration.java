@@ -15,15 +15,15 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * {@link Configuration} will load properties values into some configuration
  * attributes.
- * 
+ * <p>
  * Those values can be overloaded from CLI arguments.
- * 
+ * <p>
  * The path of the loaded properties file is set into the constructor, but can
  * be overriden
  * by the specific argument <code>configPath</code>. If thios argument is
  * present, it will reload
  * the configuration accordingly.
- * 
+ *
  * @author Frédéric Delorme
  * @since 1.0.0
  */
@@ -53,10 +53,12 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     public String debugFilter;
     public boolean requestExit;
 
+    public String defaultScene;
+
     /**
      * Iniitialize and load the configruation with the dedicated properties file,
      * and enhance file's values with possible CLI arguments.
-     * 
+     *
      * @param app         the parent application
      * @param pathCfgFile the path to the properties configuration file to be
      *                    loaded.
@@ -145,7 +147,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      */
     private static boolean getParsedBoolean(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
-                config.getProperty(key, defaultValue));
+            config.getProperty(key, defaultValue));
         return Boolean.parseBoolean(config.getProperty(key, defaultValue));
     }
 
@@ -161,7 +163,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      */
     private static int getParsedInt(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
-                config.getProperty(key, defaultValue));
+            config.getProperty(key, defaultValue));
         return Integer.parseInt(config.getProperty(key, defaultValue));
     }
 
@@ -177,7 +179,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      */
     private static double getParsedDouble(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
-                config.getProperty(key, defaultValue));
+            config.getProperty(key, defaultValue));
         return Double.parseDouble(config.getProperty(key, defaultValue));
     }
 
@@ -193,13 +195,13 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      */
     private Rectangle2D getRectangle2D(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
-                config.getProperty(key, defaultValue));
+            config.getProperty(key, defaultValue));
 
         String[] paArgs = config.getProperty(key, defaultValue).split("x");
         return new Rectangle2D.Double(
-                0, 0,
-                Integer.parseInt(paArgs[0]),
-                Integer.parseInt(paArgs[1]));
+            0, 0,
+            Integer.parseInt(paArgs[0]),
+            Integer.parseInt(paArgs[1]));
     }
 
     /**
@@ -214,12 +216,12 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      */
     private Dimension getDimension(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
-                config.getProperty(key, defaultValue));
+            config.getProperty(key, defaultValue));
 
         String[] winSizeArgs = config.getProperty(key, defaultValue).split("x");
         return new Dimension(
-                Integer.parseInt(winSizeArgs[0]),
-                Integer.parseInt(winSizeArgs[1]));
+            Integer.parseInt(winSizeArgs[0]),
+            Integer.parseInt(winSizeArgs[1]));
     }
 
     /**
@@ -235,16 +237,16 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      */
     private World getWorld(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
-                config.getProperty(key, defaultValue));
+            config.getProperty(key, defaultValue));
 
         String value = config.getProperty(key, defaultValue);
         String[] wArgs = value.substring("world(".length(), value.length() - ")".length()).split(",");
         double g = Double.parseDouble(wArgs[1]);
         String[] paArgs = wArgs[2].substring("(".length(), wArgs[2].length() - ")".length()).split("x");
         Rectangle2D pa = new Rectangle2D.Double(
-                0, 0,
-                Integer.parseInt(paArgs[0]),
-                Integer.parseInt(paArgs[0]));
+            0, 0,
+            Integer.parseInt(paArgs[0]),
+            Integer.parseInt(paArgs[0]));
         return new World(wArgs[0]).setGravity(new Vector2D(0, g)).setPlayArea(pa);
     }
 
@@ -268,7 +270,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
                 case "testMode" -> {
                     testMode = Boolean.parseBoolean(arg[1]);
                     System.out.printf(">> <!> argument 'Test Mode' set to %s: test mode %s.%n", arg[1],
-                            testMode ? "activated" : "NOT activated");
+                        testMode ? "activated" : "NOT activated");
                 }
                 // define debug level for this application run.
                 case "d", "debugLevel" -> {
@@ -290,6 +292,10 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
                 case "c", "configPath" -> {
                     this.pathToConfigFile = arg[1];
                     System.out.printf(">> <!> argument 'configuration file path' set to %s%n", arg[1]);
+                }
+                case "ds", "defaultScene" -> {
+                    this.defaultScene = arg[1];
+                    System.out.printf(">> <!> argument 'default scene' set to %s%n", arg[1]);
                 }
                 default -> {
                     System.err.printf(">> <?> unknown argument: %s in %s%n", arg[0], s);

@@ -8,6 +8,8 @@ import com.snapgames.demo.input.GameKeyInput;
 import com.snapgames.demo.scenes.DemoScene;
 import com.snapgames.demo.scenes.TitleScene;
 
+import java.util.Optional;
+
 /**
  * This {@link CubeWar} demonstration app highlight the way to implement your
  * own {@link Application}.
@@ -21,9 +23,13 @@ public class CubeWar extends Application {
         InputHandler ih = ((InputHandler) GSystemManager.find(InputHandler.class));
         ih.add(new GameKeyInput());
         ((SceneManager) GSystemManager.find(SceneManager.class))
-                .add(new TitleScene())
-                .add(new DemoScene());
-
+            .add(new TitleScene())
+            .add(new DemoScene());
+        // if a defaultScene argument is set, switch to the required scene (mainly used for debug purpose.
+        if (Optional.ofNullable(ih.getApplication().getConfiguration().defaultScene).isPresent()) {
+            ((SceneManager) GSystemManager.find(SceneManager.class))
+                .activate(ih.getApplication().getConfiguration().defaultScene);
+        }
     }
 
     /**

@@ -72,193 +72,200 @@ public class DemoScene extends AbstractScene {
         World world = pe.getWorld();
 
         ((InputHandler) GSystemManager.find(InputHandler.class))
-                .add(demoInput)
-                .add(playerInput)
-                .add(cameraInput);
+            .add(demoInput)
+            .add(playerInput)
+            .add(cameraInput);
         world.add(
-                new Perturbation(
-                        "wind",
-                        0, 0,
-                        world.getPlayArea().getWidth(), world.getPlayArea().getHeight(),
-                        3, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
-                        .setForce(new Vector2D(0.01, 0.00))
-                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
-                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.1f)));
+            new Perturbation(
+                "wind",
+                0, 0,
+                world.getPlayArea().getWidth(), world.getPlayArea().getHeight(),
+                3, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+                .setForce(new Vector2D(0.03, 0.00))
+                .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.1f)));
         world.add(
-                new Perturbation(
-                        "water",
-                        0, world.getPlayArea().getHeight() * 0.85,
-                        world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
-                        .setForce(new Vector2D(0.12, -1.0))
-                        .setColor(new Color(0.5f, 0.4f, 0.9f, 0.6f))
-                        .setFillColor(new Color(0.3f, 0.2f, 0.8f, 0.5f)));
+            new Perturbation(
+                "water",
+                0, world.getPlayArea().getHeight() * 0.85,
+                world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
+                .setForce(new Vector2D(0.0, -1.0))
+                .setColor(new Color(0.5f, 0.4f, 0.9f, 0.6f))
+                .setFillColor(new Color(0.3f, 0.2f, 0.8f, 0.5f)));
         world.add(
-                new Perturbation(
-                        "magnet_1",
-                        0, world.getPlayArea().getHeight() * 0.1,
-                        world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight())
-                        .setForce(new Vector2D(-0.05, 0.0))
-                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
-                        .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+            new Perturbation(
+                "magnet_1",
+                0, world.getPlayArea().getHeight() * 0.1,
+                world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight() * 0.9)
+                .setForce(new Vector2D(0.05, 0.0))
+                .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
         world.add(
-                new Perturbation(
-                        "magnet_2",
-                        world.getPlayArea().getWidth() * 0.90, world.getPlayArea().getHeight() * 0.1,
-                        world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight())
-                        .setForce(new Vector2D(0.05, 0.0))
-                        .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
-                        .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
-
+            new Perturbation(
+                "magnet_2",
+                world.getPlayArea().getWidth() * 0.90, world.getPlayArea().getHeight() * 0.1,
+                world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight() * 0.9)
+                .setForce(new Vector2D(-0.05, 0.0))
+                .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+        world.add(
+            new Perturbation(
+                "magnet_3",
+                world.getPlayArea().getWidth() * 0.1, 0,
+                world.getPlayArea().getWidth() * 0.8, world.getPlayArea().getHeight() * 0.1)
+                .setForce(new Vector2D(0.00, -1.3))
+                .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
+                .setFillColor(new Color(0.9f, 0.7f, 0.1f, 0.1f)));
 
         TextObject score = new TextObject("score")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.98, 32)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setPhysicType(PhysicType.NONE)
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(20.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setText("%05d")
-                .setValue(0)
-                .setPriority(20)
-                .setLayer(1)
-                .setTextAlign(TextObject.ALIGN_RIGHT)
-                .setStickToCameraView(true)
-                .setMaterial(null)
-                .setDebug(3);
+            .setPosition(
+                configuration.bufferResolution.getWidth() * 0.98, 32)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setPhysicType(PhysicType.NONE)
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(20.0f))
+            .setColor(Color.WHITE)
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setText("%05d")
+            .setValue(0)
+            .setPriority(20)
+            .setLayer(1)
+            .setTextAlign(TextObject.ALIGN_RIGHT)
+            .setStickToCameraView(true)
+            .setMaterial(null)
+            .setDebug(3);
 
         addEntity(score);
 
         TextObject heart = new TextObject("heart")
-                .setPosition(10, configuration.bufferResolution.getHeight() * 0.90)
-                .setPhysicType(PhysicType.NONE)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(16.0f))
-                .setColor(Color.RED)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setText("❤")
-                .setPriority(20)
-                .setLayer(1)
-                .setStickToCameraView(true)
-                .setMaterial(null);
+            .setPosition(10, configuration.bufferResolution.getHeight() * 0.90)
+            .setPhysicType(PhysicType.NONE)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(16.0f))
+            .setColor(Color.RED)
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setText("❤")
+            .setPriority(20)
+            .setLayer(1)
+            .setStickToCameraView(true)
+            .setMaterial(null);
 
         addEntity(heart);
 
         TextObject life = new TextObject("life")
-                .setPosition(20, configuration.bufferResolution.getHeight() * 0.90)
-                .setPhysicType(PhysicType.NONE)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(12.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(1)
-                .setText("%d")
-                .setValue(3)
-                .setPriority(21)
-                .setLayer(1)
-                .setStickToCameraView(true)
-                .setDebug(2)
-                .setMaterial(null);
+            .setPosition(20, configuration.bufferResolution.getHeight() * 0.90)
+            .setPhysicType(PhysicType.NONE)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(12.0f))
+            .setColor(Color.WHITE)
+            .setShadowWidth(3)
+            .setBorderWidth(1)
+            .setText("%d")
+            .setValue(3)
+            .setPriority(21)
+            .setLayer(1)
+            .setStickToCameraView(true)
+            .setDebug(2)
+            .setMaterial(null);
 
         addEntity(life);
 
         TextObject welcomeMessage = new TextObject("message")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.70)
-                .setPhysicType(PhysicType.NONE)
-                .setTextAlign(TextObject.ALIGN_CENTER)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(12.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setI18nKeyCode("app.title.welcome")
-                .setPriority(20)
-                .setLayer(1)
-                .setStickToCameraView(true)
-                .setDuration(5000)
-                .setDebug(2)
-                .setMaterial(null);
+            .setPosition(
+                configuration.bufferResolution.getWidth() * 0.50,
+                configuration.bufferResolution.getHeight() * 0.70)
+            .setPhysicType(PhysicType.NONE)
+            .setTextAlign(TextObject.ALIGN_CENTER)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(12.0f))
+            .setColor(Color.WHITE)
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setI18nKeyCode("app.title.welcome")
+            .setPriority(20)
+            .setLayer(1)
+            .setStickToCameraView(true)
+            .setDuration(5000)
+            .setDebug(2)
+            .setMaterial(null);
 
         addEntity(welcomeMessage);
 
         TextObject pauseObj = new TextObject("pause")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.40)
-                .setPhysicType(PhysicType.NONE)
-                .setTextAlign(TextObject.ALIGN_CENTER)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(24.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setI18nKeyCode("app.pause.message")
-                .setPriority(20)
-                .setLayer(1)
-                .setStickToCameraView(true)
-                .setMaterial(null)
-                .setActive(false);
+            .setPosition(
+                configuration.bufferResolution.getWidth() * 0.50,
+                configuration.bufferResolution.getHeight() * 0.40)
+            .setPhysicType(PhysicType.NONE)
+            .setTextAlign(TextObject.ALIGN_CENTER)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(24.0f))
+            .setColor(Color.WHITE)
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setI18nKeyCode("app.pause.message")
+            .setPriority(20)
+            .setLayer(1)
+            .setStickToCameraView(true)
+            .setMaterial(null)
+            .setActive(false);
 
         addEntity(pauseObj);
 
         GameObject player = new GameObject("player")
-                .setPosition(
-                        configuration.world.getPlayArea().getWidth() * 0.50,
-                        configuration.world.getPlayArea().getHeight() * 0.50)
-                .setSize(16, 16)
-                .setType(GameObjectType.TYPE_ELLIPSE)
-                .setPhysicType(PhysicType.DYNAMIC)
-                .setPriority(10)
-                .setLayer(80)
-                .setColor(Color.WHITE)
-                .setFillColor(Color.GREEN)
-                .setMass(60.0)
-                .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
-                .setAttribute("speedStep", 0.1)
-                .setAttribute("jumpFactor", 99.601)
-                .setAttribute("speedRotStep", 0.001)
-                .setDebug(2);
+            .setPosition(
+                configuration.world.getPlayArea().getWidth() * 0.50,
+                configuration.world.getPlayArea().getHeight() * 0.50)
+            .setSize(16, 16)
+            .setType(GameObjectType.TYPE_RECTANGLE)
+            .setPhysicType(PhysicType.DYNAMIC)
+            .setPriority(10)
+            .setLayer(80)
+            .setColor(Color.WHITE)
+            .setFillColor(Color.GREEN)
+            .setMass(60.0)
+            .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
+            .setAttribute("speedStep", 0.1)
+            .setAttribute("jumpFactor", 99.601)
+            .setAttribute("speedRotStep", 0.001)
+            .setDebug(2);
         addEntity(player);
 
         TextObject helpPanel = new TextObject("helpPanel")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.50)
-                .setPhysicType(PhysicType.STATIC)
-                .setTextAlign(TextObject.ALIGN_CENTER)
-                .setColor(Color.LIGHT_GRAY)
-                .setShadowColor(new Color(0.4f, 0.4f, 0.4f, 0.8f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(8.5f))
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setI18nKeyCode("app.demo.help")
-                .setPriority(30)
-                .setLayer(2)
-                .setStickToCameraView(true)
-                .setDuration(7000)
-                .setDebug(2)
-                .setMaterial(null)
-                .setActive(false);
+            .setPosition(
+                configuration.bufferResolution.getWidth() * 0.50,
+                configuration.bufferResolution.getHeight() * 0.50)
+            .setPhysicType(PhysicType.STATIC)
+            .setTextAlign(TextObject.ALIGN_CENTER)
+            .setColor(Color.LIGHT_GRAY)
+            .setShadowColor(new Color(0.4f, 0.4f, 0.4f, 0.8f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(8.5f))
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setI18nKeyCode("app.demo.help")
+            .setPriority(30)
+            .setLayer(2)
+            .setStickToCameraView(true)
+            .setDuration(7000)
+            .setDebug(2)
+            .setMaterial(null)
+            .setActive(false);
         addEntity(helpPanel);
         // create some red ball particle system
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
-                        new BallParticleBehavior(200.0, 2.0)));
+            ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
+                new BallParticleBehavior(200.0, 2.0)));
 
         // add rain drops particle system.
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 50,
-                        new RainParticleBehavior(0.003)));
+            ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 50,
+                new RainParticleBehavior(0.003)));
 
         Camera cam = new Camera("cam01", configuration.bufferResolution.width, configuration.bufferResolution.height);
         cam.setTarget(player);
@@ -344,20 +351,20 @@ public class DemoScene extends AbstractScene {
     @Override
     public void setWorld(World world) {
         world.add(
-                new Perturbation("wind",
-                        0, 0,
-                        (int) world.getPlayArea().getWidth(),
-                        (int) world.getPlayArea().getHeight())
-                        .setSpeed(new Vector2D(0.5, 0.5)));
+            new Perturbation("wind",
+                0, 0,
+                (int) world.getPlayArea().getWidth(),
+                (int) world.getPlayArea().getHeight())
+                .setSpeed(new Vector2D(0.5, 0.5)));
     }
 
     @Override
     public void dispose() {
         super.dispose();
         ((InputHandler) GSystemManager.find(InputHandler.class))
-                .remove(playerInput)
-                .remove(cameraInput)
-                .remove(demoInput);
+            .remove(playerInput)
+            .remove(cameraInput)
+            .remove(demoInput);
     }
 
 }
