@@ -52,7 +52,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     private Class<? extends RendererPlugin> drawnBy;
 
     Map<String, Object> attributes = new HashMap<>();
-    public List<Behavior<T>> behaviors = new ArrayList<>();
+    public List<Behavior<?>> behaviors = new ArrayList<>();
     public PhysicType physicType = PhysicType.DYNAMIC;
     public Material material;
 
@@ -143,7 +143,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
-    public T addBehavior(Behavior<T> b) {
+    public T addBehavior(Behavior<?> b) {
         behaviors.add(b);
         return (T) this;
     }
