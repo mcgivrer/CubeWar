@@ -9,6 +9,7 @@ import com.snapgames.core.system.GSystem;
 import com.snapgames.core.system.GSystemManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,21 +45,27 @@ public class CollisionDetection implements GSystem {
                         }
                     });
             });
-        datastats.put("5_col", getCount());
+        datastats.put("5_colliders", getCount());
     }
 
     private void collide(Entity<?> e2, Entity<?> e1) {
         CollisionEvent ce = new CollisionEvent(e1, e2);
-        System.out.printf(">> <?> collision between %s and %s%n", e2.getName(), e1.getName());
+        if (e1.getName().equals("player") || e2.getName().equals("player"))
+            System.out.printf(">> <?> collision between %s and %s%n", e2.getName(), e1.getName());
         collisions.add(ce);
         collisionResponse(ce);
     }
 
     private void collisionResponse(CollisionEvent ce) {
-        ce.getEntity1().behaviors.stream()
-            .filter(b -> b.getClass().isAssignableFrom(CollisionResponseBehavior.class))
+        ce.getEntity1().behaviors
             .forEach(
-                crb -> ((CollisionResponseBehavior) crb).response(ce));
+                crb -> {
+                    try {
+                        ((CollisionResponseBehavior) crb).response(ce);
+                    } catch (Exception e) {
+                        // nothing
+                    }
+                });
     }
 
     public List<CollisionEvent> getCollisions() {

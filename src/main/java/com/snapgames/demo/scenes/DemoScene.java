@@ -26,7 +26,7 @@ import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
-import com.snapgames.demo.BallResponseBehavior;
+import com.snapgames.demo.behavior.BallResponseBehavior;
 import com.snapgames.demo.input.CameraInput;
 import com.snapgames.demo.input.DemoInput;
 import com.snapgames.demo.input.PlayerInput;

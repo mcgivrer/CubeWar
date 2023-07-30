@@ -11,7 +11,7 @@ import com.snapgames.core.entity.Entity;
  *
  * @param <GameObject> the Entity to be modified.
  */
-public interface Behavior<GameObject> {
+public interface Behavior<T extends Entity<?>> {
     /**
      * Implement the <code>update</code> the e Entity according to the elapsed time.
      *

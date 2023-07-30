@@ -37,26 +37,26 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
 
     @Override
     public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                             Entity<?> parent) {
+                             GameObject parent) {
 
         return new GameObject(
-                particleNamePrefix + "_" + GameObject.index)
-                .setPosition(
-                        Math.random() * parentWorld.getPlayArea().getWidth(),
-                        Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
-                .setSize(1, 1)
-                .setPriority(1)
-                .setType(GameObjectType.TYPE_LINE)
-                .setConstrainedToPlayArea(false)
-                // set depth to the rain drop.
-                .setLayer((int) (Math.random() * 9) + 10)
-                .setPhysicType(PhysicType.DYNAMIC)
-                .setColor(Color.YELLOW)
-                .setMaterial(Material.WATER)
-                .setMass(1.0)
-                .setParent(parent)
-                .addBehavior(this)
-                .addForce(new Vector2D(0.0, Math.random() * accFactor * parentWorld.getGravity().y));
+            particleNamePrefix + "_" + GameObject.index)
+            .setPosition(
+                Math.random() * parentWorld.getPlayArea().getWidth(),
+                Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
+            .setSize(1, 1)
+            .setPriority(1)
+            .setType(GameObjectType.TYPE_LINE)
+            .setConstrainedToPlayArea(false)
+            // set depth to the rain drop.
+            .setLayer((int) (Math.random() * 9) + 10)
+            .setPhysicType(PhysicType.DYNAMIC)
+            .setColor(Color.YELLOW)
+            .setMaterial(Material.WATER)
+            .setMass(1.0)
+            .setParent(parent)
+            .addBehavior(this)
+            .addForce(new Vector2D(0.0, Math.random() * accFactor * parentWorld.getGravity().y));
     }
 
     /**
@@ -76,10 +76,10 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
         if (!parentWorld.getPlayArea().getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
             if (Math.random() > 0.3) {
                 e.setPosition(parentWorld.getPlayArea().getWidth() * Math.random(),
-                        Math.random() * parentWorld.getPlayArea().getHeight() * 0.1);
+                    Math.random() * parentWorld.getPlayArea().getHeight() * 0.1);
             } else {
                 e.setPosition(parentWorld.getPlayArea().getWidth() * Math.random() * 0.1,
-                        Math.random() * parentWorld.getPlayArea().getHeight());
+                    Math.random() * parentWorld.getPlayArea().getHeight());
             }
             e.setOldPosition(e.x, e.y);
 

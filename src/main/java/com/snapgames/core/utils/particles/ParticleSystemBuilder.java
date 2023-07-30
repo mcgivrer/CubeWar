@@ -8,6 +8,30 @@ import com.snapgames.core.math.physic.World;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * A Particle System builder to create a parent {@link com.snapgames.core.entity.Entity} with a number of child,
+ * behaves like a particle system.
+ * <p>
+ * The created {@link com.snapgames.core.entity.Entity} will have not been animated, but all is child will take benefits
+ * of the proposed {@link ParticleBehavior}"s, but also can be enhanced with some specific {@link Behavior}'s.
+ * <p>
+ * An example of code to create a new particle system with :
+ *     <ul>
+ *         <li>a specific particle behavior for a ball (see {@link ParticleBehavior}),</li>
+ *         <li>a collision response behavior (see {@link com.snapgames.core.behavior.CollisionResponseBehavior}) for all balls.</li>
+ *     </ul>
+ * </p>
+ * <pre>
+ * <code>
+ * ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
+ *        new BallParticleBehavior(200.0, 2.0),
+ *        ((Behavior) new BallResponseBehavior())));
+ * </code>
+ * </pre>
+ *
+ * @author Frédéric Delorme
+ * @since 1.0.3
+ */
 public class ParticleSystemBuilder {
     /**
      * Create a new Particle System with a parent GameObject and a certain number of
@@ -26,7 +50,7 @@ public class ParticleSystemBuilder {
      * @param nbParticles        the number of particle to be created.
      * @param createBehavior     the common {@link ParticleBehavior} to be applied
      *                           to all those particles.
-     * @param particleBehaviors  a lit of {@link Behavior} to be added to the created particle.
+     * @param particleBehaviors  an array of {@link Behavior} to be added to the created particle.
      * @return a new parent {@link GameObject} containing a bunch of
      * {@link GameObject} particle child with
      * the same {@link ParticleBehavior}.
