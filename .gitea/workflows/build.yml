@@ -13,8 +13,10 @@ jobs:
           distribution: 'zulu' # See 'Supported distributions' for available options
           java-version: '20'
 
-      - name: build dependencies
-        run: scripts/build.sh a
+      - name: build project
+        run: |
+          chmod +x scripts/build.sh
+          scripts/build.sh a
 #      - uses: https://gitea.com/actions/release-action@main
 #        with:
 #          files: |-
