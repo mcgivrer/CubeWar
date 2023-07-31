@@ -14,10 +14,13 @@ jobs:
 
       - name: build dependencies
         run: scripts/build.sh a
-      - uses: https://gitea.com/actions/release-action@main
+#      - uses: https://gitea.com/actions/release-action@main
+#        with:
+#          files: |-
+#            target/*.jar            
+#            target/buid/*.run            
+#          api_key: '${{secrets.RELEASE_TOKEN}}'
+      - uses: actions/upload-artifact@v3
         with:
-          files: |-
-            target/*.jar            
-            target/buid/*.run            
-          api_key: '${{secrets.RELEASE_TOKEN}}'
-          
+          name: CubeWar
+          path: target/cubewar-1.0.3.jar
