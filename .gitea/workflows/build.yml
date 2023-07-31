@@ -20,7 +20,8 @@ jobs:
 #            target/*.jar            
 #            target/buid/*.run            
 #          api_key: '${{secrets.RELEASE_TOKEN}}'
+# use of upload artifacts : https://github.com/actions/upload-artifact
       - uses: actions/upload-artifact@v3
         with:
           name: CubeWar
-          path: target/cubewar-1.0.3.jar
+          path: target/cubewar-*.jar
