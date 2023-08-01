@@ -1,4 +1,4 @@
-package com.snapgames.demo.particles;
+package com.snapgames.demo.behaviors.particles;
 
 import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.Entity;
@@ -22,8 +22,8 @@ import java.awt.Color;
 public class BallParticleBehavior implements ParticleBehavior<GameObject> {
 
     private int internalTime = 0;
-    private double ballForce;
-    private double appFreq;
+    private final double ballForce;
+    private final double appFreq;
 
     /**
      * Create a new animation behavior for a Particle System created with the
@@ -44,13 +44,13 @@ public class BallParticleBehavior implements ParticleBehavior<GameObject> {
                              GameObject parent) {
 
         return new GameObject(
-            particleNamePrefix + "_" + Entity.index)
+            particleNamePrefix + "_" + GameObject.index)
             .setPosition(
                 Math.random() * parentWorld.getPlayArea().getWidth(),
                 Math.random() * parentWorld.getPlayArea().getHeight() * 0.1)
             .setSize(8, 8)
             .setPriority(1)
-            .setType(GameObjectType.TYPE_ELLIPSE)
+            .setType(GameObjectType.TYPE_RECTANGLE)
             .setConstrainedToPlayArea(true)
             .setLayer(3)
             .setPhysicType(PhysicType.DYNAMIC)
@@ -75,7 +75,7 @@ public class BallParticleBehavior implements ParticleBehavior<GameObject> {
      */
     @Override
     public void update(Entity<?> e, double elapsed) {
-        internalTime += elapsed;
+        internalTime += (int) elapsed;
         if (internalTime > appFreq) {
             internalTime = 0;
             e.addForce(
@@ -84,5 +84,4 @@ public class BallParticleBehavior implements ParticleBehavior<GameObject> {
                     -(ballForce) + Math.random() * ballForce * 2.0));
         }
     }
-
 }

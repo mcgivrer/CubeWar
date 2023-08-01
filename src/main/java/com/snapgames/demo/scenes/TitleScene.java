@@ -20,8 +20,9 @@ import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
+import com.snapgames.demo.behaviors.EnemyBehavior;
 import com.snapgames.demo.input.TitleInput;
-import com.snapgames.demo.particles.RainParticleBehavior;
+import com.snapgames.demo.behaviors.particles.RainParticleBehavior;
 
 public class TitleScene extends AbstractScene {
 
@@ -41,7 +42,7 @@ public class TitleScene extends AbstractScene {
     public void create(Application app) {
         Configuration configuration = app.getConfiguration();
         Graphics2D g2d = ((Renderer) GSystemManager.find(Renderer.class)).getBufferGraphics();
-        PhysicEngine pe = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
+        PhysicEngine pe = GSystemManager.find(PhysicEngine.class);
         pe.setMaxAcceleration(100.0).setMaxVelocity(200.0);
 
 
@@ -76,7 +77,7 @@ public class TitleScene extends AbstractScene {
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
                 .setLayer(2)
-                .setColor(Color.WHITE)
+                .setColor(Color.GREEN)
                 .setFillColor(Color.GREEN)
                 .setMass(60.0)
                 .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
@@ -85,6 +86,45 @@ public class TitleScene extends AbstractScene {
                 .setAttribute("speedRotStep", 0.001)
                 .setDebug(2);
         addEntity(player);
+
+        GameObject ennemy_1 = new GameObject("ennemy_1")
+            .setPosition(
+                pe.getWorld().getPlayArea().getWidth() * 0.10,
+                pe.getWorld().getPlayArea().getHeight() * 0.90)
+            .setSize(8, 8)
+            .setType(GameObjectType.TYPE_RECTANGLE)
+            .setPhysicType(PhysicType.DYNAMIC)
+            .setPriority(10)
+            .setLayer(2)
+            .setColor(Color.RED)
+            .setFillColor(Color.RED)
+            .setMass(30.0)
+            .setMaterial(new Material("ennemyMat", 0.80, 1.0, 0.87))
+            .setAttribute("speedStep", 0.1)
+            .setAttribute("jumpFactor", 99.601)
+            .setAttribute("speedRotStep", 0.001)
+            .setDebug(3)
+            .addBehavior(new EnemyBehavior(player,0.006));
+        addEntity(ennemy_1);
+        GameObject ennemy_2 = new GameObject("ennemy_2")
+            .setPosition(
+                pe.getWorld().getPlayArea().getWidth() * 0.90,
+                pe.getWorld().getPlayArea().getHeight() * 0.90)
+            .setSize(8, 8)
+            .setType(GameObjectType.TYPE_RECTANGLE)
+            .setPhysicType(PhysicType.DYNAMIC)
+            .setPriority(10)
+            .setLayer(2)
+            .setColor(Color.RED)
+            .setFillColor(Color.RED)
+            .setMass(30.0)
+            .setMaterial(new Material("ennemyMat", 0.80, 1.0, 0.87))
+            .setAttribute("speedStep", 0.1)
+            .setAttribute("jumpFactor", 99.601)
+            .setAttribute("speedRotStep", 0.001)
+            .setDebug(3)
+            .addBehavior(new EnemyBehavior(player,0.004));
+        addEntity(ennemy_2);
 
         TextObject title = new TextObject("title")
                 .setPosition(
