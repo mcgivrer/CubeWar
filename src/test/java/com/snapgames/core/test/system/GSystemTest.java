@@ -1,7 +1,5 @@
 package com.snapgames.core.test.system;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
