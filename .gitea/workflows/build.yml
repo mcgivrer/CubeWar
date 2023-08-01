@@ -10,20 +10,21 @@ jobs:
       - uses: https://github.com/actions/checkout@v3
       - uses: https://github.com/actions/setup-java@v3
         with:
-          distribution: 'zulu' # See 'Supported distributions' for available options
-          java-version: '20'
+          distribution: "zulu" # See 'Supported distributions' for available options
+          java-version: "20"
       - name: build project
         run: |
-          chmod +x scripts/build.sh
-          scripts/build.sh a
-#      - uses: https://gitea.com/actions/release-action@main
-#        with:
-#          files: |-
-#            target/*.jar            
-#            target/buid/*.run            
-#          api_key: '${{secrets.RELEASE_TOKEN}}'
-# use of upload artifacts : https://github.com/actions/upload-artifact
-      - uses: actions/upload-artifact@v3
+#          chmod +x scripts/build.sh
+#          scripts/build.sh a
+          mvn clean install -DskipTests=true
+      - uses: https://gitea.com/actions/release-action@main
         with:
-          name: CubeWar
-          path: target/cubewar-*.jar
+          files: |-
+            target/*.jar
+            target/buid/*.run
+          api_key: "${{secrets.RELEASE_TOKEN}}"
+# use of upload artifacts : https://github.com/actions/upload-artifact
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: CubeWar
+#          path: target/cubewar-*.jar
