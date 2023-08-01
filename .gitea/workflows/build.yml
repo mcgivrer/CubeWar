@@ -10,21 +10,24 @@ jobs:
       - uses: https://github.com/actions/checkout@v3
       - uses: https://github.com/actions/setup-java@v3
         with:
-          distribution: 'zulu' # See 'Supported distributions' for available options
-          java-version: '20'
-
-      - name: build project
+          distribution: "zulu" # See 'Supported distributions' for available options
+          java-version: "20"
+          cache: 'maven'
+      - name: Build project with Maven and Xvfb
         run: |
-          chmod +x scripts/build.sh
-          scripts/build.sh a
-#      - uses: https://gitea.com/actions/release-action@main
-#        with:
-#          files: |-
-#            target/*.jar            
-#            target/buid/*.run            
-#          api_key: '${{secrets.RELEASE_TOKEN}}'
-# use of upload artifacts : https://github.com/actions/upload-artifact
-      - uses: actions/upload-artifact@v3
+         sudo apt-get install xvfb
+         export DISPLAY=":99.0"
+         export AUDIODEV=null
+         xvfb-run :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+         mvn -B package --file pom.xml
+      - uses: https://gitea.com/actions/release-action@main
         with:
-          name: CubeWar
-          path: target/cubewar-*.jar
+          files: |-
+            target/*.jar
+            target/buid/*.run
+          api_key: "${{secrets.RELEASE_TOKEN}}"
+# use of upload artifacts : https://github.com/actions/upload-artifact
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: CubeWar
+#          path: target/cubewar-*.jar
