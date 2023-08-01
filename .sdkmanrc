@@ -1,1 +1,4 @@
-java=20.0.1-zulu
+# CubeWar build environment & tools
+# copyright 2023 - Frédéric Delorme frederic.delorme@gmail.com
+java=20.0.2-zulu
+maven=3.9.2
