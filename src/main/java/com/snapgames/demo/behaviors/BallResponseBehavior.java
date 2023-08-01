@@ -1,4 +1,4 @@
-package com.snapgames.demo.behavior;
+package com.snapgames.demo.behaviors;
 
 import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.behavior.CollisionResponseBehavior;
@@ -38,7 +38,7 @@ public class BallResponseBehavior implements CollisionResponseBehavior {
      * @see Behavior#update(Entity, double)
      */
     @Override
-    public void update(Entity e, double elapsed) {
+    public void update(Entity<?> e, double elapsed) {
 
     }
 }

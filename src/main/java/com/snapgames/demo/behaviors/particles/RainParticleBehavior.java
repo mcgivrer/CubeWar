@@ -1,4 +1,4 @@
-package com.snapgames.demo.particles;
+package com.snapgames.demo.behaviors.particles;
 
 import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.Entity;
@@ -25,7 +25,7 @@ import java.awt.geom.Point2D;
  */
 public class RainParticleBehavior implements ParticleBehavior<GameObject> {
 
-    private double accFactor;
+    private final double accFactor;
 
     /**
      * Create a new Animation behavior for a Rain simulator particle system.
