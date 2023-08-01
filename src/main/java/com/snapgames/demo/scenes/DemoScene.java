@@ -28,8 +28,8 @@ import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.input.CameraInput;
 import com.snapgames.demo.input.DemoInput;
 import com.snapgames.demo.input.PlayerInput;
-import com.snapgames.demo.particles.BallParticleBehavior;
-import com.snapgames.demo.particles.RainParticleBehavior;
+import com.snapgames.demo.behaviors.particles.BallParticleBehavior;
+import com.snapgames.demo.behaviors.particles.RainParticleBehavior;
 
 /**
  * A {@link Scene} implementing a demonstration of capabilities for this
@@ -65,7 +65,7 @@ public class DemoScene extends AbstractScene {
     public void create(Application app) {
         Configuration configuration = app.getConfiguration();
         Graphics2D g2d = ((Renderer) GSystemManager.find(Renderer.class)).getBufferGraphics();
-        PhysicEngine pe = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
+        PhysicEngine pe = GSystemManager.find(PhysicEngine.class);
         pe.setWorld(configuration.world);
         pe.setMaxAcceleration(configuration.maxEntityAcc);
         pe.setMaxVelocity(configuration.maxEntitySpeed);
@@ -226,7 +226,7 @@ public class DemoScene extends AbstractScene {
             .setPhysicType(PhysicType.DYNAMIC)
             .setPriority(10)
             .setLayer(80)
-            .setColor(Color.WHITE)
+            .setColor(Color.GREEN)
             .setFillColor(Color.GREEN)
             .setMass(60.0)
             .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
