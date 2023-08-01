@@ -12,11 +12,14 @@ jobs:
         with:
           distribution: "zulu" # See 'Supported distributions' for available options
           java-version: "20"
-      - name: build project
+          cache: 'maven'
+      - name: Build project with Maven and Xvfb
         run: |
-          mvn clean install -DskipTests=true
-#          chmod +x scripts/build.sh
-#          scripts/build.sh a
+         sudo apt-get install xvfb
+         export DISPLAY=":99.0"
+         export AUDIODEV=null
+         xvfb-run :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+         mvn -B package --file pom.xml
       - uses: https://gitea.com/actions/release-action@main
         with:
           files: |-
