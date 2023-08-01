@@ -14,9 +14,9 @@ jobs:
           java-version: "20"
       - name: build project
         run: |
+          mvn clean install -DskipTests=true
 #          chmod +x scripts/build.sh
 #          scripts/build.sh a
-          mvn clean install -DskipTests=true
       - uses: https://gitea.com/actions/release-action@main
         with:
           files: |-
