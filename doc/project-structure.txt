@@ -1,99 +1,38 @@
 .
 |-- README.md
+|-- build.properties
+|-- pom.xml
 |-- doc
 |   |-- chapter-00-indroduction.md
-|   |-- chapter-01-application.md
+|   |-- chapter-99-xxx_yyy.md
 |   |-- images
-|   |   |-- screenshot-001.png
-|   |   |-- screenshot-002-with-perturbations.png
-|   |   `-- screenshot-003-renderer-plugin-archi.png
 |   |-- index.md
 |   |-- preface.md
 |   `-- project-structure.txt
 |-- lib
-|   |-- options.txt
 |   |-- stub.sh
 |   `-- test
 |       `-- junit-platform-console-standalone-1.9.1.jar
 |-- scripts
-|   |-- build.sh
-|   `-- options.txt
+|   `-- build.sh
 `-- src
     |-- main
     |   |-- java
     |   |   `-- com
     |   |       `-- snapgames
     |   |           |-- core
-    |   |           |   |-- Application.java
-    |   |           |   |-- behavior
-    |   |           |   |   |-- Behavior.java
-    |   |           |   |   `-- ParticleBehavior.java
-    |   |           |   |-- entity
-    |   |           |   |   |-- Camera.java
-    |   |           |   |   |-- Entity.java
-    |   |           |   |   |-- GameObject.java
-    |   |           |   |   |-- GameObjectType.java
-    |   |           |   |   |-- Node.java
-    |   |           |   |   `-- TextObject.java
-    |   |           |   |-- graphics
-    |   |           |   |   |-- Renderer.java
-    |   |           |   |   `-- plugins
-    |   |           |   |       |-- GameObjectRendererPlugin.java
-    |   |           |   |       |-- PerturbationRendererPlugin.java
-    |   |           |   |       |-- RendererPlugin.java
-    |   |           |   |       `-- TextObjectRendererPlugin.java
-    |   |           |   |-- input
-    |   |           |   |   `-- InputHandler.java
-    |   |           |   |-- math
-    |   |           |   |   |-- Vector2D.java
-    |   |           |   |   `-- physic
-    |   |           |   |       |-- Material.java
-    |   |           |   |       |-- PhysicEngine.java
-    |   |           |   |       |-- PhysicType.java
-    |   |           |   |       |-- World.java
-    |   |           |   |       `-- entity
-    |   |           |   |           `-- Perturbation.java
-    |   |           |   |-- scene
-    |   |           |   |   |-- AbstractScene.java
-    |   |           |   |   |-- Scene.java
-    |   |           |   |   `-- SceneManager.java
-    |   |           |   `-- utils
-    |   |           |       |-- StringUtils.java
-    |   |           |       |-- config
-    |   |           |       |   `-- Configuration.java
-    |   |           |       |-- i18n
-    |   |           |       |   `-- I18n.java
-    |   |           |       `-- particles
-    |   |           |           `-- ParticleSystemBuilder.java
     |   |           `-- demo
-    |   |               |-- CubeWar.java
-    |   |               `-- scenes
-    |   |                   `-- DemoScene.java
     |   `-- resources
     |       |-- config.properties
     |       `-- i18n
-    |           |-- messages.properties
-    |           |-- messages_en.properties
-    |           `-- messages_fr.properties
+    |           `-- messages.properties
     `-- test
         |-- java
         |   `-- com
         |       `-- snapgames
         |           `-- core
         |               `-- test
-        |                   |-- AppTest.java
-        |                   |-- ApplicationConfigurationTest.java
-        |                   |-- math
-        |                   |   `-- physic
-        |                   |       `-- PhysicEngineTest.java
-        |                   `-- scenes
-        |                       `-- TestScene.java
         `-- resources
             |-- i18n
-            |   |-- messages.properties
-            |   |-- messages_en.properties
-            |   `-- messages_fr.properties
-            |-- test-config.properties
-            `-- test-pe.properties
-
-39 directories, 57 files
+            |   `-- messages.properties
+            `-- test-config.properties

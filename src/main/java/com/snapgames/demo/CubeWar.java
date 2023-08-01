@@ -6,6 +6,7 @@ import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.system.GSystemManager;
 import com.snapgames.demo.input.GameKeyInput;
 import com.snapgames.demo.scenes.DemoScene;
+import com.snapgames.demo.scenes.TitleScene;
 
 /**
  * This {@link CubeWar} demonstration app highlight the way to implement your
@@ -19,7 +20,10 @@ public class CubeWar extends Application {
     protected void createScenes() {
         InputHandler ih = ((InputHandler) GSystemManager.find(InputHandler.class));
         ih.add(new GameKeyInput());
-        ((SceneManager) GSystemManager.find(SceneManager.class)).add(new DemoScene());
+        ((SceneManager) GSystemManager.find(SceneManager.class))
+                .add(new TitleScene())
+                .add(new DemoScene());
+
     }
 
     /**

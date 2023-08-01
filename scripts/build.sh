@@ -1,10 +1,9 @@
 #!/bin/bash
-# more info at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
+#inspired from build script at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
 # Copyright 2023 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
-# Your program build definition
-
-#!/bin/bash
-#!/bin/sh
+#
+# Your program build definition is now in the build.properties file.
+# You can change the build properties file at your convenience.
 
 ENV="./build.properties"
 
@@ -166,6 +165,7 @@ function sign() {
 function help() {
   echo "build2 command line usage :"
   echo "---------------------------"
+  echo "NOTE: Do not forget to provide a 'build.properties' file containing required key=value."
   echo "$> build2 [options]"
   echo "where:"
   echo " - a|A|all     : perform all following operations"
