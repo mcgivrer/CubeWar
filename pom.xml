@@ -1,5 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.snapgames</groupId>
     <artifactId>cubewar</artifactId>
@@ -59,7 +60,7 @@
     </distributionManagement>
 
     <properties>
-        <mainClass>com.snapgames.demo.CubeWar</mainClass>
+        <project.mainClass>com.snapgames.demo.CubeWar</project.mainClass>
         <maven.compiler.source>20</maven.compiler.source>
         <maven.compiler.target>20</maven.compiler.target>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
@@ -244,11 +245,11 @@
                     <shadedClassifierName>shaded</shadedClassifierName>
                     <transformers>
                         <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>${project.mainClass}</mainClass>
                         </transformer>
                         <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
+                            implementation="org.apache.maven.plugins.shade.resource.IncludeResourceTransformer">
                             <resource>src/main/resources/</resource>
                         </transformer>
                     </transformers>
@@ -422,12 +423,15 @@
                         <artifactId>codacy-maven-plugin</artifactId>
                         <version>1.2.0</version>
                         <configuration>
-                            <!--suppress UnresolvedMavenProperty -->
+                            <!--suppress
+                            UnresolvedMavenProperty -->
                             <apiToken>${env.CODACY_API_TOKEN}</apiToken>
-                            <!--suppress UnresolvedMavenProperty -->
+                            <!--suppress
+                            UnresolvedMavenProperty -->
                             <projectToken>${env.CODACY_PROJECT_TOKEN}</projectToken>
                             <coverageReportFile>target/site/jacoco/jacoco.xml</coverageReportFile>
-                            <!--suppress UnresolvedMavenProperty -->
+                            <!--suppress
+                            UnresolvedMavenProperty -->
                             <commit>${env.TRAVIS_COMMIT}</commit>
                             <codacyApiBaseUrl>https://api.codacy.com</codacyApiBaseUrl>
                             <failOnMissingReportFile>false</failOnMissingReportFile>
@@ -460,7 +464,7 @@
                                 <phase>site</phase>
                                 <configuration>
                                     <executable>pandoc</executable>
-                                    <workingDirectory/>
+                                    <workingDirectory />
                                     <arguments>
                                         <argument>docs/epub-metadata.yml</argument>
                                         <argument>docs/00-index.md</argument>
@@ -499,7 +503,7 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <executable>pandoc</executable>
-                                    <workingDirectory/>
+                                    <workingDirectory />
                                     <arguments>
                                         <argument>docs/epub-metadata.yml</argument>
                                         <argument>docs/00-index.md</argument>
@@ -532,7 +536,8 @@
             <build>
                 <plugins>
                     <!-- create a Windows EXE -->
-                    <!-- https://github.com/lukaszlenart/launch4j-maven-plugin/blob/master/src/main/resources/README.adoc -->
+                    <!--
+                    https://github.com/lukaszlenart/launch4j-maven-plugin/blob/master/src/main/resources/README.adoc -->
                     <!-- see http://launch4j.sourceforge.net/ -->
                     <plugin>
                         <groupId>com.akathist.maven.plugins.launch4j</groupId>
@@ -547,7 +552,8 @@
                                 </goals>
                                 <configuration>
                                     <headerType>gui</headerType>
-                                    <jar>${project.build.directory}/${project.name}-${project.version}-shaded.jar</jar>
+                                    <jar>
+                                        ${project.build.directory}/${project.name}-${project.version}-shaded.jar</jar>
                                     <outfile>${project.build.directory}/${project.name}.exe</outfile>
                                     <downloadUrl>http://java.com/download</downloadUrl>
                                     <classPath>
