@@ -9,12 +9,9 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -29,6 +26,7 @@ import com.snapgames.core.graphics.plugins.RendererPlugin;
 import com.snapgames.core.graphics.plugins.TextObjectRendererPlugin;
 import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.World;
+import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
 
@@ -118,29 +116,30 @@ public class Renderer extends JPanel implements GSystem {
             g.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
 
             // draw playArea
-            moveFromCameraPoV(g, scene.getActiveCamera(), -1);
+            Camera cam = scene.getActiveCamera();
+            moveFromCameraPoV(g, cam, -1);
             drawGrid(g, world.getPlayArea());
             g.setColor(Color.BLUE);
             g.draw(world.getPlayArea());
-            moveFromCameraPoV(g, scene.getActiveCamera(), 1);
+            moveFromCameraPoV(g, cam, 1);
 
-            // draw entities not stick to Camera.
-            moveFromCameraPoV(g, scene.getActiveCamera(), -1);
-            drawEntities(g, scene, scene.getEntities().stream()
-                    .filter(e -> scene.getActiveCamera().inViewport(e) && !e.stickToCamera)
-                    .collect(Collectors.toList()));
-            // draw all perturbations
-            world.getPerturbations().forEach(p -> {
-                RendererPlugin rp = plugins.get(p.getClass());
-                rp.drawDebugInfo(application, scene, this, g, p);
-            });
+            // draw everything to be drawn
+            drawEntities(g, scene,
+                    // join all Entity in Scene and all Perturbation in World.
+                    Stream.concat(scene.getEntities().stream(), world.getPerturbations().stream())
+                            .filter(e -> e.isActive()
+                                    // object in the camera viewport and not stick to camera
+                                    && (((cam != null
+                                    && cam.inViewport(e)
+                                    && !e.stickToCamera)
+                                    // object stick to camera
+                                    || (e.stickToCamera)
+                                    // object is a Perturbation instance
+                                    || e.getClass().isAssignableFrom(Perturbation.class))
+                                    // Scene has no camera !
+                                    || cam == null))
+                            .collect(Collectors.toList()));
             scene.draw(application, g, stats);
-            moveFromCameraPoV(g, scene.getActiveCamera(), 1);
-
-            // draw all stick-to-camera's Entity.
-            drawEntities(g, scene, scene.getEntities().stream()
-                    .filter(e -> e.stickToCamera).collect(Collectors.toList()));
-
             g.dispose();
 
             // copy to JFrame
@@ -163,9 +162,11 @@ public class Renderer extends JPanel implements GSystem {
 
     private void drawEntities(Graphics2D g, Scene scene, List<Entity> list) {
         list.stream().filter(e -> e.isActive())
-                .sorted(Comparator.comparingInt(Entity::getPriority))
+                .sorted(Comparator.comparingInt((Entity a) -> a.getLayer() * 1000 + a.getPriority()).reversed())
                 .forEach(
                         e -> {
+
+                            if (!e.stickToCamera) moveFromCameraPoV(g, scene.getActiveCamera(), -1);
                             RendererPlugin rp = plugins.get(e.getClass());
                             g.rotate(-e.rotation,
                                     e.pos.x + e.width * 0.5,
@@ -177,9 +178,12 @@ public class Renderer extends JPanel implements GSystem {
                                     e.pos.y + e.height * 0.5);
                             rp.drawDebugInfo(application, scene, this, g, e);
 
-                            if (application.isDebugAt(4)) {
-                                System.out.printf(">> <d> draw entity %s%n", e.getName());
+                            if (application.isDebugAtLeast(5)) {
+                                System.out.printf(">> <d> draw entity %s with %s%n", e.getName(),
+                                        rp.getClass().getSimpleName());
                             }
+
+                            if (!e.stickToCamera) moveFromCameraPoV(g, scene.getActiveCamera(), 1);
                         });
     }
 

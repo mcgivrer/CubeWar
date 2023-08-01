@@ -12,13 +12,31 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * {@link Configuration} will load properties values into some configuration
+ * attributes.
+ * 
+ * Those values can be overloaded from CLI arguments.
+ * 
+ * The path of the loaded properties file is set into the constructor, but can
+ * be overriden
+ * by the specific argument <code>configPath</code>. If thios argument is
+ * present, it will reload
+ * the configuration accordingly.
+ * 
+ * @author Frédéric Delorme
+ * @since 1.0.0
+ */
 public class Configuration extends ConcurrentHashMap<String, Object> {
 
+    // the properties file handler.
+    private Properties props = new Properties();
+
+    // proposed configuration values.
     public boolean physicConstrained;
     public double timeScaleFactor;
     public boolean testMode;
     public String pathToConfigFile;
-    private Properties props = new Properties();
 
     public String name;
     public boolean debug;
@@ -35,7 +53,16 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     public String debugFilter;
     public boolean requestExit;
 
-
+    /**
+     * Iniitialize and load the configruation with the dedicated properties file,
+     * and enhance file's values with possible CLI arguments.
+     * 
+     * @param app         the parent application
+     * @param pathCfgFile the path to the properties configuration file to be
+     *                    loaded.
+     * @param lArgs       the list of command line argument to be parsed to overload
+     *                    values from file properties.
+     */
     public Configuration(Application app, String pathCfgFile, List<String> lArgs) {
         this.pathToConfigFile = pathCfgFile;
         parseArgs(lArgs);
@@ -62,7 +89,6 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         System.out.printf(">> Configuration loaded%n");
     }
 
-
     /**
      * Parse the properties configuration file to extract config values from.
      *
@@ -71,7 +97,6 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     private void parseConfig(Properties config) {
 
         // --- Configuration information ---
-
 
         // test mode (true = on)
         testMode = getParsedBoolean(config, "app.test.mode", "false");
@@ -242,7 +267,8 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
                 }
                 case "testMode" -> {
                     testMode = Boolean.parseBoolean(arg[1]);
-                    System.out.printf(">> <!> argument 'Test Mode' set to %s: test mode %s.%n", arg[1], testMode ? "activated" : "NOT activated");
+                    System.out.printf(">> <!> argument 'Test Mode' set to %s: test mode %s.%n", arg[1],
+                            testMode ? "activated" : "NOT activated");
                 }
                 // define debug level for this application run.
                 case "d", "debugLevel" -> {

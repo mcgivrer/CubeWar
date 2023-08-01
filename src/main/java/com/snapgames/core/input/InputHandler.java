@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.system.GSystem;
+import com.snapgames.demo.input.TitleInput;
 
 public class InputHandler implements KeyListener, GSystem {
 
@@ -87,5 +88,10 @@ public class InputHandler implements KeyListener, GSystem {
     @Override
     public void dispose() {
         // nothing specific to perform for this service release.
+    }
+
+    public InputHandler remove(InputInterface ti) {
+        inputInterfaceList.remove(ti);
+        return this;
     }
 }
