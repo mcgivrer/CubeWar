@@ -12,6 +12,7 @@ import com.snapgames.core.input.InputHandler;
 import com.snapgames.core.math.physic.CollisionDetection;
 import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.PhysicType;
+import com.snapgames.core.math.physic.SpacePartition;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.system.GSystemManager;
@@ -113,6 +114,7 @@ public abstract class Application {
 
         GSystemManager.add(I18n.get());
         GSystemManager.add(new PhysicEngine(this));
+        GSystemManager.add(new SpacePartition(this));
         GSystemManager.add(new CollisionDetection(this));
         GSystemManager.add(new Renderer(this));
         GSystemManager.add(new InputHandler(this));
@@ -127,10 +129,11 @@ public abstract class Application {
      */
     private void loop() {
 
-        PhysicEngine physicEngine = ((PhysicEngine) GSystemManager.find(PhysicEngine.class));
-        CollisionDetection cd = ((CollisionDetection) GSystemManager.find(CollisionDetection.class));
-        InputHandler inputHandler = ((InputHandler) GSystemManager.find(InputHandler.class));
-        Renderer renderer = ((Renderer) GSystemManager.find(Renderer.class));
+        PhysicEngine physicEngine = GSystemManager.find(PhysicEngine.class);
+        CollisionDetection cd = GSystemManager.find(CollisionDetection.class);
+        SpacePartition spacePartition = GSystemManager.find(SpacePartition.class);
+        InputHandler inputHandler = GSystemManager.find(InputHandler.class);
+        Renderer renderer = GSystemManager.find(Renderer.class);
         Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
 
         System.out.printf(
@@ -167,6 +170,7 @@ public abstract class Application {
             input(inputHandler, scene);
             if (!pause) {
                 if (upsTime > (1000.0 / UPS)) {
+                    spacePartition.update(scene, elapsed * 0.00000002);
                     cd.update(scene, elapsed * 0.00000002, datastats);
                     physicEngine.update(scene, elapsed * 0.00000002, datastats);
                     cd.reset();

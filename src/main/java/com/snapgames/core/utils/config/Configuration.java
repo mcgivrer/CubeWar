@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Configuration extends ConcurrentHashMap<String, Object> {
 
+    public int maxEntitiesInSpace;
     // the properties file handler.
     private Properties props = new Properties();
 
@@ -132,6 +133,8 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
 
         fps = getParsedInt(config, "app.render.fps", "60");
         ups = getParsedInt(config, "app.physic.ups", "120");
+
+        maxEntitiesInSpace = getParsedInt(config, "app.physic.space.max.entities", "10");
 
     }
 
