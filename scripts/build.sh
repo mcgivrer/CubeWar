@@ -163,16 +163,14 @@ function sign() {
   echo "not already implemented... sorry"
 }
 #
-function generateEpub(){
+function generateEpub() {
   rm -Rf $TARGET/book/
   mkdir $TARGET/book
-  cat docs/*.yml > $TARGET/book/book.mdo
-  cat docs/chapter-*.md >> $TARGET/book/book.mdo
+  cat docs/*.yml >$TARGET/book/book.mdo
+  cat docs/chapter-*.md >>$TARGET/book/book.mdo
   mv $TARGET/book/book.mdo $TARGET/book/book.md
   pandoc $TARGET/book/book.md --resource-path=./docs -o $TARGET/book/book-$PROGRAM_NAME-$PROGRAM_VERSION.epub
   echo "|_ 6. generate ebook to $TARGET/book/book-$PROGRAM_NAME-$PROGRAM_VERSION.epub"
-  echo "|_ 5.Execute just created JAR ${TARGET}/${PROGRAM_NAME}-${PROGRAM_VERSION}.jar"
-  java ${JAR_OPTS} -jar ${TARGET}/${PROGRAM_NAME}-${PROGRAM_VERSION}.jar "$@"
 }
 #
 function help() {
@@ -185,11 +183,11 @@ function help() {
   echo " - c|C|compile : compile all sources project"
   echo " - d|D|doc     : generate javadoc for project"
   echo " - e|E|epub    : generate epub as docs for project"
-  echo " - t|T|test    : execute JUnit tests"
   echo " - j|J|jar     : build JAR with all resources"
-  echo " - w|W|wrap    : Build and wrap jar as a shell script"
   echo " - s|S|sign    : Build and wrap signed jar as a shell script"
+  echo " - t|T|test    : execute JUnit tests"
   echo " - r|R|run     : execute (and build if needed) the created JAR"
+  echo " - w|W|wrap    : Build and wrap jar as a shell script"
   echo ""
   echo " (c)2022 MIT License Frederic Delorme (@McGivrer) fredericDOTdelormeATgmailDOTcom"
   echo " --"
