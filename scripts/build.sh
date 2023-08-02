@@ -1,15 +1,16 @@
 #!/bin/bash
-#inspired from build script at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
+#inspired f<rom build script at https://gist.github.com/mcgivrer/a31510019029eba73edf5721a93c3dec
+# build v4.2
 # Copyright 2023 Frederic Delorme (McGivrer) fredericDOTdelormeATgmailDOTcom
 #
 # Your program build definition is now in the build.properties file.
 # You can change the build properties file at your convenience.
 
-ENV="./build.properties"
+ENV=build
+BUILDPROPS="./$ENV.properties"
 
 function getPropertyValue {
-  #grep "${1}" env/${ENV}.properties|cut -d'=' -f2
-  grep "${1}" ${ENV} | cut -d'=' -f2
+  grep "${1}" ${BUILDPROPS} | cut -d'=' -f2
 }
 
 export PROGRAM_NAME=$(getPropertyValue project.name)
@@ -97,7 +98,7 @@ function generatedoc() {
     -d ${TARGET}/javadoc \
     -sourcepath ${SRC}/main/java ${JAVADOC_CLASSPATH} \
     -overview ${TARGET}/javadoc/overview.html
-  echo "   done." >>target/build.log # 
+  echo "   done." >>target/build.log #
 
 }
 #
@@ -162,6 +163,18 @@ function sign() {
   echo "not already implemented... sorry"
 }
 #
+function generateEpub(){
+  rm -Rf $TARGET/book/
+  mkdir $TARGET/book
+  cat docs/*.yml > $TARGET/book/book.mdo
+  cat docs/chapter-*.md >> $TARGET/book/book.mdo
+  mv $TARGET/book/book.mdo $TARGET/book/book.md
+  pandoc $TARGET/book/book.md --resource-path=./docs -o $TARGET/book/book-$PROGRAM_NAME-$PROGRAM_VERSION.epub
+  echo "|_ 6. generate ebook to $TARGET/book/book-$PROGRAM_NAME-$PROGRAM_VERSION.epub"
+  echo "|_ 5.Execute just created JAR ${TARGET}/${PROGRAM_NAME}-${PROGRAM_VERSION}.jar"
+  java ${JAR_OPTS} -jar ${TARGET}/${PROGRAM_NAME}-${PROGRAM_VERSION}.jar "$@"
+}
+#
 function help() {
   echo "build2 command line usage :"
   echo "---------------------------"
@@ -171,6 +184,7 @@ function help() {
   echo " - a|A|all     : perform all following operations"
   echo " - c|C|compile : compile all sources project"
   echo " - d|D|doc     : generate javadoc for project"
+  echo " - e|E|epub    : generate epub as docs for project"
   echo " - t|T|test    : execute JUnit tests"
   echo " - j|J|jar     : build JAR with all resources"
   echo " - w|W|wrap    : Build and wrap jar as a shell script"
@@ -201,6 +215,9 @@ function run() {
     manifest
     compile
     generatedoc
+    ;;
+  e | E | epub)
+    generateEpub
     ;;
   t | T | test)
     manifest
