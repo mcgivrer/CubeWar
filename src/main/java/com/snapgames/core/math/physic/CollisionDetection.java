@@ -17,6 +17,8 @@ public class CollisionDetection implements GSystem {
 
     private ArrayList<CollisionEvent> collisions;
 
+    private SpacePartition space;
+
     public CollisionDetection(Application app) {
 
     }
@@ -33,7 +35,8 @@ public class CollisionDetection implements GSystem {
 
 
     public void update(Scene scene, double elapsed, Map<String, Object> datastats) {
-
+        scene.getEntities().stream().forEach(e -> space.add(e));
+        // TODO use the space partition instance in the parsing
         scene.getEntities().stream().filter(e1 -> e1.isActive() && e1.physicType.equals(PhysicType.DYNAMIC))
             .forEach(e1 -> {
                 scene.getEntities().stream()
@@ -61,7 +64,9 @@ public class CollisionDetection implements GSystem {
             .forEach(
                 crb -> {
                     try {
-                        ((CollisionResponseBehavior) crb).response(ce);
+                        if (((CollisionResponseBehavior) crb).filter(ce)) {
+                            ((CollisionResponseBehavior) crb).response(ce);
+                        }
                     } catch (Exception e) {
                         // nothing
                     }

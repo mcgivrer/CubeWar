@@ -19,4 +19,13 @@ public interface CollisionResponseBehavior extends Behavior<Entity<?>> {
      * @param ce the {@link CollisionEvent} raised by 2  entities colliding.
      */
     void response(CollisionEvent ce);
+
+    /**
+     * apply a filter to avoid false positive.
+     * must return tru f the collision must be processed.
+     *
+     * @param ce the {@link CollisionEvent} raised by 2  entities colliding.
+     * @return boolean true if collision must be processed.
+     */
+    boolean filter(CollisionEvent ce);
 }

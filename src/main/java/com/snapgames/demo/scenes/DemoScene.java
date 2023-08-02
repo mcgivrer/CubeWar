@@ -263,7 +263,7 @@ public class DemoScene extends AbstractScene {
         addEntity(
             ParticleSystemBuilder.createParticleSystem(world, "ball", 50, 1,
                 new BallParticleBehavior(200.0, 2.0),
-                ((Behavior) new BallResponseBehavior())));
+                ((Behavior) new BallResponseBehavior("player"))));
 
         // add rain drops particle system.
         addEntity(
@@ -344,6 +344,8 @@ public class DemoScene extends AbstractScene {
     @Override
     public void update(Application app, double elapsed) {
         // nothing for this demo.
+        int score = getEntity("player").getAttribute("score", 0);
+        TextObject scoreTextObj = ((TextObject) getEntity("score")).setValue(score);
     }
 
     @Override
