@@ -3,7 +3,6 @@ package com.snapgames.demo.behaviors;
 import com.snapgames.core.behavior.Behavior;
 import com.snapgames.core.behavior.CollisionResponseBehavior;
 import com.snapgames.core.entity.Entity;
-import com.snapgames.core.entity.GameObject;
 import com.snapgames.core.math.physic.CollisionEvent;
 
 /**
@@ -17,7 +16,7 @@ import com.snapgames.core.math.physic.CollisionEvent;
  */
 public class BallResponseBehavior implements CollisionResponseBehavior {
 
-    private final String filter;
+    private String filter="";
 
     public BallResponseBehavior(String filter) {
         this.filter = filter;
@@ -31,7 +30,7 @@ public class BallResponseBehavior implements CollisionResponseBehavior {
         ce.getEntity1().setAttribute("energy", energy);
         ce.getEntity1().setSpeed(ce.getEntity1().getVelocity().multiply(-1 * ce.getEntity1().getMaterial().getDensity()));
         if (energy <= 0.0) {
-            ce.getEntity1().setActive(false);
+            ce.getEntity1().setEnabled(false);
             System.out.printf(">> <d> Ball %s has been deactivated%n", ce.getEntity1().getName());
             int score = ce.getEntity2().getAttribute("score", 0);
             ce.getEntity2().setAttribute("score", score + 10);

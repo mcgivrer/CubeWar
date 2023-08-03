@@ -2,165 +2,198 @@ package com.snapgames.core.math.physic;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Entity;
+import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
 
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * A space partitioning system to dispatch Scene's {@link Entity} list into some {@link SpacePartition}, to accelerate
+ * any neighbour operation like collision detection.
+ * <p>
+ * This partitioning system is used from {@link CollisionDetection} system.
+ * During collision detection, {@link CollisionEvent} are created and processed by
+ * {@link com.snapgames.core.behavior.CollisionResponseBehavior} at {@link Entity} level.
+ * <p>
+ * At each {@link PhysicEngine}  update cycle, the inactive entities are removed from scene.
+ *
+ * @author Frédéric Delorme
+ * @see CollisionDetection
+ * @see PhysicEngine
+ * @since 1.0.3
+ */
 public class SpacePartition extends Rectangle2D.Double implements GSystem {
-    private static SpacePartition root;
-    private static Map<Entity<?>, SpacePartition> mapping = new ConcurrentHashMap<>();
-    private static int maxEntities = 10;
-    private SpacePartition[] childSpace = new SpacePartition[4];
+    private int maxObjectsPerNode = 10;
+    private int maxTreeLevels = 5;
 
-    private List<Entity<?>> entities = new ArrayList<>();
+    private SpacePartition root;
 
-    public SpacePartition getRoot() {
-        return root;
+    private int level;
+    private List<Entity<?>> objects;
+    private SpacePartition[] nodes;
+
+    /**
+     * Create a new {@link SpacePartition} with a depth level and its defined rectangle area.
+     *
+     * @param pLevel  the  depth level for this {@link SpacePartition}
+     * @param pBounds the Rectangle area covered by this {@link SpacePartition}.
+     */
+    public SpacePartition(int pLevel, Rectangle pBounds) {
+        level = pLevel;
+        objects = new ArrayList<>();
+        setRect(pBounds);
+        nodes = new SpacePartition[4];
     }
 
-    public SpacePartition setMaxEntities(int maxEntities) {
-        SpacePartition.maxEntities = maxEntities;
-        root = this;
-        return this;
-    }
-
+    /**
+     * Initialize the {@link SpacePartition} {@link GSystem}'s implementation according to the defined configuration.
+     * <p>
+     * The configuration file will provide 2 parameters:
+     *     <ul>
+     *         <li><code>app.physic.space.max.entities</code> is the maximum number of entities that a SpacePartition node can contain,</li>
+     *         <li><code>app.physic.space.max.levels</code> is the max Depth level the tree hierarchy can contain.</li>
+     *     </ul>
+     * </p>
+     *
+     * @param app the parent {@link Application} instance.
+     */
     public SpacePartition(Application app) {
-        // nothing to do right now.
-    }
-
-    public SpacePartition(double x, double y, double w, double h) {
-        this.setRect(x, y, w, h);
-        if (Optional.ofNullable(root).isEmpty()) {
-            this.root = this;
-        }
-    }
-
-    public SpacePartition(Rectangle2D space) {
-        initializeSubSpace(space);
-
-    }
-
-    private void initializeSubSpace(Rectangle2D space) {
-        if (space != null) {
-            childSpace[0] = new SpacePartition(
-                    space.getX(), space.getY(),
-                    space.getWidth() * 0.5, space.getHeight() * 0.5);
-            childSpace[1] = new SpacePartition(
-                    space.getX() + space.getWidth() * 0.5, space.getY(),
-                    space.getWidth() * 0.5, space.getHeight() * 0.5);
-            childSpace[2] = new SpacePartition(
-                    space.getX(), space.getY() + space.getHeight() * 0.5,
-                    space.getWidth() * 0.5, space.getHeight() * 0.5);
-            childSpace[3] = new SpacePartition(
-                    space.getX() + space.getWidth() * 0.5, space.getY() + space.getHeight() * 0.5,
-                    space.getWidth() * 0.5, space.getHeight() * 0.5);
-        }
-    }
-
-    public void add(Entity<?> e) {
-        // if entity exists in the tree, remove it from exiting branch
-        if (mapping.containsKey(e)) {
-            mapping.get(e).getEntities().remove(e);
-        }
-        // then try to add it to the corresponding tree branch.
-        if (getEntities().size() < maxEntities) {
-            if (!this.getEntities().contains(e)) {
-                this.getEntities().add(e);
-                mapping.put(e, this);
-            }
-        } else {
-            moveToSubSpace(this);
-            insertIntoSubSpace(this, e);
-        }
-    }
-
-    private void moveToSubSpace(SpacePartition spacePartition) {
-        spacePartition.getEntities().forEach(e -> insertIntoSubSpace(spacePartition, e));
-    }
-
-    private void insertIntoSubSpace(SpacePartition p, Entity<?> e) {
-        for (int i = 0; i < 4; i++) {
-            if ((p.childSpace[i].contains(e) || p.childSpace[i].intersects(e))) {
-                if (p.childSpace[i].entities.size() > maxEntities) {
-                    p.childSpace[i] = new SpacePartition(p.childSpace[i]);
-                    p.childSpace[i].add(e);
-                } else {
-                    p.childSpace[i].entities.add(e);
-                    mapping.put(e, p.childSpace[i]);
-                    e.setAttribute("childSpace", p.childSpace[i]);
-                    return;
-                }
-            }
-        }
+        this(0, app.getConfiguration().world.getPlayArea().getBounds());
+        this.maxObjectsPerNode = app.getConfiguration().maxEntitiesInSpace;
+        this.maxTreeLevels = app.getConfiguration().maxLevelsInSpace;
     }
 
     /**
-     * Search for {@link SpacePartition} instance containing this {@link Entity}.
-     *
-     * @param e the Entity to be found
-     * @return the SpacePartition instance containing the {@link Entity} looking at.
-     */
-    public List<Entity<?>> find(Entity<?> e) {
-        if (!mapping.containsKey(e)) {
-            add(e);
-        }
-        if (mapping.get(e) == null || mapping.get(e).getEntities() == null) {
-            return new ArrayList<>();
-        }
-        return mapping.get(e).getEntities();
-    }
-
-    /**
-     * Parse all the {@link SpacePartition} child structure to find the {@link Entity}, and then return the list
-     * of entities contained by the corresponding {@link SpacePartition}.
-     *
-     * @param spacePartition the tre space partition branch to search from.
-     * @param e              the entity to be found
-     * @return the list of {@link Entity} from the contained {@link SpacePartition}.
-     */
-    @Deprecated
-    private List<Entity<?>> find(SpacePartition spacePartition, Entity<?> e) {
-        Entity<?> found = spacePartition.getEntities().stream().filter(i -> i.getName().equals(e.name)).findFirst().orElse(null);
-        if (Optional.ofNullable(found).isEmpty()) {
-            for (int i = 0; i < childSpace.length; i++) {
-                return find(childSpace[i], e);
-            }
-        }
-        return spacePartition.getEntities();
-    }
-
-    /**
-     * Return the list of {@link Entity} of this {@link SpacePartition}.
-     *
-     * @return
-     */
-    private List<Entity<?>> getEntities() {
-        return entities;
-    }
-
-    /**
-     * Clear everything ion the {@link SpacePartition} tree.
+     * Clears the {@link SpacePartition} nodes.
      */
     public void clear() {
-        clear(root);
+        objects.clear();
+        for (int i = 0; i < nodes.length; i++) {
+            if (nodes[i] != null) {
+                nodes[i].clear();
+                nodes[i] = null;
+            }
+        }
     }
 
     /**
-     * Clear everything in a specific  {@link SpacePartition}.
+     * Split the current SpacePartition into 4 sub spaces.
      */
+    private void split() {
+        int subWidth = (int) (getWidth() / 2);
+        int subHeight = (int) (getHeight() / 2);
+        int x = (int) getX();
+        int y = (int) getY();
+        nodes[0] = new SpacePartition(level + 1, new Rectangle(x + subWidth, y, subWidth, subHeight));
+        nodes[1] = new SpacePartition(level + 1, new Rectangle(x, y, subWidth, subHeight));
+        nodes[2] = new SpacePartition(level + 1, new Rectangle(x, y + subHeight, subWidth, subHeight));
+        nodes[3] = new SpacePartition(level + 1, new Rectangle(x + subWidth, y + subHeight, subWidth, subHeight));
+    }
 
-    private void clear(SpacePartition sp) {
-        if (sp != null) {
-            sp.getEntities().clear();
-            for (int i = 0; i < sp.childSpace.length; i++) {
-                if (sp != null) {
-                    sp.clear(sp.childSpace[i]);
+    /**
+     * Determine which {@link SpacePartition} node the {@link Entity} belongs to.
+     *
+     * @param pRect the {@link Entity} to search in the {@link SpacePartition}'s tree.
+     * @return the depth level of the {@link Entity}; -1 means object cannot completely fit
+     * within a child node and is part of the parent node
+     */
+    private int getIndex(Entity<?> pRect) {
+        int index = -1;
+        double verticalMidpoint = getX() + (getWidth() / 2);
+        double horizontalMidpoint = getY() + (getHeight() / 2);
+        // Object can completely fit within the top quadrants
+        boolean topQuadrant = (pRect.getY() < horizontalMidpoint && pRect.getY() + pRect.getHeight() < horizontalMidpoint);
+        // Object can completely fit within the bottom quadrants
+        boolean bottomQuadrant = (pRect.getY() > horizontalMidpoint);
+        // Object can completely fit within the left quadrants
+        if (pRect.getX() < verticalMidpoint && pRect.getX() + pRect.getWidth() < verticalMidpoint) {
+            if (topQuadrant) {
+                index = 1;
+            } else if (bottomQuadrant) {
+                index = 2;
+            }
+        }
+        // Object can completely fit within the right quadrants
+        else if (pRect.getX() > verticalMidpoint) {
+            if (topQuadrant) {
+                index = 0;
+            } else if (bottomQuadrant) {
+                index = 3;
+            }
+        }
+        return index;
+    }
+
+
+    /**
+     * Insert the {@link Entity} into the {@link SpacePartition} tree. If the node
+     * exceeds the capacity, it will split and add all
+     * objects to their corresponding nodes.
+     *
+     * @param pRect the {@link Entity} to insert into the tree.
+     */
+    public void insert(Entity<?> pRect) {
+        if (nodes[0] != null) {
+            int index = getIndex(pRect);
+            if (index != -1) {
+                nodes[index].insert(pRect);
+                return;
+            }
+        }
+        objects.add(pRect);
+        if (objects.size() > maxObjectsPerNode && level < maxTreeLevels) {
+            if (nodes[0] == null) {
+                split();
+            }
+            int i = 0;
+            while (i < objects.size()) {
+                int index = getIndex(objects.get(i));
+                if (index != -1) {
+                    nodes[index].insert(objects.remove(i));
+                } else {
+                    i++;
                 }
             }
         }
+    }
+
+    /**
+     * Find the {@link Entity} into the {@link SpacePartition} tree and return the list of neighbour's entities.
+     *
+     * @param e the entity to find.
+     * @return a list of neighbour's entities.
+     */
+    public List<Entity<?>> find(Entity<?> e) {
+        List<Entity<?>> list = new ArrayList<>();
+        return find(list, e);
+    }
+
+
+    /*
+     * Return all objects that could collide with the given object
+     */
+    private List find(List returnObjects, Entity<?> pRect) {
+        int index = getIndex(pRect);
+        if (index != -1 && nodes[0] != null) {
+            nodes[index].find(returnObjects, pRect);
+        }
+        returnObjects.addAll(objects);
+        return returnObjects;
+    }
+
+    /**
+     * Dispatch all the {@link Scene} {@link Entity}'s into the {@link SpacePartition} tree.
+     *
+     * @param scene   the Scene to be processed.
+     * @param elapsed the elapsed time since previous call (not used here).
+     */
+    public void update(Scene scene, double elapsed) {
+        this.clear();
+        scene.getEntities().forEach(e -> this.insert(e));
     }
 
 
@@ -172,17 +205,41 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
     @Override
     public void initialize(Application app) {
         this.root = this;
-        setRect(app.getConfiguration().world.getPlayArea());
-        setMaxEntities(app.getConfiguration().maxEntitiesInSpace);
-        initializeSubSpace(root);
-    }
-
-    public void update(Scene scn, double elapsed) {
-        scn.getEntities().forEach(e -> add(e));
     }
 
     @Override
     public void dispose() {
-        clear();
+
+    }
+
+    /**
+     * Draw all {@link SpacePartition} nodes with a following color code:
+     * <ul>
+     *     <li><code>RED</code> the node is full,</li>
+     *     <li><code>ORANGE</code> the node has entities but is not full,</li>
+     *     <li><code>GREEN</code> the node is empty.</li>
+     * </ul>
+     *
+     * @param r     the {@link Renderer} instance
+     * @param g     the {@link Graphics2D} API instance
+     * @param scene the {@link Scene} to be processed.
+     */
+    public void draw(Renderer r, Graphics2D g, Scene scene) {
+        SpacePartition sp = this;
+        if (objects.isEmpty()) {
+            g.setColor(Color.GREEN);
+        } else if (objects.size() < maxObjectsPerNode) {
+            g.setColor(Color.ORANGE);
+        } else {
+            g.setColor(Color.RED);
+        }
+        g.draw(this);
+        if (this.nodes != null && this.nodes.length > 0) {
+            for (int i = 0; i < nodes.length; i++) {
+                if (nodes[i] != null) {
+                    nodes[i].draw(r, g, scene);
+                }
+            }
+        }
     }
 }

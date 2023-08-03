@@ -1,10 +1,8 @@
 package com.snapgames.core.math.physic;
 
 import java.awt.geom.Rectangle2D;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
@@ -12,7 +10,6 @@ import com.snapgames.core.entity.Entity;
 import com.snapgames.core.math.Vector2D;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
-import com.snapgames.core.system.GSystemManager;
 import com.snapgames.core.utils.config.Configuration;
 
 /**
@@ -99,9 +96,13 @@ public class PhysicEngine implements GSystem {
         double time = (elapsed * timeScaleFactor);
         cumulatedTime += elapsed;
 
+        // remove not active entities
+        List<Entity<?>> toBeDeleted = entities.stream().filter(e -> !e.isActive()).collect(Collectors.toList());
+        entities.removeAll(toBeDeleted);
+
         // if world contains any Perturbation, apply to all concerned entities.
         world.getPerturbations().stream()
-            .forEach(p -> entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
+            .forEach(p -> entities.stream().filter(e -> e.isEnabled() && p.isEntityConstrained(e))
                 .forEach(e -> {
                     // applying penetration factor.
                     Rectangle2D intersection = e.getBounds2D().createIntersection(p);
@@ -134,6 +135,7 @@ public class PhysicEngine implements GSystem {
         long renderedEntities = entities.stream()
             .filter(e -> (camera != null && camera.inViewport(e)) || e.stickToCamera).count();
         stats.put("3_rendered", renderedEntities);
+
 
     }
 

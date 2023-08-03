@@ -1,14 +1,12 @@
 package com.snapgames.demo.behaviors.particles;
 
+import com.snapgames.core.behavior.CollisionResponseBehavior;
 import com.snapgames.core.behavior.ParticleBehavior;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.entity.GameObject;
 import com.snapgames.core.entity.GameObjectType;
 import com.snapgames.core.math.Vector2D;
-import com.snapgames.core.math.physic.Material;
-import com.snapgames.core.math.physic.PhysicEngine;
-import com.snapgames.core.math.physic.PhysicType;
-import com.snapgames.core.math.physic.World;
+import com.snapgames.core.math.physic.*;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.scene.SceneManager;
 import com.snapgames.core.system.GSystemManager;
@@ -23,15 +21,17 @@ import java.awt.geom.Point2D;
  * @author Frédéric Delorme
  * @since 1.0.3
  */
-public class RainParticleBehavior implements ParticleBehavior<GameObject> {
+public class RainParticleBehavior implements ParticleBehavior<GameObject>, CollisionResponseBehavior {
 
     private final double accFactor;
+    private final String collisionFilter;
 
     /**
      * Create a new Animation behavior for a Rain simulator particle system.
      */
-    public RainParticleBehavior(double accelerationFactorY) {
+    public RainParticleBehavior(double accelerationFactorY, String collisionFilter) {
         this.accFactor = accelerationFactorY;
+        this.collisionFilter = collisionFilter;
 
     }
 
@@ -74,6 +74,7 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
         float layerColor = (layer - 10) * 0.1f;
         e.setColor(new Color(layerColor, layerColor, layerColor, layerColor));
         if (!parentWorld.getPlayArea().getBounds2D().contains(new Point2D.Double(e.x, e.y))) {
+            e.setOldPosition(e.x, e.y);
             if (Math.random() > 0.3) {
                 e.setPosition(parentWorld.getPlayArea().getWidth() * Math.random(),
                     Math.random() * parentWorld.getPlayArea().getHeight() * 0.1);
@@ -81,8 +82,6 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
                 e.setPosition(parentWorld.getPlayArea().getWidth() * Math.random() * 0.1,
                     Math.random() * parentWorld.getPlayArea().getHeight());
             }
-            e.setOldPosition(e.x, e.y);
-
         }
         GameObject parent = (GameObject) e.parent;
         double time = parent.getAttribute("particleTime", 0.0);
@@ -99,5 +98,15 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject> {
             time = 0;
         }
         parent.setAttribute("particleTime", time);
+    }
+
+    @Override
+    public void response(CollisionEvent ce) {
+        ce.getEntity1().setActive(false);
+    }
+
+    @Override
+    public boolean filter(CollisionEvent ce) {
+        return collisionFilter.contains(ce.getEntity2().getName());
     }
 }
