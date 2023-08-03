@@ -19,45 +19,101 @@ import java.util.concurrent.ConcurrentHashMap;
  * Those values can be overloaded from CLI arguments.
  * <p>
  * The path of the loaded properties file is set into the constructor, but can
- * be overriden
- * by the specific argument <code>configPath</code>. If thios argument is
- * present, it will reload
- * the configuration accordingly.
+ * be overridden by the specific argument <code>configPath</code>. If this argument is
+ * present, it will reload the configuration accordingly.
  *
  * @author Frédéric Delorme
  * @since 1.0.0
  */
 public class Configuration extends ConcurrentHashMap<String, Object> {
 
-    public int maxEntitiesInSpace;
     // the properties file handler.
     private Properties props = new Properties();
 
     // proposed configuration values.
-    public boolean physicConstrained;
-    public double timeScaleFactor;
-    public boolean testMode;
-    public String pathToConfigFile;
 
+    /**
+     * Timescale factor to speed-up or slow down the game loop.
+     */
+    public double timeScaleFactor;
+    /**
+     * Activate the test mode for unit test only.
+     */
+    public boolean testMode;
+    /**
+     * path to the configuration properties file.
+     */
+    public String pathToConfigFile;
+    /**
+     * Internal name for this application.
+     */
     public String name;
+    /**
+     * Debug mode activation.
+     */
     public boolean debug;
+    /**
+     * If debug mode is activated, set the current required debug level.
+     */
     public int debugLevel;
 
+    /**
+     * {@link com.snapgames.core.graphics.Renderer}:Window size to display the application.
+     */
     public Dimension winSize;
+    /**
+     * {@link com.snapgames.core.graphics.Renderer}: the screen resolution for rendering process.
+     */
     public Dimension bufferResolution;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: Maximum speed for any {@link com.snapgames.core.entity.Entity}.
+     */
     public double maxEntitySpeed;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: Maximum acceleration for any {@link com.snapgames.core.entity.Entity}.
+     */
     public double maxEntityAcc;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: {@link World} instance defining world contraints and environment for this {@link Application} at physic processing time.
+     */
     public World world;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: Define if Entities must be constrained by {@link World#playArea}.
+     */
+    public boolean physicConstrained;
+    /**
+     * {@link com.snapgames.core.math.physic.SpacePartition}: define the maximum number of {@link com.snapgames.core.entity.Entity} in a tree node.
+     */
+    public int maxEntitiesInSpace;
+    /**
+     * {@link com.snapgames.core.math.physic.SpacePartition}: define the maximum depth level in the tree.
+     */
+    public int maxLevelsInSpace;
 
+    /**
+     * targeted frame-per-second rate
+     */
     public int fps;
+    /**
+     * targeted update-per-second rate.
+     */
     public int ups;
+    /**
+     * Define an {@link com.snapgames.core.entity.Entity}'s name based filtering for debug display process.
+     */
     public String debugFilter;
+    /**
+     * internal {@link Application} flag to decide exit request.
+     */
     public boolean requestExit;
 
+    /**
+     * the default {@link com.snapgames.core.scene.Scene} name to be activated at {@link Application} start.
+     */
     public String defaultScene;
 
     /**
-     * Iniitialize and load the configruation with the dedicated properties file,
+     * Initialize and load the configuration with the dedicated properties file,
      * and enhance file's values with possible CLI arguments.
      *
      * @param app         the parent application
@@ -136,6 +192,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
 
         maxEntitiesInSpace = getParsedInt(config, "app.physic.space.max.entities", "10");
 
+        maxLevelsInSpace = getParsedInt(config, "app.physic.space.max.levels", "5");
     }
 
     /**

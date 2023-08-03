@@ -67,6 +67,12 @@ public class InputHandler implements KeyListener, GSystem {
         });
     }
 
+    public void input() {
+        inputInterfaceList.forEach(ii -> {
+            ii.input(this);
+        });
+    }
+
     public boolean isKeyPressed(int keyCode) {
         return keys[keyCode];
     }

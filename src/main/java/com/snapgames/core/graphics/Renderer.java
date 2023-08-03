@@ -86,9 +86,9 @@ public class Renderer extends JPanel implements GSystem {
         clearWindow(frame);
 
         buffer = new BufferedImage(
-                application.getConfiguration().bufferResolution.width,
-                application.getConfiguration().bufferResolution.height,
-                BufferedImage.TYPE_INT_ARGB);
+            application.getConfiguration().bufferResolution.width,
+            application.getConfiguration().bufferResolution.height,
+            BufferedImage.TYPE_INT_ARGB);
     }
 
     private void clearWindow(JFrame frame) {
@@ -125,34 +125,34 @@ public class Renderer extends JPanel implements GSystem {
 
             // draw everything to be drawn
             drawEntities(g, scene,
-                    // join all Entity in Scene and all Perturbation in World.
-                    Stream.concat(scene.getEntities().stream(), world.getPerturbations().stream())
-                            .filter(e -> e.isActive()
-                                    // object in the camera viewport and not stick to camera
-                                    && (((cam != null
-                                    && cam.inViewport(e)
-                                    && !e.stickToCamera)
-                                    // object stick to camera
-                                    || (e.stickToCamera)
-                                    // object is a Perturbation instance
-                                    || e.getClass().isAssignableFrom(Perturbation.class))
-                                    // Scene has no camera !
-                                    || cam == null))
-                            .collect(Collectors.toList()));
+                // join all Entity in Scene and all Perturbation in World.
+                Stream.concat(scene.getEntities().stream(), world.getPerturbations().stream())
+                    .filter(e -> e.isEnabled()
+                        // object in the camera viewport and not stick to camera
+                        && (((cam != null
+                        && cam.inViewport(e)
+                        && !e.stickToCamera)
+                        // object stick to camera
+                        || (e.stickToCamera)
+                        // object is a Perturbation instance
+                        || e.getClass().isAssignableFrom(Perturbation.class))
+                        // Scene has no camera !
+                        || cam == null))
+                    .collect(Collectors.toList()));
             scene.draw(application, g, stats);
             g.dispose();
 
             // copy to JFrame
             Graphics2D gScreen = (Graphics2D) frame.getBufferStrategy().getDrawGraphics();
             gScreen.drawImage(
-                    buffer, 0, 0, frame.getWidth(), frame.getHeight(),
-                    0, 0, buffer.getWidth(), buffer.getHeight(),
-                    null);
+                buffer, 0, 0, frame.getWidth(), frame.getHeight(),
+                0, 0, buffer.getWidth(), buffer.getHeight(),
+                null);
             if (application.getConfiguration().debug && application.getConfiguration().debugLevel > 0) {
                 gScreen.setColor(Color.ORANGE);
                 gScreen.drawString(
-                        prepareStatsString(stats, "[ ", " | ", " ]"),
-                        20, frame.getHeight() - 20);
+                    prepareStatsString(stats, "[ ", " | ", " ]"),
+                    20, frame.getHeight() - 20);
             }
             gScreen.dispose();
             // switch to next available drawing buffer
@@ -161,38 +161,38 @@ public class Renderer extends JPanel implements GSystem {
     }
 
     private void drawEntities(Graphics2D g, Scene scene, List<Entity> list) {
-        list.stream().filter(e -> e.isActive())
-                .sorted(Comparator.comparingInt((Entity a) -> a.getLayer() * 1000 + a.getPriority()).reversed())
-                .forEach(
-                        e -> {
+        list.stream().filter(e -> e.isEnabled())
+            .sorted(Comparator.comparingInt((Entity a) -> a.getLayer() * 1000 + a.getPriority()).reversed())
+            .forEach(
+                e -> {
 
-                            if (!e.stickToCamera) moveFromCameraPoV(g, scene.getActiveCamera(), -1);
-                            RendererPlugin rp = plugins.get(e.getClass());
-                            g.rotate(-e.rotation,
-                                    e.pos.x + e.width * 0.5,
-                                    e.pos.y + e.height * 0.5);
-                            rp.draw(this, g, e);
-                            e.setDrawnBy(rp.getClass());
-                            g.rotate(e.rotation,
-                                    e.pos.x + e.width * 0.5,
-                                    e.pos.y + e.height * 0.5);
-                            rp.drawDebugInfo(application, scene, this, g, e);
+                    if (!e.stickToCamera) moveFromCameraPoV(g, scene.getActiveCamera(), -1);
+                    RendererPlugin rp = plugins.get(e.getClass());
+                    g.rotate(-e.rotation,
+                        e.pos.x + e.width * 0.5,
+                        e.pos.y + e.height * 0.5);
+                    rp.draw(this, g, e);
+                    e.setDrawnBy(rp.getClass());
+                    g.rotate(e.rotation,
+                        e.pos.x + e.width * 0.5,
+                        e.pos.y + e.height * 0.5);
+                    rp.drawDebugInfo(application, scene, this, g, e);
 
-                            if (application.isDebugAtLeast(5)) {
-                                System.out.printf(">> <d> draw entity %s with %s%n", e.getName(),
-                                        rp.getClass().getSimpleName());
-                            }
+                    if (application.isDebugAtLeast(5)) {
+                        System.out.printf(">> <d> draw entity %s with %s%n", e.getName(),
+                            rp.getClass().getSimpleName());
+                    }
 
-                            if (!e.stickToCamera) moveFromCameraPoV(g, scene.getActiveCamera(), 1);
-                        });
+                    if (!e.stickToCamera) moveFromCameraPoV(g, scene.getActiveCamera(), 1);
+                });
     }
 
-    private void moveFromCameraPoV(Graphics2D g, Camera camera, double direction) {
+    public void moveFromCameraPoV(Graphics2D g, Camera camera, double direction) {
         if (camera != null) {
             AffineTransform af = AffineTransform.getRotateInstance(
-                    direction * camera.rotation,
-                    camera.width * 0.5,
-                    camera.height * 0.5);
+                direction * camera.rotation,
+                camera.width * 0.5,
+                camera.height * 0.5);
             af.translate(camera.x * direction, camera.y * direction);
             // A Zoom factor can be : af.scale(1.0 / zoom, 1.0 / zoom);
             g.transform(af);

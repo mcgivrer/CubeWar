@@ -11,6 +11,10 @@ import com.snapgames.core.system.GSystemManager;
 
 import java.awt.event.KeyEvent;
 
+/**
+ * A specific InputInterface implementation to manage player controls input.
+ * Will also player rotation.
+ */
 public class PlayerInput implements InputInterface {
     @Override
     public void input(InputHandler ih) {

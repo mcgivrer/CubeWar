@@ -170,9 +170,9 @@ public abstract class Application {
             input(inputHandler, scene);
             if (!pause) {
                 if (upsTime > (1000.0 / UPS)) {
+                    physicEngine.update(scene, elapsed * 0.00000002, datastats);
                     spacePartition.update(scene, elapsed * 0.00000002);
                     cd.update(scene, elapsed * 0.00000002, datastats);
-                    physicEngine.update(scene, elapsed * 0.00000002, datastats);
                     cd.reset();
                     updates++;
                     upsTime = 0;
@@ -254,6 +254,7 @@ public abstract class Application {
     protected abstract void createScenes();
 
     protected void input(InputHandler ih, Scene scene) {
+        ih.input();
         scene.input(this, ih);
     }
 
