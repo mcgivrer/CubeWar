@@ -1,0 +1,9 @@
+{
+  "image": "ghcr.io/devcontainers/features/java:1",
+  "features": {
+    "version":"20.0.1",
+      "jdkDistro":"zulu",
+    "installMaven":true,
+      "mavenVersion":"3.9.2"
+  }
+}
