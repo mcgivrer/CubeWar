@@ -295,7 +295,6 @@ public class DemoScene extends AbstractScene {
             TextObject scoreTextObj = ((TextObject) getEntity("score")).setValue(score);
         }
     }
-
     @Override
     public void setWorld(World world) {
         world.add(
