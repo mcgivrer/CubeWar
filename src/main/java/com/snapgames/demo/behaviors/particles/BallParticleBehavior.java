@@ -41,7 +41,7 @@ public class BallParticleBehavior implements ParticleBehavior<GameObject> {
 
     @Override
     public GameObject create(World parentWorld, double elapsed, String particleNamePrefix,
-                             Entity<?> parent) {
+                             GameObject parent) {
 
         return new GameObject(
             particleNamePrefix + "_" + GameObject.index)
@@ -57,9 +57,10 @@ public class BallParticleBehavior implements ParticleBehavior<GameObject> {
             .setColor(Color.RED.darker().darker())
             .setFillColor(Color.RED)
             .setMaterial(Material.RUBBER)
-            .setMass(15.0 * Math.random() + 1.0)
+            .setMass(30.0 * Math.random() + 20.0)
             .setParent(parent)
             .addBehavior(this)
+            .setAttribute("energy", Math.random() * 20.0)
             .addForce(
                 new Vector2D(
                     -0.15 + Math.random() * 0.30,
@@ -83,5 +84,4 @@ public class BallParticleBehavior implements ParticleBehavior<GameObject> {
                     -(ballForce) + Math.random() * ballForce * 2.0));
         }
     }
-
 }

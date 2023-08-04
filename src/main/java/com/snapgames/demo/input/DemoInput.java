@@ -22,7 +22,7 @@ public class DemoInput implements InputInterface {
                         .getEntity("helpPanel");
                 if (Optional.ofNullable(helpPanel).isPresent()) {
                     helpPanel.setDuration(7000)
-                            .setActive(!helpPanel.active);
+                            .setEnabled(!helpPanel.enabled);
                 }
             }
             case KeyEvent.VK_P, KeyEvent.VK_PAUSE -> {
@@ -30,7 +30,7 @@ public class DemoInput implements InputInterface {
                 TextObject pause = (TextObject) ((SceneManager) GSystemManager.find(SceneManager.class))
                         .getCurrent()
                         .getEntity("pause");
-                pause.setActive(application.isPaused());
+                pause.setEnabled(application.isPaused());
             }
             default -> {
                 // nothing to do here !
