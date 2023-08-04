@@ -1,7 +1,7 @@
 package com.snapgames.demo.scenes;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
+import java.io.IOException;
 import java.util.Map;
 
 import com.snapgames.core.Application;
@@ -60,6 +60,12 @@ public class DemoScene extends AbstractScene {
     public void create(Application app) {
         Configuration configuration = app.getConfiguration();
         Graphics2D g2d = ((Renderer) GSystemManager.find(Renderer.class)).getBufferGraphics();
+        Font tiny;
+        try {
+            tiny = Font.createFont(Font.ROMAN_BASELINE, this.getClass().getResourceAsStream("/fonts/lilliput steps.ttf"));
+        } catch (FontFormatException | RuntimeException | IOException e) {
+            throw new RuntimeException(e);
+        }
         PhysicEngine pe = GSystemManager.find(PhysicEngine.class);
         pe.setWorld(configuration.world);
         pe.setMaxAcceleration(configuration.maxEntityAcc);
@@ -78,7 +84,9 @@ public class DemoScene extends AbstractScene {
                 3, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
                 .setForce(new Vector2D(0.03, 0.00))
                 .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
-                .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.1f)));
+                .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.1f))
+                .setLayer(10)
+        );
         world.add(
             new Perturbation(
                 "water",
@@ -86,7 +94,9 @@ public class DemoScene extends AbstractScene {
                 world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
                 .setForce(new Vector2D(0.0, -1.0))
                 .setColor(new Color(0.5f, 0.4f, 0.9f, 0.6f))
-                .setFillColor(new Color(0.3f, 0.2f, 0.8f, 0.5f)));
+                .setFillColor(new Color(0.3f, 0.2f, 0.8f, 0.5f))
+                .setLayer(10)
+        );
         world.add(
             new Perturbation(
                 "magnet_1",
@@ -94,7 +104,9 @@ public class DemoScene extends AbstractScene {
                 world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight() * 0.9)
                 .setForce(new Vector2D(0.05, 0.0))
                 .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
-                .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+                .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f))
+                .setLayer(10)
+        );
         world.add(
             new Perturbation(
                 "magnet_2",
@@ -102,7 +114,9 @@ public class DemoScene extends AbstractScene {
                 world.getPlayArea().getWidth() * 0.1, world.getPlayArea().getHeight() * 0.9)
                 .setForce(new Vector2D(-0.05, 0.0))
                 .setColor(new Color(0.0f, 0.0f, 0.0f, 0.0f))
-                .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f)));
+                .setFillColor(new Color(0.1f, 0.7f, 0.2f, 0.1f))
+                .setLayer(10)
+        );
         world.add(
             new Perturbation(
                 "magnet_3",
@@ -221,7 +235,7 @@ public class DemoScene extends AbstractScene {
             .setType(GameObjectType.TYPE_RECTANGLE)
             .setPhysicType(PhysicType.DYNAMIC)
             .setPriority(10)
-            .setLayer(80)
+            .setLayer(20)
             .setColor(Color.GREEN)
             .setFillColor(Color.GREEN)
             .setMass(60.0)
@@ -235,18 +249,18 @@ public class DemoScene extends AbstractScene {
 
         TextObject helpPanel = new TextObject("helpPanel")
             .setPosition(
-                configuration.bufferResolution.getWidth() * 0.50,
-                configuration.bufferResolution.getHeight() * 0.50)
+                configuration.bufferResolution.getWidth() * 0.96,
+                configuration.bufferResolution.getHeight() * 0.80)
             .setPhysicType(PhysicType.STATIC)
-            .setTextAlign(TextObject.ALIGN_CENTER)
+            .setTextAlign(TextObject.ALIGN_RIGHT)
             .setColor(Color.LIGHT_GRAY)
             .setShadowColor(new Color(0.4f, 0.4f, 0.4f, 0.8f))
             .setBorderColor(Color.BLACK)
-            .setFont(g2d.getFont().deriveFont(8.5f))
+            .setFont(tiny.deriveFont(8.5f))
             .setShadowWidth(3)
             .setBorderWidth(2)
             .setI18nKeyCode("app.demo.help")
-            .setPriority(30)
+            .setPriority(1)
             .setLayer(2)
             .setStickToCameraView(true)
             .setDuration(7000)
