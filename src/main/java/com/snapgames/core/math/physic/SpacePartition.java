@@ -234,10 +234,10 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
             g.setColor(Color.RED);
         }
         g.draw(this);
-        if (this.nodes != null && this.nodes.length > 0) {
-            for (int i = 0; i < nodes.length; i++) {
-                if (nodes[i] != null) {
-                    nodes[i].draw(r, g, scene);
+        if (this.nodes != null) {
+            for (SpacePartition node : nodes) {
+                if (node != null) {
+                    node.draw(r, g, scene);
                 }
             }
         }

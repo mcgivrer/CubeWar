@@ -4,7 +4,7 @@ run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
 on: [push]
 
 jobs:
-  Explore-Gitea-Actions:
+  Build-My-Java-Project:
     runs-on: ubuntu-latest
     steps:
       - uses: https://github.com/actions/checkout@v3
@@ -15,7 +15,7 @@ jobs:
           cache: 'maven'
       - name: Build project with Maven and Xvfb
         run: |
-         sudo apt-get install xvfb
+         apt install xvfb
          export DISPLAY=":99.0"
          export AUDIODEV=null
          xvfb-run :99 -screen 0 1024x768x24 > /dev/null 2>&1 &

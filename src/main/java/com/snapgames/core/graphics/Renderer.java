@@ -13,9 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
@@ -63,10 +61,12 @@ public class Renderer extends JPanel implements GSystem {
      * configuration attributes.
      */
     public void createWindow(InputHandler ih) {
-        frame = new JFrame(application.title);
         setPreferredSize(application.getConfiguration().winSize);
         setMinimumSize(application.getConfiguration().winSize);
         setSize(application.getConfiguration().winSize);
+
+        frame = new JFrame(application.title);
+        frame.setIconImage(new ImageIcon("/images/icon-app.png").getImage());
         frame.setContentPane(this);
         frame.setLayout(new GridLayout());
         frame.enableInputMethods(true);
@@ -223,7 +223,7 @@ public class Renderer extends JPanel implements GSystem {
     public void takeScreenShot() {
         this.drawing = false;
         if (Optional.ofNullable(buffer).isPresent()) {
-            // TODO implement buffer image save to file.
+            // TODO implement buffer image saving to file.
         }
         this.drawing = true;
     }

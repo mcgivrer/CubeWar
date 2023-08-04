@@ -4,8 +4,11 @@ import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.entity.GameObject;
+import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.input.InputHandler;
+import com.snapgames.core.math.physic.SpacePartition;
 import com.snapgames.core.math.physic.World;
+import com.snapgames.core.system.GSystemManager;
 
 import java.awt.*;
 import java.util.Collection;
@@ -85,7 +88,13 @@ public abstract class AbstractScene implements Scene {
 
     @Override
     public void draw(Application app, Graphics2D g, Map<String, Object> stats) {
-        // default implementation
+        SpacePartition sp = GSystemManager.find(SpacePartition.class);
+        Renderer r = GSystemManager.find(Renderer.class);
+        if (app.isDebugAtLeast(2)) {
+            r.moveFromCameraPoV(g, getActiveCamera(), -1);
+            sp.draw(r, g, this);
+            r.moveFromCameraPoV(g, getActiveCamera(), 1);
+        }
     }
 
     @Override
