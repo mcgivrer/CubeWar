@@ -6,7 +6,7 @@ import java.awt.Color;
  * Utilities for Color management.
  *
  * @author Frédéric Delorme
- * @since 1.0.3
+ * @since 1.0.4
  */
 public class Colors {
 
