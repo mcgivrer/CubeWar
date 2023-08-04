@@ -13,12 +13,14 @@ import java.util.Map;
 
 public class CollisionDetection implements GSystem {
 
+    Application application;
+
     private ArrayList<CollisionEvent> collisions;
 
     private SpacePartition spacePartition;
 
     public CollisionDetection(Application app) {
-
+        this.application = app;
     }
 
     @Override
@@ -54,8 +56,9 @@ public class CollisionDetection implements GSystem {
 
     private void collide(Entity<?> e2, Entity<?> e1) {
         CollisionEvent ce = new CollisionEvent(e1, e2);
-        if (e1.getName().equals("player") || e2.getName().equals("player"))
+        if (application.isDebugAtLeast(3) && (e1.getName().equals("player") || e2.getName().equals("player"))) {
             System.out.printf(">> <?> collision between %s and %s%n", e2.getName(), e1.getName());
+        }
         collisions.add(ce);
         collisionResponse(ce);
     }
