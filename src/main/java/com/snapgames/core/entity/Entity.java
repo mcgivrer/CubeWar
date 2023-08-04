@@ -40,6 +40,8 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public List<Vector2D> forces = new ArrayList<>();
     public double dRotation;
     public double mass;
+    public boolean enabled;
+
     public boolean active;
 
     protected int duration = -1;
@@ -52,7 +54,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     private Class<? extends RendererPlugin> drawnBy;
 
     Map<String, Object> attributes = new HashMap<>();
-    public List<Behavior<T>> behaviors = new ArrayList<>();
+    public List<Behavior<?>> behaviors = new ArrayList<>();
     public PhysicType physicType = PhysicType.DYNAMIC;
     public Material material;
 
@@ -80,6 +82,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         setName(n);
         setPosition(x, y);
         setSize((int) w, (int) h);
+        setEnabled(true);
         setActive(true);
         setStickToCameraView(false);
         setConstrainedToPlayArea(true);
@@ -110,7 +113,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
         lifespan += elapsed;
         if (duration != -1 && lifespan > duration) {
-            this.active = false;
+            this.enabled = false;
         }
 
     }
@@ -118,14 +121,14 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     /**
      * Define the {@link Entity} activity state.
      *
-     * @param active true to activate this {@link Entity}.
+     * @param enabled true to activate this {@link Entity}.
      */
-    public T setActive(boolean active) {
-        this.active = active;
+    public T setEnabled(boolean enabled) {
+        this.enabled = enabled;
         if (duration != -1) {
             lifespan = duration;
         }
-        child.forEach(c -> c.setActive(active));
+        child.forEach(c -> c.setEnabled(enabled));
         return (T) this;
     }
 
@@ -134,8 +137,8 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
      *
      * @return true if {@link Entity} is active, elsewhere false.
      */
-    public boolean isActive() {
-        return this.active;
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
     public T setDebug(int d) {
@@ -143,7 +146,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
-    public T addBehavior(Behavior<T> b) {
+    public T addBehavior(Behavior<?> b) {
         behaviors.add(b);
         return (T) this;
     }
@@ -377,5 +380,15 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
     public void setDrawnBy(Class<? extends RendererPlugin> aClass) {
         drawnBy = aClass;
+    }
+
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public T setActive(boolean active) {
+        this.active = active;
+        return (T) this;
     }
 }

@@ -13,7 +13,7 @@ import com.snapgames.core.math.physic.World;
  * with the implementation of this behavior interface, and allow to
  * <ul><li>create a new
  * particle by the
- * {@link com.snapgames.core.utils.particles.ParticleSystemBuilder#createParticleSystem(World, String, int, ParticleBehavior)},
+ * {@link com.snapgames.core.utils.particles.ParticleSystemBuilder#createParticleSystem(World, String, int, int, ParticleBehavior, Behavior[])},
  * </li>
  * <li>while the already defined
  * {@link Behavior#update(Entity, double)} will be used to update the created
@@ -23,7 +23,7 @@ import com.snapgames.core.math.physic.World;
  *
  * @param <T> the Entity to be modified.
  */
-public interface ParticleBehavior<T> extends Behavior<T> {
+public interface ParticleBehavior<T> extends Behavior<Entity<?>> {
     /**
      * Implement the <code>create</code> phase for the particle using a prefix name,
      * the {@link World} object as
@@ -38,5 +38,5 @@ public interface ParticleBehavior<T> extends Behavior<T> {
      * @param parent             the parent {@link Entity} hosting this particle.
      * @return the newly created {@link ParticleBehavior} implementation.
      */
-    T create(World w, double elapsed, String particleNamePrefix, Entity<?> parent);
+    T create(World w, double elapsed, String particleNamePrefix, T parent);
 }

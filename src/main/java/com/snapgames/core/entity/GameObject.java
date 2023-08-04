@@ -1,5 +1,9 @@
 package com.snapgames.core.entity;
 
+import com.snapgames.core.behavior.CollisionResponseBehavior;
+import com.snapgames.core.math.Vector2D;
+import com.snapgames.core.math.physic.CollisionEvent;
+
 import java.awt.image.BufferedImage;
 
 /**

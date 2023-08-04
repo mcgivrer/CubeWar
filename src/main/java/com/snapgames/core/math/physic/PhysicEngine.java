@@ -1,10 +1,8 @@
 package com.snapgames.core.math.physic;
 
 import java.awt.geom.Rectangle2D;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.Camera;
@@ -98,41 +96,46 @@ public class PhysicEngine implements GSystem {
         double time = (elapsed * timeScaleFactor);
         cumulatedTime += elapsed;
 
+        // remove not active entities
+        List<Entity<?>> toBeDeleted = entities.stream().filter(e -> !e.isActive()).collect(Collectors.toList());
+        entities.removeAll(toBeDeleted);
+
         // if world contains any Perturbation, apply to all concerned entities.
         world.getPerturbations().stream()
-                .forEach(p -> entities.stream().filter(e -> e.isActive() && p.isEntityConstrained(e))
-                        .forEach(e -> {
-                            // applying penetration factor.
-                            Rectangle2D intersection = e.getBounds2D().createIntersection(p);
-                            Vector2D dist = new Vector2D(intersection.getWidth(), intersection.getHeight());
-                            Vector2D eDist = new Vector2D(e.getWidth(), e.getHeight());
-                            double vf = dist.length() / eDist.length();
-                            // apply reduction factor on forces according to distance
-                            p.getForces().forEach(f -> e.addForce(f.multiply(vf)));
+            .forEach(p -> entities.stream().filter(e -> e.isEnabled() && p.isEntityConstrained(e))
+                .forEach(e -> {
+                    // applying penetration factor.
+                    Rectangle2D intersection = e.getBounds2D().createIntersection(p);
+                    Vector2D dist = new Vector2D(intersection.getWidth(), intersection.getHeight());
+                    Vector2D eDist = new Vector2D(e.getWidth(), e.getHeight());
+                    double vf = dist.length() / eDist.length();
+                    // apply reduction factor on forces according to distance
+                    p.getForces().forEach(f -> e.addForce(f.multiply(vf)));
 
-                        }));
+                }));
 
         entities.stream()
-                .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
-                .forEach(
-                        e -> {
-                            if (e.behaviors.size() > 0) {
-                                e.behaviors.forEach(b -> b.update(e, elapsed));
-                            }
-                            if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
-                                updateEntity(e, time);
-                            }
-                            e.update(time * 100);
-                            // apply Behaviors
+            .sorted(Comparator.comparingInt(a -> a.physicType.ordinal()))
+            .forEach(
+                e -> {
+                    if (e.behaviors.size() > 0) {
+                        e.behaviors.forEach(b -> b.update(e, elapsed));
+                    }
+                    if (e.physicType != PhysicType.STATIC && !e.stickToCamera) {
+                        updateEntity(e, time);
+                    }
+                    e.update(time * 100);
+                    // apply Behaviors
 
-                        });
+                });
         if (Optional.ofNullable(camera).isPresent()) {
             camera.update(time);
         }
         scene.update(application, time);
         long renderedEntities = entities.stream()
-                .filter(e -> (camera != null && camera.inViewport(e)) || e.stickToCamera).count();
+            .filter(e -> (camera != null && camera.inViewport(e)) || e.stickToCamera).count();
         stats.put("3_rendered", renderedEntities);
+
 
     }
 
@@ -152,7 +155,7 @@ public class PhysicEngine implements GSystem {
         // compute acceleration
         entity.setAcceleration(entity.acceleration.addAll(entity.getForces()));
         entity.setAcceleration(entity.acceleration.multiply(
-                (entity.getMaterial() != null ? entity.getMaterial().getDensity() : 1.0) * entity.mass));
+            (entity.getMaterial() != null ? entity.getMaterial().getDensity() : 1.0) * entity.mass));
         if (configuration.physicConstrained) {
             entity.acceleration = entity.acceleration.maximize(entity.getAttribute("maxAccelY", this.maxEntityAcc));
         }
