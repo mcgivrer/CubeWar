@@ -136,7 +136,6 @@ public class PhysicEngine implements GSystem {
             .filter(e -> (camera != null && camera.inViewport(e)) || e.stickToCamera).count();
         stats.put("3_rendered", renderedEntities);
 
-
     }
 
     /**
