@@ -24,7 +24,7 @@ import java.util.List;
  * @author Frédéric Delorme
  * @see CollisionDetection
  * @see PhysicEngine
- * @since 1.0.3
+ * @since 1.0.4
  */
 public class SpacePartition extends Rectangle2D.Double implements GSystem {
     private int maxObjectsPerNode = 10;

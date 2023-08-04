@@ -1,14 +1,12 @@
 package com.snapgames.core.input;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.snapgames.core.Application;
 import com.snapgames.core.system.GSystem;
-import com.snapgames.demo.input.TitleInput;
+
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InputHandler implements KeyListener, GSystem {
 
