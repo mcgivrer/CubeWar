@@ -223,7 +223,7 @@ public class Renderer extends JPanel implements GSystem {
     public void takeScreenShot() {
         this.drawing = false;
         if (Optional.ofNullable(buffer).isPresent()) {
-            // TODO implement buffer image save to file.
+            // TODO implement buffer image saving to file.
         }
         this.drawing = true;
     }
