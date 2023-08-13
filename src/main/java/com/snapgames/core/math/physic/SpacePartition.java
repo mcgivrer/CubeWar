@@ -225,6 +225,7 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
      * @param scene the {@link Scene} to be processed.
      */
     public void draw(Renderer r, Graphics2D g, Scene scene) {
+        g.setFont(g.getFont().deriveFont(8.5f));
         SpacePartition sp = this;
         if (objects.isEmpty()) {
             g.setColor(Color.GREEN);
@@ -234,6 +235,8 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
             g.setColor(Color.RED);
         }
         g.draw(this);
+        g.setColor(Color.ORANGE);
+        g.drawString("s:" + this.objects.size(), (int) (this.x + 4), (int) (this.y + 10));
         if (this.nodes != null) {
             for (SpacePartition node : nodes) {
                 if (node != null) {

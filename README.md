@@ -45,7 +45,7 @@ jdb -sourcepath src/main/java/,src/main/resources \
 
 ### Build script
 
-> **NOTE** _To get more information this script usga ejust execite:_
+> **NOTE** _To get more information this script usage, just execute the following command line:_
 >
 > ```bash
 > $> scripts/build.sh
