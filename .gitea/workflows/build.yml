@@ -21,6 +21,7 @@ jobs:
          export AUDIODEV=null
          xvfb-run :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
          curl -s "https://get.sdkman.io" | bash
+         source "/root/.sdkman/bin/sdkman-init.sh"
          sdk env install
          sdk env use
          mvn -B package -DskipTests=true --file pom.xml
