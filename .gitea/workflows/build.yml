@@ -15,11 +15,11 @@ jobs:
           cache: 'maven'
       - name: Build project with Maven and Xvfb
         run: |
-         #apt-get install xvfb
-         #export DISPLAY=":99.0"
-         #export AUDIODEV=null
-         #xvfb-run :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-         apt install curl zip unzip
+         apt update
+         apt install xvfb curl zip unzip
+         export DISPLAY=":99.0"
+         export AUDIODEV=null
+         xvfb-run :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
          curl -s "https://get.sdkman.io" | bash
          sdk env install
          sdk env use
