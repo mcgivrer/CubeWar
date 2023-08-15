@@ -89,11 +89,11 @@ public class DemoScene extends AbstractScene {
         );
         world.add(
             new Perturbation(
-                "water",
-                0, world.getPlayArea().getHeight() * 0.85,
-                world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.15)
-                .setForce(new Vector2D(0.0, -1.0))
-                .setColor(new Color(0.5f, 0.4f, 0.9f, 0.6f))
+                "water_1",
+                0, world.getPlayArea().getHeight() * 0.90,
+                world.getPlayArea().getWidth(), world.getPlayArea().getHeight() * 0.10)
+                .setForce(new Vector2D(0.0, -0.80))
+                .setColor(new Color(0.6f, 0.7f, 0.9f, 0.6f))
                 .setFillColor(new Color(0.3f, 0.2f, 0.8f, 0.5f))
                 .setLayer(10)
         );
@@ -278,7 +278,7 @@ public class DemoScene extends AbstractScene {
         // add rain drops particle system.
         addEntity(
             ParticleSystemBuilder.createParticleSystem(world, "raindrop", 1000, 50,
-                new RainParticleBehavior(0.003, "ball_,player,water")));
+                new RainParticleBehavior(0.003, "ball_,player,water_1")));
 
         Camera cam = new Camera("cam01", configuration.bufferResolution.width, configuration.bufferResolution.height);
         cam.setTarget(player);

@@ -54,7 +54,7 @@ public class TitleScene extends AbstractScene {
 
         pe.getWorld().add(
             new Perturbation(
-                "wind",
+                "water_1",
                 0, 0,
                 pe.getWorld().getPlayArea().getWidth(), pe.getWorld().getPlayArea().getHeight(),
                 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
@@ -67,7 +67,7 @@ public class TitleScene extends AbstractScene {
         // add rain drops particle system.
         addEntity(
             ParticleSystemBuilder.createParticleSystem(pe.getWorld(), "raindrop", 1000, 10,
-                new RainParticleBehavior(0.03, "enemy_,player,water")));
+                new RainParticleBehavior(0.03, "enemy_,player,water_1")));
 
         GameObject player = new GameObject("player")
             .setPosition(

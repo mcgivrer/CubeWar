@@ -102,7 +102,8 @@ public class RainParticleBehavior implements ParticleBehavior<GameObject>, Colli
 
     @Override
     public void response(CollisionEvent ce) {
-        ce.getEntity1().setActive(false);
+
+        ce.getEntity2().setActive(false);
     }
 
     @Override

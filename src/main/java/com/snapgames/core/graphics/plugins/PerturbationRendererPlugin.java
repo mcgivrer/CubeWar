@@ -6,6 +6,7 @@ import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.Scene;
 
 import java.awt.*;
+import java.util.Optional;
 
 public class PerturbationRendererPlugin implements RendererPlugin<Perturbation> {
     @Override
@@ -23,5 +24,9 @@ public class PerturbationRendererPlugin implements RendererPlugin<Perturbation> 
         RendererPlugin.super.drawDebugInfo(application, scene, r, g, e);
         g.setColor(e.getFillColor());
         g.fill(e);
+        if (Optional.ofNullable(e.getColor()).isPresent()) {
+            g.setColor(e.getColor());
+            g.draw(e);
+        }
     }
 }
