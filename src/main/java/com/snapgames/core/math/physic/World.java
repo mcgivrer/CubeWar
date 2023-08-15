@@ -7,6 +7,7 @@ import com.snapgames.core.math.physic.entity.Perturbation;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class World {
     private Vector2D gravity;
     private Material material = Material.AIR;
 
-    public List<Perturbation> perturbations = new ArrayList<>();
+    public List<Entity<?>> perturbations = new ArrayList<>();
 
     public World(String name) {
         this.name = name;
@@ -57,16 +58,16 @@ public class World {
         return this.playArea;
     }
 
-    public List<Perturbation> getPerturbations() {
+    public Collection<Entity<?>> getPerturbations() {
         return this.perturbations;
     }
 
     @Override
     public String toString() {
         return "World{" +
-                "name='" + name + '\'' +
-                ", playArea=(" + playArea.getWidth() + "x" + playArea.getHeight() + ")" +
-                ", gravity=" + gravity +
-                '}';
+            "name='" + name + '\'' +
+            ", playArea=(" + playArea.getWidth() + "x" + playArea.getHeight() + ")" +
+            ", gravity=" + gravity +
+            '}';
     }
 }

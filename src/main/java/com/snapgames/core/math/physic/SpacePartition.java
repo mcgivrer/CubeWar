@@ -5,11 +5,14 @@ import com.snapgames.core.entity.Entity;
 import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
+import com.snapgames.core.system.GSystemManager;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A space partitioning system to dispatch Scene's {@link Entity} list into some {@link SpacePartition}, to accelerate
@@ -192,8 +195,10 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
      * @param elapsed the elapsed time since previous call (not used here).
      */
     public void update(Scene scene, double elapsed) {
+        PhysicEngine pe = GSystemManager.find(PhysicEngine.class);
         this.clear();
-        scene.getEntities().forEach(e -> this.insert(e));
+        Collection<Entity<?>> col = Stream.concat(scene.getEntities(), pe.getWorld().getPerturbations());
+        scene.getEntities().forEach(e -> this.insert((Entity<?>) e));
     }
 
 
