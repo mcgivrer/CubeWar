@@ -44,6 +44,9 @@ public abstract class AbstractScene implements Scene {
         e.child.forEach(c -> entities.put(c.name, c));
     }
 
+    public void addBehavior(SceneBehavior sb) {
+        this.behaviors.add(sb);
+    }
 
     public void addEntities(List<GameObject> listEntities) {
         for (Entity<? extends Entity<?>> e : listEntities) {

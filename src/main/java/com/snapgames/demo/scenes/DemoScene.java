@@ -20,6 +20,7 @@ import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.behaviors.BallResponseBehavior;
 import com.snapgames.demo.behaviors.GameObjectCollisionResponse;
+import com.snapgames.demo.behaviors.scene.ScoreDisplayBehavior;
 import com.snapgames.demo.input.CameraInput;
 import com.snapgames.demo.input.DemoInput;
 import com.snapgames.demo.input.PlayerInput;
@@ -285,15 +286,13 @@ public class DemoScene extends AbstractScene {
         cam.setTween(0.5);
         addCamera(cam);
 
+        addBehavior(new ScoreDisplayBehavior());
     }
 
     @Override
     public void update(Application app, double elapsed) {
         // nothing for this demo.
-        if (getEntity("player") != null) {
-            int score = getEntity("player").getAttribute("score", 0);
-            TextObject scoreTextObj = ((TextObject) getEntity("score")).setValue(score);
-        }
+
     }
     @Override
     public void setWorld(World world) {
