@@ -45,11 +45,13 @@ public class SceneManager implements GSystem {
     public void activate(String name) {
         if (current != null) {
             System.out.printf(">> <!> Disable current scene '%s'(%s) as current one.%n", current.getName(),
-                    current.getClass().getName());
+                current.getClass().getName());
             this.current.dispose();
         }
         this.current = scenes.get(name);
         this.current.create(application);
+        // execute all SceneBehavior on the create event.
+        this.current.getBehaviors().forEach(sb -> sb.create(this.current));
     }
 
     @Override

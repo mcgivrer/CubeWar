@@ -1,6 +1,7 @@
 package com.snapgames.core.scene;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.behavior.SceneBehavior;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.entity.GameObject;
@@ -11,10 +12,8 @@ import com.snapgames.core.math.physic.World;
 import com.snapgames.core.system.GSystemManager;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -34,6 +33,10 @@ public abstract class AbstractScene implements Scene {
      * the map of entities maintained for this Scene implementation.
      */
     private final Map<String, Entity<? extends Entity<?>>> entities = new ConcurrentHashMap<>();
+    /**
+     * The list of behaviors for this scene.
+     */
+    private Collection<SceneBehavior> behaviors = new ArrayList<>();
 
     @Override
     public void addEntity(Entity<?> e) {
@@ -100,5 +103,11 @@ public abstract class AbstractScene implements Scene {
     @Override
     public void setWorld(World world) {
         // default implementation
+    }
+
+
+    @Override
+    public Collection<SceneBehavior> getBehaviors() {
+        return behaviors;
     }
 }

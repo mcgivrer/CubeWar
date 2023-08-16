@@ -1,6 +1,7 @@
 package com.snapgames.core.scene;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.behavior.SceneBehavior;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.input.InputHandler;
@@ -98,9 +99,16 @@ public interface Scene {
     /**
      * Retrieve all entities acting in this {@link Scene} instance.
      *
-     * @return
+     * @return a {@link Collection} of {@link Entity}
      */
     Collection<Entity<?>> getEntities();
+
+    /**
+     * Retrieve the list collection of scene behavior attached to this scene.
+     *
+     * @return a {@link Collection} of {@link SceneBehavior}
+     */
+    Collection<SceneBehavior> getBehaviors();
 
     /**
      * retrieve an {@link Entity} instance on its name.
