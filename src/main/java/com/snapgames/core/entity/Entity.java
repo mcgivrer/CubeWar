@@ -67,6 +67,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
     public Entity<?> parent;
     public List<Entity<?>> child = new CopyOnWriteArrayList<>();
+    private boolean entityIsConstrained;
 
 
     /**
@@ -88,7 +89,9 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         setConstrainedToPlayArea(true);
         setMaterial(Material.DEFAULT);
         setMass(1.0);
+        setEntityIsConstrained(true);
     }
+
 
     /**
      * Entity's constructor with a name, a position (x,y) and a size (w,h).
@@ -390,5 +393,14 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public T setActive(boolean active) {
         this.active = active;
         return (T) this;
+    }
+
+    private T setEntityIsConstrained(boolean eic) {
+        this.entityIsConstrained = eic;
+        return (T) this;
+    }
+
+    public boolean isEntityConstrained(Entity<?> e) {
+        return entityIsConstrained;
     }
 }
