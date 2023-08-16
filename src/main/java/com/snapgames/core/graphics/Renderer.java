@@ -140,6 +140,8 @@ public class Renderer extends JPanel implements GSystem {
                         || cam == null))
                     .collect(Collectors.toList()));
             scene.draw(application, g, stats);
+            // execute all the SceneBehavior on the draw operation event
+            scene.getBehaviors().forEach(sb -> sb.draw(scene, this));
             g.dispose();
 
             // copy to JFrame
@@ -149,6 +151,9 @@ public class Renderer extends JPanel implements GSystem {
                 0, 0, buffer.getWidth(), buffer.getHeight(),
                 null);
             if (application.getConfiguration().debug && application.getConfiguration().debugLevel > 0) {
+
+                gScreen.setColor(new Color(0.4f, 0.0f, 0.0f, 0.7f));
+                gScreen.fillRect(0, frame.getHeight() - 32, frame.getWidth(), 32);
                 gScreen.setColor(Color.ORANGE);
                 gScreen.drawString(
                     prepareStatsString(stats, "[ ", " | ", " ]"),

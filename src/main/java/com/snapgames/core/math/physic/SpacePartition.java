@@ -197,8 +197,10 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
     public void update(Scene scene, double elapsed) {
         PhysicEngine pe = GSystemManager.find(PhysicEngine.class);
         this.clear();
-        Collection<Entity<?>> col = Stream.concat(scene.getEntities(), pe.getWorld().getPerturbations());
-        scene.getEntities().forEach(e -> this.insert((Entity<?>) e));
+        Collection<Entity<?>> colEntity = scene.getEntities();
+        Collection<Entity<?>> colPerturbs = pe.getWorld().getPerturbations();
+
+        Stream.concat(colEntity.stream(), colPerturbs.stream()).forEach(e -> this.insert((Entity<?>) e));
     }
 
 

@@ -132,6 +132,10 @@ public class PhysicEngine implements GSystem {
             camera.update(time);
         }
         scene.update(application, time);
+
+        // execute all SceneBehavior's on the update event.
+        scene.getBehaviors().forEach(sb -> sb.update(scene, time));
+
         long renderedEntities = entities.stream()
             .filter(e -> (camera != null && camera.inViewport(e)) || e.stickToCamera).count();
         stats.put("3_rendered", renderedEntities);
