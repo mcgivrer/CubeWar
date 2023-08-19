@@ -30,7 +30,7 @@ or you can execute the command line :
 $> java -jar target/JavaTestApp-1.0.0.jar
 ```
 
-![A screenshot from the current version](doc/images/screenshot-003-renderer-plugin-archi.png "A screenshot from the current version")
+![A screenshot from the current version](docs/images/screenshot-005-adding-space-partitioning.png "A screenshot from the current version")
 
 ## Debug
 
