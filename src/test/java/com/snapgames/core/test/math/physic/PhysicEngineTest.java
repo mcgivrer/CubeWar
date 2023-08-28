@@ -38,7 +38,7 @@ public class PhysicEngineTest {
     @Order(1)
     public void testStaticEntity() {
         // Just initialize a configuration, but no looping (testMode=true)
-        Configuration cfg = new Configuration(application, "./test-pe.properties", Arrays.asList("testMode=true"));
+        Configuration cfg = new Configuration("./test-pe.properties", Arrays.asList("testMode=true"));
         // create a specific instance of the PhysicEngine for test purpose (isolated)
         PhysicEngine pe = new PhysicEngine(application);
         pe.initialize(cfg);
@@ -66,7 +66,7 @@ public class PhysicEngineTest {
     @Order(2)
     public void testDynamicEntity() {
         // Just initialize a configuration, but no looping (testMode=true)
-        Configuration cfg = new Configuration(application, "./test-pe.properties", Arrays.asList("testMode=true"));
+        Configuration cfg = new Configuration("./test-pe.properties", Arrays.asList("testMode=true"));
         // create a specific instance of the PhysicEngine for test purpose (isolated)
         PhysicEngine pe = new PhysicEngine(application);
         pe.initialize(cfg);
@@ -91,7 +91,7 @@ public class PhysicEngineTest {
     @Order(3)
     public void testDynamicEntityWithPerturbation() {
         // Just initialize a configuration, but no looping (testMode=true)
-        Configuration cfg = new Configuration(application, "./test-pe.properties", Arrays.asList("testMode=true"));
+        Configuration cfg = new Configuration("./test-pe.properties", Arrays.asList("testMode=true"));
         // create a specific instance of the PhysicEngine for test purpose (isolated)
         PhysicEngine pe = new PhysicEngine(application);
         pe.initialize(cfg);

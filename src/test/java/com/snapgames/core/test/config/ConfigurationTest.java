@@ -1,17 +1,13 @@
 package com.snapgames.core.test.config;
 
 import com.snapgames.core.math.Vector2D;
-import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.World;
-import com.snapgames.core.system.GSystemManager;
-import com.snapgames.core.test.AppTest;
 import com.snapgames.core.utils.config.Configuration;
 import org.junit.jupiter.api.*;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,7 +20,7 @@ public class ConfigurationTest {
     @BeforeEach
     public void setup() {
         // Just initialize a configuration, but no looping (testMode=true)
-        cfg = new Configuration(null, "./test-config.properties", Arrays.asList("testMode=true"));
+        cfg = new Configuration("./test-config.properties", Arrays.asList("testMode=true"));
     }
 
     @AfterEach

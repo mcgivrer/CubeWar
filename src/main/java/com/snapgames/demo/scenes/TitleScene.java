@@ -3,6 +3,7 @@ package com.snapgames.demo.scenes;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Optional;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.GameObject;
@@ -151,7 +152,7 @@ public class TitleScene extends AbstractScene {
 
         addEntity(startMessage);
 
-        TextObject copyRMessage = new TextObject("copyright")
+        TextObject copyRightMessage = new TextObject("copyright")
             .setPosition(
                 configuration.bufferResolution.getWidth() * 0.50,
                 configuration.bufferResolution.getHeight() * 0.95)
@@ -170,7 +171,7 @@ public class TitleScene extends AbstractScene {
             .setDebug(2)
             .setMaterial(null);
 
-        addEntity(copyRMessage);
+        addEntity(copyRightMessage);
 
         ((InputHandler) GSystemManager.find(InputHandler.class))
             .add(ti);
@@ -181,7 +182,7 @@ public class TitleScene extends AbstractScene {
         double factor = 40.0;
         GameObject player = (GameObject) getEntity("player");
         internalSceneTime += elapsed;
-        if (internalSceneTime > 0.5) {
+        if (Optional.ofNullable(player).isPresent() && internalSceneTime > 0.5) {
             player.addForce(new Vector2D(-(factor * 0.5) + Math.random() * factor, -(factor * 1.5) + Math.random() * factor * 3));
             internalSceneTime = 0;
         }

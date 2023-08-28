@@ -100,16 +100,16 @@ public class PhysicEngine implements GSystem {
         List<Entity<?>> toBeDeleted = entities.stream().filter(e -> !e.isActive()).collect(Collectors.toList());
         entities.removeAll(toBeDeleted);
 
-        // if world contains any Perturbation, apply to all concerned entities.
+        // if the world contains any Perturbation, apply to all concerned entities.
         world.getPerturbations().stream()
             .forEach(p -> entities.stream().filter(e -> e.isEnabled() && p.isEntityConstrained(e))
                 .forEach(e -> {
-                    // applying penetration factor.
+                    // applying a penetration factor.
                     Rectangle2D intersection = e.getBounds2D().createIntersection(p);
                     Vector2D dist = new Vector2D(intersection.getWidth(), intersection.getHeight());
                     Vector2D eDist = new Vector2D(e.getWidth(), e.getHeight());
                     double vf = dist.length() / eDist.length();
-                    // apply reduction factor on forces according to distance
+                    // apply a reduction factor on forces according to distance
                     p.getForces().forEach(f -> e.addForce(f.multiply(vf)));
 
                 }));
