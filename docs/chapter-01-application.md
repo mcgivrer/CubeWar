@@ -1,13 +1,168 @@
 ## The Application
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Vivendum intellegat et qui, ei denique consequuntur vix. No vis iuvaret appareat. No epicuri hendrerit consetetur sit, sit dicta adipiscing ex, in facete detracto deterruisset duo. Pri posse graeco definitiones cu, id eam populo quaestio adipiscing, usu quod malorum te. An dicant apeirian qui, at vide indoctum pro. Scripta periculis ei eam, te pro movet reformidans. Commune platonem mel id, brute adipiscing duo an. Sit fugit nostrum et. Vivendum intellegat et qui, ei denique consequuntur vix. Ex nam agam veri, dicunt efficiantur ad qui, ad legere adversarium sit. Offendit eleifend moderatius ex vix, quem odio mazim et qui, purto expetendis cotidieque quo cu, veri persius vituperata ei nec. Pri posse graeco definitiones cu, id eam populo quaestio adipiscing, usu quod malorum te. Pri viderer tamquam ei. Scripta periculis ei eam, te pro movet reformidans.
+### Goals
+
+The main class for all the application will consist in the core loop of our game. The `Application` class will embed all
+the required loop structure and API initial call.
 
 ```plantuml
 @startuml
-class Application
-class Scene
-class Entity
-Application --> Scene:scenes
-Scene "1"-->"n" Entity:entities
+!theme plain
+main -> Application: new
+Application-> Application:initialize()
+Application--> main : game instance
+main -> Application: run
+Application-> Application:create
+loop until exit
+  Application-> Application:input()
+  alt not paused
+    Application -> Application:update()
+  end
+  Application-> Application:render()
+  Application -> Application:wait()
+end
+Application-> Application:dispose()
 @enduml
 ```
+
+_figure 1.1 - The initial lifecycle API call from the `Application` main class, inherited by any game implementation._
+
+### The Application class
+
+the game loop lifecycle will inspire a lot our Application class :
+
+```java
+public class Application {
+    private void initialize() {
+    }
+
+    private void create() {
+    }
+
+    private void loop() {
+    }
+
+    private void input() {
+    }
+
+    private void update() {
+    }
+
+    private void render() {
+    }
+
+    private void wait() {
+    }
+
+    private void dispose() {
+    }
+
+    public void run(String[] args) {
+    }
+}
+```
+
+These are all the main methods to be implemented. We will also need some attributes, to get a sustainable main loop:
+
+the main entry point if the `Application.run()` method.
+
+To use the Application class:
+
+```java
+public class MyApp {
+    public static void main(String argc[]) {
+        Application app = new Application();
+        app.run(argc);
+    }
+}
+```
+
+
+```java
+public class Application {
+    private boolean exit;
+    private boolean pause;
+
+    public void initialize() {
+    }
+    //...
+}
+```
+
+- the `exit` attribute is a flag to tell the main loop if the loop is ending or not,
+- the `pause` attribute intends to tell the update phase to stay in pause mode or not.
+
+Some new attribute will be added along the code exploration and development.
+
+#### The main loop implementation
+
+The core function of our `Application` class i s the loop method.
+Everything is sync from this loop.
+
+```java
+public class Application {
+    private boolean exit;
+    private boolean pause;
+
+    //...
+    private void loop() {
+        FPS = 60;
+        UPS = 60;
+
+        long start = System.nanoTime();
+        long previous = start;
+        long elapsedTime = 0;
+        int fpsTime = 0;
+        int realFPS = 0;
+        int realUPS = 0;
+        int frames = 0;
+        int updates = 0;
+        int wait = 0;
+        long cumulatedGameTime = 0;
+        long upsTime = 0;
+        Map<String, Object> datastats = new HashMap<>();
+        do {
+            scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
+            start = System.nanoTime();
+            long elapsed = start - previous;
+
+            input(inputHandler, scene);
+            if (!pause) {
+                if (upsTime > (1000.0 / UPS)) {
+                    physicEngine.update(scene, elapsed * 0.00000002, datastats);
+                    spacePartition.update(scene, elapsed * 0.00000002);
+                    cd.update(scene, elapsed * 0.00000002, datastats);
+                    cd.reset();
+                    updates++;
+                    upsTime = 0;
+                }
+
+                upsTime += (elapsed * 0.00001);
+                cumulatedGameTime += elapsed * 0.000001;
+            }
+            if (fpsTime > (1000.0 / FPS)) {
+                renderer.draw(physicEngine.getWorld(), scene, datastats);
+                frames++;
+                fpsTime = 0;
+            }
+
+            fpsTime += (elapsed * 0.00001);
+            previous = start;
+            elapsedTime += (elapsed * 0.000001);
+            if (elapsedTime > 1000) {
+                realFPS = frames;
+                realUPS = updates;
+                traceStatsCycle(scene, realFPS, realUPS, datastats);
+
+                elapsedTime = 0;
+                frames = 0;
+                updates = 0;
+            }
+            waitNextCycle(elapsed);
+        } while (!exit);
+    }
+    //...
+}
+```
+
+

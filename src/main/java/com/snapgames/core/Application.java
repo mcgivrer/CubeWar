@@ -72,7 +72,7 @@ public abstract class Application {
     }
 
     public void run(String[] args) {
-        init(args);
+        initialize(args);
         initializeService();
         // --- Translated information ---
         // Application name.
@@ -98,9 +98,9 @@ public abstract class Application {
      *
      * @param args the list of arguments from the java CLI.
      */
-    private void init(String[] args) {
+    private void initialize(String[] args) {
         List<String> lArgs = Arrays.asList(args);
-        configuration = new Configuration(this, pathToConfigFile, lArgs);
+        configuration = new Configuration(pathToConfigFile, lArgs);
         testMode = configuration.testMode;
         exit = configuration.requestExit;
         pathToConfigFile = configuration.pathToConfigFile;

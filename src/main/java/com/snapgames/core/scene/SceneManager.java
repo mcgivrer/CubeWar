@@ -42,7 +42,7 @@ public class SceneManager implements GSystem {
         return this.current;
     }
 
-    public void activate(String name) {
+    public Scene activate(String name) {
         if (current != null) {
             System.out.printf(">> <!> Disable current scene '%s'(%s) as current one.%n", current.getName(),
                 current.getClass().getName());
@@ -50,8 +50,9 @@ public class SceneManager implements GSystem {
         }
         this.current = scenes.get(name);
         this.current.create(application);
-        // execute all SceneBehavior on the create event.
+        // execute all SceneBehavior on the creation event.
         this.current.getBehaviors().forEach(sb -> sb.create(this.current));
+        return this.current;
     }
 
     @Override
@@ -68,5 +69,9 @@ public class SceneManager implements GSystem {
     public void dispose() {
         scenes.clear();
         System.out.printf(">> <!> Scenes managed list has been cleared.%n");
+    }
+
+    public Scene getScene(String sceneName) {
+        return scenes.get(sceneName);
     }
 }
