@@ -9,6 +9,8 @@ import java.util.Optional;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.input.InputHandler;
+import com.snapgames.core.loop.GameLoop;
+import com.snapgames.core.loop.StandardGameLoop;
 import com.snapgames.core.math.physic.CollisionDetection;
 import com.snapgames.core.math.physic.PhysicEngine;
 import com.snapgames.core.math.physic.PhysicType;
@@ -45,8 +47,8 @@ import com.snapgames.core.utils.i18n.I18n;
  * @since 1.0.0
  */
 public abstract class Application {
-    private static int FPS = 60;
-    private static int UPS = 120;
+    public static int FPS = 60;
+    public static int UPS = 120;
 
     public boolean exit = false;
     public boolean pause = false;
@@ -62,6 +64,7 @@ public abstract class Application {
     protected Configuration configuration;
     protected SceneManager scnMgr;
     public boolean testMode;
+    private GameLoop gameLoop;
 
     /**
      * Create the {@link Application}.
@@ -111,7 +114,7 @@ public abstract class Application {
      */
     private void initializeService() {
         GSystemManager.get();
-
+        gameLoop = new StandardGameLoop(configuration);
         GSystemManager.add(I18n.get());
         GSystemManager.add(new PhysicEngine(this));
         GSystemManager.add(new SpacePartition(this));
@@ -128,123 +131,7 @@ public abstract class Application {
      * displayed from.
      */
     private void loop() {
-
-        PhysicEngine physicEngine = GSystemManager.find(PhysicEngine.class);
-        CollisionDetection cd = GSystemManager.find(CollisionDetection.class);
-        SpacePartition spacePartition = GSystemManager.find(SpacePartition.class);
-        InputHandler inputHandler = GSystemManager.find(InputHandler.class);
-        Renderer renderer = GSystemManager.find(Renderer.class);
-        Scene scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
-
-        System.out.printf(
-            ">> <!> Activate Scene '%s'(%s).%n",
-            scene.getName(), scene.getClass().getName());
-
-        // retrieve Frame-Per-Second
-        FPS = configuration.fps;
-        // retrieve Update-Per-Second
-        UPS = configuration.ups;
-
-        scene.create(this);
-        traceStats(scene);
-
-        System.out.printf(
-            ">> <!> Application now loops on Scene '%s'%n", scene.getName());
-        long start = System.nanoTime();
-        long previous = start;
-        long elapsedTime = 0;
-        int fpsTime = 0;
-        int realFPS = 0;
-        int realUPS = 0;
-        int frames = 0;
-        int updates = 0;
-        int wait = 0;
-        long cumulatedGameTime = 0;
-        long upsTime = 0;
-        Map<String, Object> datastats = new HashMap<>();
-        do {
-            scene = ((SceneManager) GSystemManager.find(SceneManager.class)).getCurrent();
-            start = System.nanoTime();
-            long elapsed = start - previous;
-
-            input(inputHandler, scene);
-            if (!pause) {
-                if (upsTime > (1000.0 / UPS)) {
-                    physicEngine.update(scene, elapsed * 0.00000002, datastats);
-                    spacePartition.update(scene, elapsed * 0.00000002);
-                    cd.update(scene, elapsed * 0.00000002, datastats);
-                    cd.reset();
-                    updates++;
-                    upsTime = 0;
-                }
-
-                upsTime += (elapsed * 0.00001);
-                cumulatedGameTime += elapsed * 0.000001;
-            }
-            if (fpsTime > (1000.0 / FPS)) {
-                renderer.draw(physicEngine.getWorld(), scene, datastats);
-                frames++;
-                fpsTime = 0;
-            }
-
-            fpsTime += (elapsed * 0.00001);
-            previous = start;
-            elapsedTime += (elapsed * 0.000001);
-            if (elapsedTime > 1000) {
-                realFPS = frames;
-                realUPS = updates;
-                traceStatsCycle(scene, realFPS, realUPS, datastats);
-
-                elapsedTime = 0;
-                frames = 0;
-                updates = 0;
-            }
-            waitNextCycle(elapsed);
-
-            datastats.put("5_internal", StringUtils.formatDuration(cumulatedGameTime));
-        } while (!(exit || testMode));
-    }
-
-    private void traceStatsCycle(Scene scene, int realFPS, int realUPS, Map<String, Object> datastats) {
-        datastats.put("0_dbg", configuration.debug ? "ON" : "off");
-        if (configuration.debug) {
-            datastats.put("0_dbgLvl", configuration.debugLevel);
-        }
-        datastats.put("1_FPS", realFPS);
-        datastats.put("2_UPS", realUPS);
-        datastats.put("3_nbObj", scene.getEntities().size());
-        datastats.put("4_pause", this.pause ? "on" : "off");
-    }
-
-    private void waitNextCycle(long elapsed) {
-        int wait;
-        wait = (int) ((1000.0 / UPS) - elapsed * 0.000001);
-        try {
-            Thread.sleep((wait > 1 ? wait : 1));
-        } catch (InterruptedException e) {
-            Thread.interrupted();
-            System.err.printf("Error while waiting for next update/frame %s%n",
-                Arrays.toString(e.getStackTrace()));
-        }
-    }
-
-    private void traceStats(Scene scene) {
-        long staticEntities = scene.getEntities().stream()
-            .filter(e -> e.physicType.equals(PhysicType.STATIC))
-            .count();
-        long dynamicEntities = scene.getEntities().stream()
-            .filter(e -> e.physicType.equals(PhysicType.DYNAMIC))
-            .count();
-        long nonePhysicEntities = scene.getEntities().stream()
-            .filter(e -> e.physicType.equals(PhysicType.NONE))
-            .count();
-        System.out.printf(
-            ">> <!> Scene '%s' created with %d static entities, %d dynamic entities and %d with physic disabled entities and %d camera%n",
-            scene.getName(),
-            staticEntities,
-            dynamicEntities,
-            nonePhysicEntities,
-            scene.getActiveCamera() != null ? 1 : 0);
+        gameLoop.loop(this);
     }
 
     /**
@@ -253,7 +140,7 @@ public abstract class Application {
      */
     protected abstract void createScenes();
 
-    protected void input(InputHandler ih, Scene scene) {
+    public void input(InputHandler ih, Scene scene) {
         ih.input();
         scene.input(this, ih);
     }
@@ -304,5 +191,9 @@ public abstract class Application {
 
     public I18n getI18n() {
         return I18n.get();
+    }
+
+    public boolean isTestMode() {
+        return testMode;
     }
 }
