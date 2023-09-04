@@ -3,7 +3,7 @@
 
 ## Context
 
-This is the readme file for JavaTestApp (1.0.0) project.
+This is the readme file for CubeWar (1.0.4) project.
 
 The java project can be built or executed through the provided `scripts/build.sh` script, see reference later in this
 README for more info on this build script.
