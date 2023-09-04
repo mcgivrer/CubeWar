@@ -2,8 +2,8 @@
 
 ### Goals
 
-The main class for all the application will consist in the core loop of our game. The `Application` class will embed all
-the required loop structure and API initial call.
+The main class for the full application will consist in the core loop of our game.
+The `Application` class will embed all the required loop structure and API initial call.
 
 ```plantuml
 @startuml
@@ -29,7 +29,7 @@ _figure 1.1 - The initial lifecycle API call from the `Application` main class, 
 
 ### The Application class
 
-the game loop lifecycle will inspire a lot our Application class :
+The game loop lifecycle will mostly inspire our Application class :
 
 ```java
 public class Application {
@@ -76,7 +76,6 @@ public class MyApp {
     }
 }
 ```
-
 
 ```java
 public class Application {

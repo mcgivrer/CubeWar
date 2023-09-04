@@ -11,7 +11,7 @@ Basically, it will:
 2. If no file exists, some default by construction values is set,
 3. and then parse the command line arguments to overload the default loaded values.
 
-#### the Configuration class
+### the Configuration class
 
 Let's dive into some java code:
 
@@ -55,7 +55,7 @@ Main steps:
 3. parse configuration keys/values and set attributes to the desired values,
 4. parse arguments a second time to overwrite required attributes.
 
-#### Parsing configuration keys/values
+### Parsing configuration keys/values
 
 The parsing mechanism will rely on some helpers to extract typed values from the property file and set the
 corresponding attribute to the right typed value:
@@ -111,21 +111,21 @@ Every typed has its own helper which sharing the same global
 signature `getParsed[Type](Propeties props, String key, String defaultValue)`
 where:
 
-- `props` is the source of data,
-- `key` is the key to be retrieved,
-- `defaultValue` is the default value in text format.
+-   `props` is the source of data,
+-   `key` is the key to be retrieved,
+-   `defaultValue` is the default value in text format.
 
 here are the existing and available helpers:
 
 | Data Type   | Static method         |
-|-------------|-----------------------|
+| ----------- | --------------------- |
 | boolean     | getParsedBoolean(...) |
 | int         | getParsedInt(...)     |
 | double      | getParsedDouble(...)  |
 | Rectangle2D | getRectangle2D(...)   |
 | Dimension   | getDimension(...)     |
 
-#### Using it
+### Using it
 
 ```java
 import com.snapgames.core.Application;
@@ -162,7 +162,7 @@ app.physic.world=world(amazing,0.10,(1024x1024))
 these extracted values:
 
 | Name                        | Default value                   | Type      | Description                                 |
-|:----------------------------|:--------------------------------|:----------|:--------------------------------------------|
+| :-------------------------- | :------------------------------ | :-------- | :------------------------------------------ |
 | app.window.name             | "AppTest"                       | String    | the default application name                |
 | app.debug                   | true                            | boolean   | the debug flag mode                         |
 | app.debug.level             | 4                               | int       | the debug level                             |
@@ -224,7 +224,7 @@ Parsing all the arguments is trying to extract argument and value, separated by 
 values, here are the defined switch cases:
 
 | Argument value       | Description                                                       |
-|----------------------|-------------------------------------------------------------------|
+| -------------------- | ----------------------------------------------------------------- |
 | "x", "exit"          | Request exit mode                                                 |
 | "testMode"           | run Application class in a test mode for unit test execution only |
 | "d", "debugLevel"    | Activate the debug mode and set the debug level                   |
