@@ -9,6 +9,13 @@
 ENV=build
 BUILDPROPS="./$ENV.properties"
 
+if [ -f $PWD/init-env.sh ]; then
+  echo "Start initializing environment"
+  . init-env.sh
+else
+  echo "no environement settings"
+fi
+
 function getPropertyValue {
   grep "${1}" ${BUILDPROPS} | cut -d'=' -f2
 }
