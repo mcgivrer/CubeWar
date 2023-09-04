@@ -2,6 +2,7 @@ package com.snapgames.core.test.system;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.system.GSystem;
+import com.snapgames.core.utils.config.Configuration;
 
 public class TestSystem implements GSystem {
 
@@ -13,7 +14,7 @@ public class TestSystem implements GSystem {
     }
 
     @Override
-    public void initialize(Application app) {
+    public void initialize(Configuration config) {
         System.out.println("TestSystem initialized");
     }
 
