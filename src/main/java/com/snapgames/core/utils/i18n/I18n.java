@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.system.GSystem;
+import com.snapgames.core.utils.config.Configuration;
 
 /**
  * Propose a Translation service implementation to satisfy the language and
@@ -51,7 +52,7 @@ public class I18n implements GSystem {
     }
 
     @Override
-    public void initialize(Application app) {
+    public void initialize(Configuration configuration) {
         messages = ResourceBundle.getBundle("i18n.messages", Locale.ROOT);
         supportedLanguages = Arrays.asList(Locale.FRENCH, Locale.ENGLISH);
     }

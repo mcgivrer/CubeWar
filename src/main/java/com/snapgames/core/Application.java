@@ -120,7 +120,7 @@ public abstract class Application {
         GSystemManager.add(new InputHandler(this));
         GSystemManager.add(new SceneManager(this));
 
-        GSystemManager.initialize(this);
+        GSystemManager.initialize(configuration);
     }
 
     /**
