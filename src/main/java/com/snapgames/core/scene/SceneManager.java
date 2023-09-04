@@ -2,6 +2,7 @@ package com.snapgames.core.scene;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.system.GSystem;
+import com.snapgames.core.utils.config.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class SceneManager implements GSystem {
     }
 
     @Override
-    public void initialize(Application app) {
+    public void initialize(Configuration configuration) {
 
     }
 

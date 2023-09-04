@@ -2,6 +2,7 @@ package com.snapgames.core.input;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.system.GSystem;
+import com.snapgames.core.utils.config.Configuration;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -85,7 +86,7 @@ public class InputHandler implements KeyListener, GSystem {
     }
 
     @Override
-    public void initialize(Application app) {
+    public void initialize(Configuration configuration) {
         // nothing specific to perform for this service initialization.
     }
 

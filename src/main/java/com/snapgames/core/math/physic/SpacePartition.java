@@ -6,6 +6,7 @@ import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
 import com.snapgames.core.system.GSystemManager;
+import com.snapgames.core.utils.config.Configuration;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * A space partitioning system to dispatch Scene's {@link Entity} list into some {@link SpacePartition}, to accelerate
+ * A space-partitioning system to dispatch Scene's {@link Entity} list into some {@link SpacePartition}, to accelerate
  * any neighbour operation like collision detection.
  * <p>
  * This partitioning system is used from {@link CollisionDetection} system.
@@ -42,7 +43,7 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
     /**
      * Create a new {@link SpacePartition} with a depth level and its defined rectangle area.
      *
-     * @param pLevel  the  depth level for this {@link SpacePartition}
+     * @param pLevel  the depth level for this {@link SpacePartition}
      * @param pBounds the Rectangle area covered by this {@link SpacePartition}.
      */
     public SpacePartition(int pLevel, Rectangle pBounds) {
@@ -65,9 +66,7 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
      * @param app the parent {@link Application} instance.
      */
     public SpacePartition(Application app) {
-        this(0, app.getConfiguration().world.getPlayArea().getBounds());
-        this.maxObjectsPerNode = app.getConfiguration().maxEntitiesInSpace;
-        this.maxTreeLevels = app.getConfiguration().maxLevelsInSpace;
+
     }
 
     /**
@@ -210,8 +209,14 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
     }
 
     @Override
-    public void initialize(Application app) {
+    public void initialize(Configuration configuration) {
         this.root = this;
+        this.maxObjectsPerNode = configuration.maxEntitiesInSpace;
+        this.maxTreeLevels = configuration.maxLevelsInSpace;
+        level = 0;
+        objects = new ArrayList<>();
+        setRect(configuration.world.getPlayArea());
+        nodes = new SpacePartition[4];
     }
 
     @Override

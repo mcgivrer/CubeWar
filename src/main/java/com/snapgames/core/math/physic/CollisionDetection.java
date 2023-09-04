@@ -6,6 +6,7 @@ import com.snapgames.core.entity.Entity;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
 import com.snapgames.core.system.GSystemManager;
+import com.snapgames.core.utils.config.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,10 +60,10 @@ public class CollisionDetection implements GSystem {
     /**
      * Initialize the {@link GSystem}.
      *
-     * @param app parent {@link Application}.
+     * @param configuration parent {@link Configuration}.
      */
     @Override
-    public void initialize(Application app) {
+    public void initialize(Configuration configuration) {
         collisions = new ArrayList<>();
     }
 

@@ -27,6 +27,7 @@ import com.snapgames.core.math.physic.World;
 import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.Scene;
 import com.snapgames.core.system.GSystem;
+import com.snapgames.core.utils.config.Configuration;
 
 /**
  * The {@link Renderer} service will draw all entities from the {@link Scene}.
@@ -239,7 +240,7 @@ public class Renderer extends JPanel implements GSystem {
     }
 
     @Override
-    public void initialize(Application app) {
+    public void initialize(Configuration configuration) {
         addPlugin(new GameObjectRendererPlugin());
         addPlugin(new TextObjectRendererPlugin());
         addPlugin(new PerturbationRendererPlugin());

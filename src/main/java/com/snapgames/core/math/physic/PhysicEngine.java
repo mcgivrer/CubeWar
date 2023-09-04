@@ -73,6 +73,7 @@ public class PhysicEngine implements GSystem {
      * @param config the {@link Configuration} object corresponding to the loaded
      *               properties file.
      */
+    @Override
     public void initialize(Configuration config) {
         this.maxEntityAcc = config.maxEntityAcc;
         this.maxEntitySpeed = config.maxEntitySpeed;
@@ -256,11 +257,6 @@ public class PhysicEngine implements GSystem {
     @Override
     public Class<? extends GSystem> getSystemName() {
         return PhysicEngine.class;
-    }
-
-    @Override
-    public void initialize(Application app) {
-        initialize(app.getConfiguration());
     }
 
     public PhysicEngine setMaxAcceleration(double maxAcc) {

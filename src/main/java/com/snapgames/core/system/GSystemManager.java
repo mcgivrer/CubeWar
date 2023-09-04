@@ -1,6 +1,7 @@
 package com.snapgames.core.system;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.utils.config.Configuration;
 
 import java.util.Map;
 import java.util.Optional;
@@ -69,9 +70,9 @@ public class GSystemManager {
         return systems.size();
     }
 
-    public static void initialize(Application application) {
+    public static void initialize(Configuration configuration) {
         if (Optional.ofNullable(systems).isPresent()) {
-            systems.values().forEach(s -> s.initialize(application));
+            systems.values().forEach(s -> s.initialize(configuration));
         }
     }
 
