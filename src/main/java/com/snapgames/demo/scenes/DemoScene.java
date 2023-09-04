@@ -244,6 +244,7 @@ public class DemoScene extends AbstractScene {
             .setAttribute("jumpFactor", 99.601)
             .setAttribute("speedRotStep", 0.001)
             .setDebug(2)
+            .setDuration(-1)
             .addBehavior(new GameObjectCollisionResponse());
         addEntity(player);
 
@@ -295,6 +296,7 @@ public class DemoScene extends AbstractScene {
             TextObject scoreTextObj = ((TextObject) getEntity("score")).setValue(score);
         }
     }
+
     @Override
     public void setWorld(World world) {
         world.add(

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.snapgames</groupId>
     <artifactId>cubewar</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.5-SNAPSHOT</version>
     <name>CubeWar</name>
     <description>A smart a simple java project</description>
     <inceptionYear>2023</inceptionYear>
