@@ -12,21 +12,22 @@ use JavaFX (beuarrk:)) I'll use the good old AWT and Swing (yes, I am maybe a 50
 
 Anyway, let's try it through a series of posts to design some code.
 
-## Creating a simple class
+### Creating a simple class
 
 The basic Game class will support the famous "triptych" of the game loop: manage input, update objects, and draw
 everything on screen!
 But do you know why this is the basic default pattern for a game?
 
-## A bit of video game history
+### A bit of video game history
 
 Why the game loop exists?
 This is an exceptional question and the reason why is a historically based answer.
 Everything <starts from the first ever video game: PONG.
 
-![Pong, where all begin !](https://cdn-images-1.medium.com/max/800/0*ySNC72GHeT19Nq3N "wikipedia PONG screenshot")
-
-_figure 0.1 - Pong where all begins (ref:[https://fr.wikipedia.org/wiki/Pong](https://fr.wikipedia.org/wiki/Pong))_
+<figure>
+<img src="https://cdn-images-1.medium.com/max/800/0*ySNC72GHeT19Nq3N" alt="wikipedia PONG screenshot" width="450">
+<figcaption>Pong where all begins (ref: https://fr.wikipedia.org/wiki/Pong)</figcaption>
+</figure>
 
 The original Pong video game from wikipediaAt this very beginning time, the processor to execute tasks is very slow
 on, almost some hundreds of Khz as CPU frequency. To understand the scale we are talking about, the current processor is
@@ -43,26 +44,32 @@ frame.
 A CRT tube with its ion gun! The CRT Tube is nothing more than a big bubble light. (3) the cathode emits ions (1) and
 (2) are anodes, deflecting ion ray to screen, lighting a fluorescent dot.
 
-![A CRT diagram with ions gun and anodes deflectors](images/figure-crt.jpg "A CRT diagram with ions gun and anodes deflectors (c) myself with my own hands !")
-
-_figure 0.2 - A CRT diagram with ion gun and anodes deflectors_
+<figure>
+<img src="images/figure-crt.jpg" alt="A CRT diagram with ion gun and anodes deflectors">
+<figcaption>A CRT diagram with ion gun and anodes deflectors</figcaption>
+</figure>
 
 This is the available time for the CPU to prepare next image!
 
+### The Game Loop concept
+
 So capturing input, moving things and displaying things must be done in 16ms. And loop again for the next frame.
+So the main process is a _LOOP_, that's why we talk about _Game Loop_:
 
-So the main process is a LOOP. that's why we talk about a Game Loop:
-
-![The basic Game loop explained with a pencil: the method to keep a fixed frame rate !](images/figure-game-loop.jpg "the basic Game loop explained with a pencil: the method to keep a fixed frame rate ! (c) myself with my own hands !")
-
-_figure 0.3 - The basic Game loop explained with a pencil: the method to keep a fixed frame rate !_
+<figure>
+<img src="images/figure-game-loop.jpg"
+  alt="the basic Game loop explained with a pencil: the method to keep a fixed frame rate ! (c) myself with my own hands !">
+<figcaption>The basic Game loop explained with a pencil: the method to keep a fixed frame rate !</figcaption>
+</figure>
 
 There is also some advanced version of the Game Loop, where multiple updates can be performed between each rendering
 phase, the timer is around the update methods only:
 
-![The advanced method to keep a fixed update rate](images/figure-game-loop-fixed.jpg "The advanced method to keep a fixed update rate (c) myself with my own hands !")
-
-_figure 0.4 - The advanced method to keep a fixed update rate_
+<figure>
+<img src="images/figure-game-loop-fixed.jpg"
+  alt="The advanced method to keep a fixed update rate (c) myself with my own hands !">
+<figcaption>The advanced method to keep a fixed update rate</figcaption>
+</figure>
 
 I can only invite you to read the fantastic book from Robert Nystrom for details about the Game loop.
 
@@ -70,6 +77,8 @@ I can only invite you to read the fantastic book from Robert Nystrom for details
 
 Anyway, I need to implement my own. As a good diagram is better than word:
 
-![A good diagram explaining the Game class and its usage](http://www.plantuml.com/plantuml/png/VOynRiOm28Ltdu9koT0BPAZIew0OjKWO8nihLKzVbAc9VddnW3_UzzYxO_DH9BtvDnK24sHD9Hvu_u1FC-43dQjke7IcVuF7Doixe_0lBUiD2-wAs-0BGy0QIZtejQCDdJYEHkYKf5Q3eSu2zCEU06QrRFYo1eFYeDN1S7JACRYjFPiCow6w5adpLD42e1ReDF14zc22dHoOkLlj5DmUu2Zo1m00 "figure 5 - A good diagram explaining the Game class and its usage")
-
-_figure 0.5 - A good diagram explaining the Game class and its usage_
+<figure class="diagram">
+<img src="http://www.plantuml.com/plantuml/png/VOynRiOm28Ltdu9koT0BPAZIew0OjKWO8nihLKzVbAc9VddnW3_UzzYxO_DH9BtvDnK24sHD9Hvu_u1FC-43dQjke7IcVuF7Doixe_0lBUiD2-wAs-0BGy0QIZtejQCDdJYEHkYKf5Q3eSu2zCEU06QrRFYo1eFYeDN1S7JACRYjFPiCow6w5adpLD42e1ReDF14zc22dHoOkLlj5DmUu2Zo1m00"
+  alt="A good diagram explaining the Game class and its usage">
+<figcaption>A good diagram explaining the Game class and its usage</figcaption>
+</figure>

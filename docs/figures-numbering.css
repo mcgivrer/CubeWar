@@ -1,0 +1,32 @@
+body {
+  counter-reset: figure-counter;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+  font-size: 10pt;
+  text-align: justify;
+}
+figure {
+  counter-increment: figure-counter;
+  text-align: center;
+  align-content: center;
+}
+figure img {
+  border: 1px solid #ddd;
+  box-shadow: 4px 4px #ccc;
+  max-width: 500px;
+}
+figure.diagram img{
+  width: auto;
+}
+
+figcaption:before {
+  text-transform: capitalize;
+  content: "figure " counter(figure-counter) " - ";
+}
+figcaption {
+  font-size: 9pt;
+  font-style: italic;
+  padding: 0.2em;
+  margin: 2em;
+  margin-top: 0.4em;
+}

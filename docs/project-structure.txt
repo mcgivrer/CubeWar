@@ -3,6 +3,7 @@
 |-- build.properties
 |-- pom.xml
 |-- doc
+|   |-- book.yml
 |   |-- chapter-00-indroduction.md
 |   |-- chapter-99-xxx_yyy.md
 |   |-- images

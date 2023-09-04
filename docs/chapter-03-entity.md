@@ -169,10 +169,11 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 ```
 
 here is a screenshot of the debug mode with a debug level set to 3:
+<figure>
+<img src="images/screenshot-005-adding-space-partitioning.png" alt="Debug mode displaying some Entity's info">
+<figcaption>Displaying Entity with debug display mode set to 3</figcaption>
+</figure>
 
-![Display Entity with debug display mode set to 3](./images/screenshot-005-adding-space-partitioning.png "Debug mode displaying some Entity's info")
-
-_figure 3.1 - Displaying some debug info on screen_
 
 An `Entity` instance is not directly added to the `Application` implementation class, but to a `Scene` instance (see
 next chapter [Scene](chapter-04-scene.md)).
