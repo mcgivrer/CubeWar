@@ -51,6 +51,10 @@ public abstract class AbstractScene implements Scene {
         }
     }
 
+    public void addBehavior(SceneBehavior sb) {
+        this.behaviors.add(sb);
+    }
+
     public void addCamera(Camera cam) {
         this.activeCamera = cam;
     }
