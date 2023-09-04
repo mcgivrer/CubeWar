@@ -3,7 +3,7 @@
 
 ## Context
 
-This is the readme file for CubeWar (1.0.4) project.
+This is the readme file for CubeWar (1.0.5) project.
 
 The java project can be built or executed through the provided `scripts/build.sh` script, see reference later in this
 README for more info on this build script.
@@ -48,12 +48,12 @@ jdb -sourcepath src/main/java/,src/main/resources \
 > **NOTE** _To get more information this script usage, just execute the following command line:_
 >
 > ```bash
-> $> scripts/build.sh
+> $> build.sh
 > Build of program 'JavaTestApp-1.0.0' ...
 > -----------
 > build2 command line usage :
 > ---------------------------
-> $> build2 [options]
+> $> build [options]
 > where:
 > - a|A|all     : perform all following operations
 > - c|C|compile : compile all sources project

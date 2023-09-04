@@ -25,15 +25,12 @@ function prop {
 export PROGRAM_NAME=$(prop project.name)
 export PROGRAM_VERSION=$(prop project.version)
 export PROGRAM_TITLE=$(prop project.title)
-export MAIN_CLASS=$(prop project.mainclass)
+export MAIN_CLASS=$(prop project.main.class)
 export JAVADOC_CLASSPATH=$(prop project.javadoc.classpath)
 export JAVADOC_GROUPS=$(prop project.javadoc.packages)
 export VENDOR_NAME=$(prop project.author.name)
 export AUTHOR_NAME=$(prop project.author.email)
 export JAVA_VERSION=$(prop project.build.jdk.version)
-
-# A dirty list of package to be build (TODO add automation on package detection)
-#export JAVADOC_CLASSPATH="$PACKAGES_LIST"
 
 # paths
 export SRC=./src
@@ -146,7 +143,8 @@ function generatedoc() {
   -author -use -version \
   -doctitle \"$PROGRAM_TITLE\" \
   -d $TARGET/javadoc \
-  -sourcepath $SRC/main/java $JAVADOC_CLASSPATH \
+  -sourcepath $SRC/main/java \
+  -subpackages $JAVADOC_CLASSPATH \
   -overview $TARGET/javadoc/overview.html \
   -group $JAVADOC_GROUPS"
   javadoc $JAR_OPTS -source $SOURCE_VERSION \
@@ -155,7 +153,7 @@ function generatedoc() {
     -d $TARGET/javadoc \
     -sourcepath $SRC/main/java $JAVADOC_CLASSPATH \
     -overview $TARGET/javadoc/overview.html \
-    -group $JAVADOC_GROUPS
+    $JAVADOC_GROUPS
   cd $TARGET/javadoc
   jar cvf ../$JAR_JAVADOC_NAME *
   cd ../../

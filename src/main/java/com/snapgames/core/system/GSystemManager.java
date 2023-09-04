@@ -1,6 +1,5 @@
 package com.snapgames.core.system;
 
-import com.snapgames.core.Application;
 import com.snapgames.core.utils.config.Configuration;
 
 import java.util.Map;
