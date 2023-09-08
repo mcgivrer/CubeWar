@@ -119,8 +119,6 @@ function checkCodeStyleQA() {
   find $SRC/main -name '*.java' >$TARGET/sources.lst
   java $JAR_OPTS -cp "$LIB_CHECKSTYLES:$CLASSES:." \
     -jar $LIB_CHECKSTYLES \
-    java $JAR_OPTS -cp "$LIB_CHECKSTYLES:$CLASSES:." \
-    -jar $LIB_CHECKSTYLES \
     -c $CHECK_RULES_FILE \
     -f xml \
     -o $TARGET/checkstyle_errors.xml \
