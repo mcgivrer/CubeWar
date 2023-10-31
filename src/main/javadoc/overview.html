@@ -1,0 +1,70 @@
+<h1>README</h1>
+<p><img src="http://nextserver02:4000/frederic/build/main/badge.png" alt="Build" /></p>
+<h2>Context</h2>
+<p>This is the readme file for CubeWar (1.0.5) project.</p>
+<p>The java project can be built or executed through the provided <code>scripts/build.sh</code> script, see reference later in this
+README for more info on this build script.</p>
+<h2>Build</h2>
+<p>To build the project, just execute the following command line :</p>
+<pre><code class="language-bash">$&gt; build.sh a
+</code></pre>
+<h2>Run</h2>
+<p>To execute the build project, just run it with :</p>
+<pre><code class="language-bash">$&gt; build.sh r
+</code></pre>
+<p>or you can execute the command line :</p>
+<pre><code class="language-bash">$&gt; java -jar target/JavaTestApp-1.0.0.jar
+</code></pre>
+<p><img src="docs/images/screenshot-005-adding-space-partitioning.png" alt="A screenshot from the current version" title="A screenshot from the current version" /></p>
+<h2>Debug</h2>
+<p>you may use the jdb command line :</p>
+<pre><code class="language-bash">jdb -sourcepath src/main/java/,src/main/resources \
+    target/classes/com/snapgames/demo/Application
+</code></pre>
+<h2>Reference</h2>
+<h3>Build script</h3>
+<blockquote>
+<p><strong>NOTE</strong> <em>To get more information this script usage, just execute the following command line:</em></p>
+<pre><code class="language-bash">$&gt; build.sh
+Build of program 'JavaTestApp-1.0.0' ...
+-----------
+build2 command line usage :
+---------------------------
+$&gt; build [options]
+where:
+- a|A|all     : perform all following operations
+- c|C|compile : compile all sources project
+- d|D|doc     : generate javadoc for project
+- t|T|test    : execute JUnit tests
+- j|J|jar     : build JAR with all resources
+- w|W|wrap    : Build and wrap jar as a shell script
+- s|S|sign    : Build and wrap signed jar as a shell  script
+- r|R|run     : execute (and build if needed) the  created JAR
+
+(c)2022 MIT License Frederic Delorme (@McGivrer) fredericDOTdelormeATgmailDOTcom
+--
+-----------
+... done.
+</code></pre>
+</blockquote>
+<h3>Keys from the demo</h3>
+<table>
+<thead>
+<tr><th align="left">Key</th><th align="left">description</th></tr>
+</thead>
+<tbody>
+<tr><td align="left"><kbd>UP</kbd>, <kbd>DOWN</kbd>, <kbd>LEFT</kbd>, <kbd>RIGHT</kbd></td><td align="left">Move player vertically <br/>or horizontally</td></tr>
+<tr><td align="left"><kbd>ALT</kbd>+<kbd>UP</kbd>, <kbd>ALT</kbd>+<kbd>DOWN</kbd></td><td align="left">Player rotation left or right</td></tr>
+<tr><td align="left"><kbd>CTRL</kbd>+<kbd>D</kbd>, <kbd>D</kbd></td><td align="left">Activate debug display, <br/>change debug level (0 to 5)</td></tr>
+<tr><td align="left"><kbd>PAGE-UP</kbd>, <kbd>PAGE-DOWN</kbd></td><td align="left">Camera roll</td></tr>
+<tr><td align="left"><kbd>ALT</kbd>+<kbd>BACKSPACE</kbd></td><td align="left">Reset camera roll to initial position</td></tr>
+<tr><td align="left"><kbd>CTRL</kbd>+<kbd>Z</kbd></td><td align="left">Reset Scene</td></tr>
+<tr><td align="left"><kbd>ESCAPE</kbd>,<kbd>Q</kbd></td><td align="left">Exit demonstration</td></tr>
+<tr><td align="left"><kbd>P</kbd>,<kbd>PAUSE</kbd></td><td align="left">set/unset Game update in pause mode</td></tr>
+<tr><td align="left"><kbd>G</kbd></td><td align="left">Reverse World gravity</td></tr>
+<tr><td align="left"><kbd>F3</kbd></td><td align="left">take screen shot (not implemented yet)</td></tr>
+</tbody>
+</table>
+<p>Enjoy !</p>
+<p>Frédéric.</p>
+

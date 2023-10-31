@@ -149,12 +149,15 @@ public abstract class Application {
         PhysicEngine physicEngine = GSystemManager.find(PhysicEngine.class);
         CollisionDetection cd = GSystemManager.find(CollisionDetection.class);
         SpacePartition spacePartition = GSystemManager.find(SpacePartition.class);
+
+        GSystemManager.update(scene, elapsed * 0.00000002, stats);
+
         physicEngine.update(scene, elapsed * 0.00000002, stats);
-        spacePartition.update(scene, elapsed * 0.00000002);
+        spacePartition.update(scene, elapsed * 0.00000002, stats);
         cd.update(scene, elapsed * 0.00000002, stats);
+
         cd.reset();
     }
-
 
 
     /**

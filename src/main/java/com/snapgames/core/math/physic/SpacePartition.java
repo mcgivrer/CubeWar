@@ -13,6 +13,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -193,7 +194,7 @@ public class SpacePartition extends Rectangle2D.Double implements GSystem {
      * @param scene   the Scene to be processed.
      * @param elapsed the elapsed time since previous call (not used here).
      */
-    public void update(Scene scene, double elapsed) {
+    public void update(Scene scene, double elapsed, Map<String, Object> stats) {
         PhysicEngine pe = GSystemManager.find(PhysicEngine.class);
         this.clear();
         Collection<Entity<?>> colEntity = scene.getEntities();

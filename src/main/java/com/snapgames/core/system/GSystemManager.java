@@ -1,5 +1,6 @@
 package com.snapgames.core.system;
 
+import com.snapgames.core.scene.Scene;
 import com.snapgames.core.utils.config.Configuration;
 
 import java.util.Map;
@@ -75,4 +76,16 @@ public class GSystemManager {
         }
     }
 
+    /**
+     * Update all services with the elapsed time on the {@link Scene}, and provide some stats.
+     *
+     * @param scene   the Scene to be updated
+     * @param elapsed the elapsed time since previous call
+     * @param stats   the internal statistics to feed up.
+     */
+    public static void update(Scene scene, double elapsed, Map<String, Object> stats) {
+        if (Optional.ofNullable(systems).isPresent()) {
+            systems.values().forEach(s -> s.update(scene, elapsed, stats));
+        }
+    }
 }
