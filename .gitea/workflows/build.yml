@@ -8,22 +8,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: https://github.com/actions/checkout@v3
-      - uses: https://github.com/actions/setup-java@v3
-        with:
-          distribution: "zulu" # See 'Supported distributions' for available options
-          java-version: "20"
-          cache: 'maven'
+#      - uses: https://github.com/actions/setup-java@v3
+#        with:
+#          distribution: "zulu" # See 'Supported distributions' for available options
+#          java-version: "20"
+#          cache: 'maven'
       - name: Build project with Maven and Xvfb
         run: |
-<<<<<<< HEAD
-         apt install xvfb
-=======
-         apt-get install xvfb
->>>>>>> main
+         apt update -y
+         apt -y install xvfb curl zip unzip
          export DISPLAY=":99.0"
          export AUDIODEV=null
          xvfb-run :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-         mvn -B package --file pom.xml
+         curl -s "https://get.sdkman.io" | bash
+         source "/root/.sdkman/bin/sdkman-init.sh"
+         sdk env install
+         sdk env use
+         chmod a+x "$HOME/.sdkman/bin/sdkman-init.sh"
+         /root/.sdkman/candidates/maven/current/mvn -B package -DskipTests=true --file pom.xml
       - uses: https://gitea.com/actions/release-action@main
         with:
           files: |-
