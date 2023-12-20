@@ -1,0 +1,38 @@
+.
+|-- README.md
+|-- build.properties
+|-- pom.xml
+|-- doc
+|   |-- chapter-00-indroduction.md
+|   |-- chapter-99-xxx_yyy.md
+|   |-- images
+|   |-- index.md
+|   |-- preface.md
+|   `-- project-structure.txt
+|-- lib
+|   |-- stub.sh
+|   `-- test
+|       `-- junit-platform-console-standalone-1.9.1.jar
+|-- scripts
+|   `-- build.sh
+`-- src
+    |-- main
+    |   |-- java
+    |   |   `-- com
+    |   |       `-- snapgames
+    |   |           |-- core
+    |   |           `-- demo
+    |   `-- resources
+    |       |-- config.properties
+    |       `-- i18n
+    |           `-- messages.properties
+    `-- test
+        |-- java
+        |   `-- com
+        |       `-- snapgames
+        |           `-- core
+        |               `-- test
+        `-- resources
+            |-- i18n
+            |   `-- messages.properties
+            `-- test-config.properties

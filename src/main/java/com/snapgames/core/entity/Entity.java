@@ -29,37 +29,37 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     public static int index = 0;
     protected int id = ++index;
     public String name;
-    public double rotation;
 
+    public double rotation;
     public Vector2D oldPos = Vector2D.ZERO();
     public Vector2D pos = Vector2D.ZERO();
     public Vector2D vel = Vector2D.ZERO();
     public Vector2D acceleration = Vector2D.ZERO();
-
+    public PhysicType physicType = PhysicType.DYNAMIC;
 
     public List<Vector2D> forces = new ArrayList<>();
     public double dRotation;
+    public Material material;
     public double mass;
-    public boolean active;
+    private boolean entityIsConstrained;
+    public boolean constrainedToPlayArea;
+    public boolean stickToCamera;
+    public int contact;
 
+    public boolean active;
+    public boolean enabled;
     protected int duration = -1;
     protected int lifespan;
 
+    private Class<? extends RendererPlugin<?>> drawnBy;
     protected Color color = Color.WHITE;
     protected Color fillColor = Color.RED;
     protected int layer;
     protected int priority = 1;
-    private Class<? extends RendererPlugin> drawnBy;
 
     Map<String, Object> attributes = new HashMap<>();
-    public List<Behavior<T>> behaviors = new ArrayList<>();
-    public PhysicType physicType = PhysicType.DYNAMIC;
-    public Material material;
 
-
-    public boolean constrainedToPlayArea;
-    public boolean stickToCamera;
-    public int contact;
+    public List<Behavior<?>> behaviors = new ArrayList<>();
 
     public int debug = 5;
 
@@ -80,12 +80,15 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         setName(n);
         setPosition(x, y);
         setSize((int) w, (int) h);
+        setEnabled(true);
         setActive(true);
         setStickToCameraView(false);
         setConstrainedToPlayArea(true);
         setMaterial(Material.DEFAULT);
         setMass(1.0);
+        setEntityIsConstrained(true);
     }
+
 
     /**
      * Entity's constructor with a name, a position (x,y) and a size (w,h).
@@ -110,7 +113,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
 
         lifespan += elapsed;
         if (duration != -1 && lifespan > duration) {
-            this.active = false;
+            this.enabled = false;
         }
 
     }
@@ -118,14 +121,14 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     /**
      * Define the {@link Entity} activity state.
      *
-     * @param active true to activate this {@link Entity}.
+     * @param enabled true to activate this {@link Entity}.
      */
-    public T setActive(boolean active) {
-        this.active = active;
+    public T setEnabled(boolean enabled) {
+        this.enabled = enabled;
         if (duration != -1) {
             lifespan = duration;
         }
-        child.forEach(c -> c.setActive(active));
+        child.forEach(c -> c.setEnabled(enabled));
         return (T) this;
     }
 
@@ -134,8 +137,8 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
      *
      * @return true if {@link Entity} is active, elsewhere false.
      */
-    public boolean isActive() {
-        return this.active;
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
     public T setDebug(int d) {
@@ -143,7 +146,7 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return (T) this;
     }
 
-    public T addBehavior(Behavior<T> b) {
+    public T addBehavior(Behavior<?> b) {
         behaviors.add(b);
         return (T) this;
     }
@@ -276,18 +279,21 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
     }
 
     public List<String> getDebugInfo() {
-        List<String> infos = new ArrayList<>();
-        infos.add(String.format("1_#%d", id));
-        infos.add(String.format("1_name:%s", name));
-        infos.add(String.format("2_pos:(%.02f,%.02f)", pos.x, pos.y));
-        infos.add(String.format("2_size:(%.02f,%.02f)", width, height));
-        infos.add(String.format("3_vel:(%.02f,%.02f)", vel.x, vel.y));
-        infos.add(String.format("4_acc:(%.02f,%.02f)", acceleration.x, acceleration.y));
+        List<String> info = new ArrayList<>();
+        info.add(String.format("1_#%d", id));
+        info.add(String.format("1_name:%s", name));
+        info.add(String.format("2_pos:(%.02f,%.02f)", pos.x, pos.y));
+        info.add(String.format("2_size:(%.02f,%.02f)", width, height));
+        info.add(String.format("3_vel:(%.02f,%.02f)", vel.x, vel.y));
+        info.add(String.format("4_acc:(%.02f,%.02f)", acceleration.x, acceleration.y));
         if (mass != 0.0)
-            infos.add(String.format("4_mass:%.02f kg", mass));
+            info.add(String.format("4_mass:%.02f kg", mass));
         if (material != null)
-            infos.add(String.format("4_mat:%s", material));
-        return infos;
+            info.add(String.format("4_mat:%s", material));
+        if (duration != -1) {
+            info.add(String.format("5_life:%d/%d", lifespan, duration));
+        }
+        return info;
     }
 
     public T setParent(Entity<?> e) {
@@ -375,7 +381,26 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
         return fillColor;
     }
 
-    public void setDrawnBy(Class<? extends RendererPlugin> aClass) {
+    public void setDrawnBy(Class<? extends RendererPlugin<?>> aClass) {
         drawnBy = aClass;
+    }
+
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public T setActive(boolean active) {
+        this.active = active;
+        return (T) this;
+    }
+
+    private T setEntityIsConstrained(boolean eic) {
+        this.entityIsConstrained = eic;
+        return (T) this;
+    }
+
+    public boolean isEntityConstrained(Entity<?> e) {
+        return entityIsConstrained;
     }
 }

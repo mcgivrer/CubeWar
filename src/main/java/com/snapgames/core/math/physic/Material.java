@@ -23,8 +23,8 @@ import com.snapgames.core.entity.Entity;
  */
 public class Material {
     public static final Material DEFAULT = new Material("default", 0.0, 1.0, 1.0);
-    public static final Material RUBBER = new Material("rubber", 0.68, 0.7, 0.67);
-    public static final Material SUPER_BALL = new Material("super_ball", 0.98, 0.7, 0.998);
+    public static final Material RUBBER = new Material("rubber", 0.70, 0.99, 0.99);
+    public static final Material SUPER_BALL = new Material("super_ball", 0.998, 0.7, 0.998);
     public static final Material WOOD = new Material("wood", 0.20, 0.65, 0.50);
     public static final Material STEEL = new Material("steel", 0.10, 1.2, 0.12);
     public static final Material AIR = new Material("air", 0.0, 0.05, 0.9999);

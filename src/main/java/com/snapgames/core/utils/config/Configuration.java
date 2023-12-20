@@ -13,16 +13,14 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link Configuration} will load properties values into some configuration
+ * {@link Configuration} will load property values into some configuration
  * attributes.
  * <p>
  * Those values can be overloaded from CLI arguments.
  * <p>
  * The path of the loaded properties file is set into the constructor, but can
- * be overriden
- * by the specific argument <code>configPath</code>. If thios argument is
- * present, it will reload
- * the configuration accordingly.
+ * be overridden by the specific argument <code>configPath</code>. If this argument is
+ * present, it will reload the configuration accordingly.
  *
  * @author Frédéric Delorme
  * @since 1.0.0
@@ -30,42 +28,100 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Configuration extends ConcurrentHashMap<String, Object> {
 
     // the properties file handler.
-    private Properties props = new Properties();
+    private final Properties props = new Properties();
 
     // proposed configuration values.
-    public boolean physicConstrained;
-    public double timeScaleFactor;
-    public boolean testMode;
-    public String pathToConfigFile;
 
+    /**
+     * Timescale factor to speed-up or slow down the game loop.
+     */
+    public double timeScaleFactor;
+    /**
+     * Activate the test mode for unit test only.
+     */
+    public boolean testMode;
+    /**
+     * path to the configuration properties file.
+     */
+    public String pathToConfigFile;
+    /**
+     * Internal name for this application.
+     */
     public String name;
+    /**
+     * Debug mode activation.
+     */
     public boolean debug;
+    /**
+     * If debug mode is activated, set the current required debug level.
+     */
     public int debugLevel;
 
+    /**
+     * {@link com.snapgames.core.graphics.Renderer}:Window size to display the application.
+     */
     public Dimension winSize;
+    /**
+     * {@link com.snapgames.core.graphics.Renderer}: the screen resolution for a rendering process.
+     */
     public Dimension bufferResolution;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: Maximum speed for any {@link com.snapgames.core.entity.Entity}.
+     */
     public double maxEntitySpeed;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: Maximum acceleration for any {@link com.snapgames.core.entity.Entity}.
+     */
     public double maxEntityAcc;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: {@link World} instance defining world constraints and environment for this {@link Application} at physic processing time.
+     */
     public World world;
+    /**
+     * {@link com.snapgames.core.math.physic.PhysicEngine}: Define if Entities must be constrained by {@link World#playArea}.
+     */
+    public boolean physicConstrained;
+    /**
+     * {@link com.snapgames.core.math.physic.SpacePartition}: define the maximum number of {@link com.snapgames.core.entity.Entity} in a tree node.
+     */
+    public int maxEntitiesInSpace;
+    /**
+     * {@link com.snapgames.core.math.physic.SpacePartition}: define the maximum depth level in the tree.
+     */
+    public int maxLevelsInSpace;
 
+    /**
+     * targeted frame-per-second rate
+     */
     public int fps;
+    /**
+     * targeted update-per-second rate.
+     */
     public int ups;
+    /**
+     * Define an {@link com.snapgames.core.entity.Entity}'s name-based filtering for a debug display process.
+     */
     public String debugFilter;
+    /**
+     * internal {@link Application} flag to decide exit request.
+     */
     public boolean requestExit;
 
+    /**
+     * the default {@link com.snapgames.core.scene.Scene} name to be activated at {@link Application} start.
+     */
     public String defaultScene;
 
     /**
-     * Iniitialize and load the configruation with the dedicated properties file,
+     * Initialize and load the configuration with the dedicated properties file,
      * and enhance file's values with possible CLI arguments.
      *
-     * @param app         the parent application
-     * @param pathCfgFile the path to the properties configuration file to be
+     * @param pathCfgFile the path to the property configuration file to be
      *                    loaded.
      * @param lArgs       the list of command line argument to be parsed to overload
      *                    values from file properties.
      */
-    public Configuration(Application app, String pathCfgFile, List<String> lArgs) {
+    public Configuration(String pathCfgFile, List<String> lArgs) {
         this.pathToConfigFile = pathCfgFile;
         parseArgs(lArgs);
         try {
@@ -92,7 +148,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     }
 
     /**
-     * Parse the properties configuration file to extract config values from.
+     * Parse the property configuration file to extract config values from.
      *
      * @param config {@link Properties} instance to be parsed.
      */
@@ -113,11 +169,11 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         requestExit = getParsedBoolean(config, "app.exit", "false");
 
         // Window size
-        winSize = getDimension(config, "app.window.size", "640x400");
+        winSize = getParsedDimension(config, "app.window.size", "640x400");
         // resolution
-        bufferResolution = getDimension(config, "app.render.resolution", "320x200");
+        bufferResolution = getParsedDimension(config, "app.render.resolution", "320x200");
 
-        // Time scale factor adaptation for Physic computation.
+        // Timescale factor adaptation for Physic computation.
         timeScaleFactor = getParsedDouble(config, "app.physic.time.scale.factor", "1.0");
         // apply constraints on Speed and Acceleration.
         physicConstrained = getParsedBoolean(config, "app.physic.constrained", "false");
@@ -125,14 +181,17 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
         maxEntitySpeed = getParsedDouble(config, "app.physic.speed.max", "16.0");
         // Maximum Acceleration for Entity.
         maxEntityAcc = Double.parseDouble(config.getProperty("app.physic.acceleration.max", "4.0"));
-        // set Default World for physic engine computation.
-        world = getWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
+        // set the Default World for physic engine computation.
+        world = getParsedWorld(config, "app.physic.world", "world(default,0.981,(1024x1024))");
 
-        name = config.getProperty("app.name", "Default name Application");
+        name = config.getProperty("app.window.name", "Default name Application");
 
         fps = getParsedInt(config, "app.render.fps", "60");
         ups = getParsedInt(config, "app.physic.ups", "120");
 
+        maxEntitiesInSpace = getParsedInt(config, "app.physic.space.max.entities", "10");
+
+        maxLevelsInSpace = getParsedInt(config, "app.physic.space.max.levels", "5");
     }
 
     /**
@@ -193,7 +252,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      *                     exists in.
      * @return Rectangle2D value.
      */
-    private Rectangle2D getRectangle2D(Properties config, String key, String defaultValue) {
+    private Rectangle2D getParsedRectangle2D(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
             config.getProperty(key, defaultValue));
 
@@ -205,7 +264,8 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
     }
 
     /**
-     * Retrieve the key Dimension value from the config. if nof exists, return the
+     * Retrieve the key Dimension value from the config.
+     * If nof exists, return the
      * default value.
      *
      * @param config       the Properties instance to be parsed in.
@@ -214,7 +274,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      *                     exists in.
      * @return Dimension value.
      */
-    private Dimension getDimension(Properties config, String key, String defaultValue) {
+    private Dimension getParsedDimension(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
             config.getProperty(key, defaultValue));
 
@@ -235,7 +295,7 @@ public class Configuration extends ConcurrentHashMap<String, Object> {
      *                     exists in.
      * @return World value.
      */
-    private World getWorld(Properties config, String key, String defaultValue) {
+    private World getParsedWorld(Properties config, String key, String defaultValue) {
         System.out.printf(">> <!> Configuration attribute %s loaded to %s value.%n", key,
             config.getProperty(key, defaultValue));
 

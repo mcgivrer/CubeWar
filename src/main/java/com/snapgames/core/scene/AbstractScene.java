@@ -1,17 +1,19 @@
 package com.snapgames.core.scene;
 
 import com.snapgames.core.Application;
+import com.snapgames.core.behavior.SceneBehavior;
 import com.snapgames.core.entity.Camera;
 import com.snapgames.core.entity.Entity;
 import com.snapgames.core.entity.GameObject;
+import com.snapgames.core.graphics.Renderer;
 import com.snapgames.core.input.InputHandler;
+import com.snapgames.core.math.physic.SpacePartition;
 import com.snapgames.core.math.physic.World;
+import com.snapgames.core.system.GSystemManager;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,6 +33,10 @@ public abstract class AbstractScene implements Scene {
      * the map of entities maintained for this Scene implementation.
      */
     private final Map<String, Entity<? extends Entity<?>>> entities = new ConcurrentHashMap<>();
+    /**
+     * The list of behaviors for this scene.
+     */
+    private Collection<SceneBehavior> behaviors = new ArrayList<>();
 
     @Override
     public void addEntity(Entity<?> e) {
@@ -85,11 +91,23 @@ public abstract class AbstractScene implements Scene {
 
     @Override
     public void draw(Application app, Graphics2D g, Map<String, Object> stats) {
-        // default implementation
+        SpacePartition sp = GSystemManager.find(SpacePartition.class);
+        Renderer r = GSystemManager.find(Renderer.class);
+        if (app.isDebugAtLeast(2)) {
+            r.moveFromCameraPoV(g, getActiveCamera(), -1);
+            sp.draw(r, g, this);
+            r.moveFromCameraPoV(g, getActiveCamera(), 1);
+        }
     }
 
     @Override
     public void setWorld(World world) {
         // default implementation
+    }
+
+
+    @Override
+    public Collection<SceneBehavior> getBehaviors() {
+        return behaviors;
     }
 }

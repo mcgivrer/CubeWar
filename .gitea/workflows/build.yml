@@ -4,7 +4,7 @@ run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
 on: [push]
 
 jobs:
-  Explore-Gitea-Actions:
+  Build-My-Java-Project:
     runs-on: ubuntu-latest
     steps:
       - uses: https://github.com/actions/checkout@v3

@@ -3,6 +3,7 @@ package com.snapgames.demo.scenes;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Optional;
 
 import com.snapgames.core.Application;
 import com.snapgames.core.entity.GameObject;
@@ -18,6 +19,7 @@ import com.snapgames.core.math.physic.World;
 import com.snapgames.core.math.physic.entity.Perturbation;
 import com.snapgames.core.scene.AbstractScene;
 import com.snapgames.core.system.GSystemManager;
+import com.snapgames.core.utils.Colors;
 import com.snapgames.core.utils.config.Configuration;
 import com.snapgames.core.utils.particles.ParticleSystemBuilder;
 import com.snapgames.demo.behaviors.EnemyBehavior;
@@ -47,148 +49,132 @@ public class TitleScene extends AbstractScene {
 
 
         pe.setWorld(
-                new World("title")
-                        .setGravity(new Vector2D(0, 0.1))
-                        .setPlayArea(new Rectangle2D.Double(0, 0, 400, 240)));
+            new World("title")
+                .setGravity(new Vector2D(0, 0.1))
+                .setPlayArea(new Rectangle2D.Double(0, 0, 400, 240)));
 
         pe.getWorld().add(
-                new Perturbation(
-                        "wind",
-                        0, 0,
-                        pe.getWorld().getPlayArea().getWidth(), pe.getWorld().getPlayArea().getHeight(),
-                        10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
-                        .setForce(new Vector2D(0.1, 0.00))
-                        .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.5f))
-                        .setLayer(5)
+            new Perturbation(
+                "water_1",
+                0, 0,
+                pe.getWorld().getPlayArea().getWidth(), pe.getWorld().getPlayArea().getHeight(),
+                10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+                .setForce(new Vector2D(0.1, 0.00))
+                .setFillColor(new Color(0.1f, 0.6f, 0.3f, 0.5f))
+                .setLayer(5)
         );
 
 
         // add rain drops particle system.
         addEntity(
-                ParticleSystemBuilder.createParticleSystem(pe.getWorld(), "raindrop", 1000, 10,
-                        new RainParticleBehavior(0.03)));
+            ParticleSystemBuilder.createParticleSystem(pe.getWorld(), "raindrop", 1000, 10,
+                new RainParticleBehavior(0.03, "enemy_,player,water_1")));
 
         GameObject player = new GameObject("player")
+            .setPosition(
+                pe.getWorld().getPlayArea().getWidth() * 0.50,
+                pe.getWorld().getPlayArea().getHeight() * 0.50)
+            .setSize(16, 16)
+            .setType(GameObjectType.TYPE_RECTANGLE)
+            .setPhysicType(PhysicType.DYNAMIC)
+            .setPriority(10)
+            .setLayer(2)
+            .setColor(Color.GREEN)
+            .setFillColor(Color.GREEN)
+            .setMass(60.0)
+            .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
+            .setAttribute("speedStep", 0.1)
+            .setAttribute("jumpFactor", 99.601)
+            .setAttribute("speedRotStep", 0.001)
+            .setDebug(2);
+        addEntity(player);
+
+        // generate some enemies
+        for (int i = 0; i < 10; i++) {
+            GameObject ennemy = new GameObject("ennemy_" + i)
                 .setPosition(
-                        pe.getWorld().getPlayArea().getWidth() * 0.50,
-                        pe.getWorld().getPlayArea().getHeight() * 0.50)
-                .setSize(16, 16)
+                    pe.getWorld().getPlayArea().getWidth() * Math.random(),
+                    pe.getWorld().getPlayArea().getHeight() * Math.random())
+                .setSize(8, 8)
                 .setType(GameObjectType.TYPE_RECTANGLE)
                 .setPhysicType(PhysicType.DYNAMIC)
                 .setPriority(10)
                 .setLayer(2)
-                .setColor(Color.GREEN)
-                .setFillColor(Color.GREEN)
-                .setMass(60.0)
-                .setMaterial(new Material("playerMat", 0.80, 1.0, 0.99))
+                .setColor(Color.RED)
+                .setFillColor(Colors.random(Color.RED, 10))
+                .setMass(30.0)
+                .setMaterial(new Material("ennemyMat", 0.80, 1.0, 0.87))
                 .setAttribute("speedStep", 0.1)
                 .setAttribute("jumpFactor", 99.601)
                 .setAttribute("speedRotStep", 0.001)
-                .setDebug(2);
-        addEntity(player);
-
-        GameObject ennemy_1 = new GameObject("ennemy_1")
-            .setPosition(
-                pe.getWorld().getPlayArea().getWidth() * 0.10,
-                pe.getWorld().getPlayArea().getHeight() * 0.90)
-            .setSize(8, 8)
-            .setType(GameObjectType.TYPE_RECTANGLE)
-            .setPhysicType(PhysicType.DYNAMIC)
-            .setPriority(10)
-            .setLayer(2)
-            .setColor(Color.RED)
-            .setFillColor(Color.RED)
-            .setMass(30.0)
-            .setMaterial(new Material("ennemyMat", 0.80, 1.0, 0.87))
-            .setAttribute("speedStep", 0.1)
-            .setAttribute("jumpFactor", 99.601)
-            .setAttribute("speedRotStep", 0.001)
-            .setDebug(3)
-            .addBehavior(new EnemyBehavior(player,0.006));
-        addEntity(ennemy_1);
-        GameObject ennemy_2 = new GameObject("ennemy_2")
-            .setPosition(
-                pe.getWorld().getPlayArea().getWidth() * 0.90,
-                pe.getWorld().getPlayArea().getHeight() * 0.90)
-            .setSize(8, 8)
-            .setType(GameObjectType.TYPE_RECTANGLE)
-            .setPhysicType(PhysicType.DYNAMIC)
-            .setPriority(10)
-            .setLayer(2)
-            .setColor(Color.RED)
-            .setFillColor(Color.RED)
-            .setMass(30.0)
-            .setMaterial(new Material("ennemyMat", 0.80, 1.0, 0.87))
-            .setAttribute("speedStep", 0.1)
-            .setAttribute("jumpFactor", 99.601)
-            .setAttribute("speedRotStep", 0.001)
-            .setDebug(3)
-            .addBehavior(new EnemyBehavior(player,0.004));
-        addEntity(ennemy_2);
+                .setDebug(3)
+                .addBehavior(new EnemyBehavior(player, Math.random() * 0.001));
+            addEntity(ennemy);
+        }
 
         TextObject title = new TextObject("title")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.30)
-                .setPhysicType(PhysicType.STATIC)
-                .setTextAlign(TextObject.ALIGN_CENTER)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(28.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setI18nKeyCode("app.title.main")
-                .setPriority(20)
-                .setLayer(1)
-                .setDebug(2)
-                .setMaterial(null);
+            .setPosition(
+                configuration.bufferResolution.getWidth() * 0.50,
+                configuration.bufferResolution.getHeight() * 0.30)
+            .setPhysicType(PhysicType.STATIC)
+            .setTextAlign(TextObject.ALIGN_CENTER)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(28.0f))
+            .setColor(Color.WHITE)
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setI18nKeyCode("app.title.main")
+            .setPriority(20)
+            .setLayer(1)
+            .setDebug(2)
+            .setMaterial(null);
 
         addEntity(title);
 
         TextObject startMessage = new TextObject("startMessage")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.70)
-                .setPhysicType(PhysicType.STATIC)
-                .setTextAlign(TextObject.ALIGN_CENTER)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(9.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setI18nKeyCode("app.title.start")
-                .setPriority(20)
-                .setLayer(1)
-                .setDebug(2)
-                .setMaterial(null);
+            .setPosition(
+                configuration.bufferResolution.getWidth() * 0.50,
+                configuration.bufferResolution.getHeight() * 0.70)
+            .setPhysicType(PhysicType.STATIC)
+            .setTextAlign(TextObject.ALIGN_CENTER)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(9.0f))
+            .setColor(Color.WHITE)
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setI18nKeyCode("app.title.start")
+            .setPriority(20)
+            .setLayer(1)
+            .setDebug(2)
+            .setMaterial(null);
 
         addEntity(startMessage);
 
-        TextObject copyRMessage = new TextObject("copyright")
-                .setPosition(
-                        configuration.bufferResolution.getWidth() * 0.50,
-                        configuration.bufferResolution.getHeight() * 0.95)
-                .setPhysicType(PhysicType.STATIC)
-                .setTextAlign(TextObject.ALIGN_CENTER)
-                .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
-                .setBorderColor(Color.BLACK)
-                .setFont(g2d.getFont().deriveFont(9.0f))
-                .setColor(Color.WHITE)
-                .setShadowWidth(3)
-                .setBorderWidth(2)
-                .setI18nKeyCode("app.title.copyright")
-                .setPriority(20)
-                .setLayer(1)
-                .setStickToCameraView(true)
-                .setDebug(2)
-                .setMaterial(null);
+        TextObject copyRightMessage = new TextObject("copyright")
+            .setPosition(
+                configuration.bufferResolution.getWidth() * 0.50,
+                configuration.bufferResolution.getHeight() * 0.95)
+            .setPhysicType(PhysicType.STATIC)
+            .setTextAlign(TextObject.ALIGN_CENTER)
+            .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
+            .setBorderColor(Color.BLACK)
+            .setFont(g2d.getFont().deriveFont(9.0f))
+            .setColor(Color.WHITE)
+            .setShadowWidth(3)
+            .setBorderWidth(2)
+            .setI18nKeyCode("app.title.copyright")
+            .setPriority(20)
+            .setLayer(1)
+            .setStickToCameraView(true)
+            .setDebug(2)
+            .setMaterial(null);
 
-        addEntity(copyRMessage);
+        addEntity(copyRightMessage);
 
         ((InputHandler) GSystemManager.find(InputHandler.class))
-                .add(ti);
+            .add(ti);
     }
 
     @Override
@@ -196,7 +182,7 @@ public class TitleScene extends AbstractScene {
         double factor = 40.0;
         GameObject player = (GameObject) getEntity("player");
         internalSceneTime += elapsed;
-        if (internalSceneTime > 0.5) {
+        if (Optional.ofNullable(player).isPresent() && internalSceneTime > 0.5) {
             player.addForce(new Vector2D(-(factor * 0.5) + Math.random() * factor, -(factor * 1.5) + Math.random() * factor * 3));
             internalSceneTime = 0;
         }
