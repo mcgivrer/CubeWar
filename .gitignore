@@ -5,3 +5,7 @@
 .project
 /target
 **/*.class
+**/*.ZIP
+**/*.zip
+*.ZIP
+*.zip
