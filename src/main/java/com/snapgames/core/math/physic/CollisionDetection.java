@@ -102,7 +102,7 @@ public class CollisionDetection implements GSystem {
      */
     private void collide(Entity<?> e1, Entity<?> e2) {
         CollisionEvent ce = new CollisionEvent(e1, e2);
-        if (application.isDebugAtLeast(3) && (e1.getName().equals("player") || e2.getName().equals("player"))) {
+        if (application.isDebugAtLeast(6) && (e1.getName().equals("player") || e2.getName().equals("player"))) {
             System.out.printf(">> <?> collision between %s and %s%n", e1.getName(), e2.getName());
         }
         collisions.add(ce);

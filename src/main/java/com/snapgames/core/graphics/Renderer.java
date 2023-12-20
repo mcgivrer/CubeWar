@@ -173,17 +173,21 @@ public class Renderer extends JPanel implements GSystem {
 
                     if (!e.stickToCamera) moveFromCameraPoV(g, scene.getActiveCamera(), -1);
                     RendererPlugin rp = plugins.get(e.getClass());
+                    // rotate camera
                     g.rotate(-e.rotation,
                         e.pos.x + e.width * 0.5,
                         e.pos.y + e.height * 0.5);
+                    // draw the entity
                     rp.draw(this, g, e);
                     e.setDrawnBy(rp.getClass());
+                    // bring back camera
                     g.rotate(e.rotation,
                         e.pos.x + e.width * 0.5,
                         e.pos.y + e.height * 0.5);
+                    // draw debug info
                     rp.drawDebugInfo(application, scene, this, g, e);
 
-                    if (application.isDebugAtLeast(5)) {
+                    if (application.isDebugAtLeast(6)) {
                         System.out.printf(">> <d> draw entity %s with %s%n", e.getName(),
                             rp.getClass().getSimpleName());
                     }

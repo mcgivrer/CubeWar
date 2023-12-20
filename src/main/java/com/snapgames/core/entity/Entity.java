@@ -290,6 +290,9 @@ public class Entity<T extends Entity<?>> extends Rectangle2D.Double {
             info.add(String.format("4_mass:%.02f kg", mass));
         if (material != null)
             info.add(String.format("4_mat:%s", material));
+        if (duration != -1) {
+            info.add(String.format("5_life:%d/%d", lifespan, duration));
+        }
         return info;
     }
 

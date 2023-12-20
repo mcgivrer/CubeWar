@@ -148,7 +148,7 @@ public class DemoScene extends AbstractScene {
         addEntity(score);
 
         TextObject heart = new TextObject("heart")
-            .setPosition(10, configuration.bufferResolution.getHeight() * 0.90)
+            .setPosition(10, 32)
             .setPhysicType(PhysicType.NONE)
             .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
             .setBorderColor(Color.BLACK)
@@ -166,7 +166,7 @@ public class DemoScene extends AbstractScene {
         addEntity(heart);
 
         TextObject life = new TextObject("life")
-            .setPosition(20, configuration.bufferResolution.getHeight() * 0.90)
+            .setPosition(20, 32)
             .setPhysicType(PhysicType.NONE)
             .setShadowColor(new Color(0.2f, 0.2f, 0.2f, 0.6f))
             .setBorderColor(Color.BLACK)
